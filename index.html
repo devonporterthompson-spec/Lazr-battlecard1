@@ -284,6 +284,8 @@ select.field option{background:var(--bg3)}
       <span class="stage-sep">›</span>
       <div class="stage-pip">Discover</div>
       <span class="stage-sep">›</span>
+      <div class="stage-pip">Qualify</div>
+      <span class="stage-sep">›</span>
       <div class="stage-pip">Position</div>
       <span class="stage-sep">›</span>
       <div class="stage-pip">Handle</div>
@@ -776,6 +778,7 @@ function newDealObj(overrides){
     client:'', industry:'', tool:'', concern:'', size:'smb', role:'operations',
     stage:'prep', momentum:'neutral', ships:0, carriers:0, lastObj:'',
     discoveryDone:false,
+    qualifyDone:false,
     priority:'medium',    // high / medium / low
     champion:{ exists:false, name:'', strength:'none' }, // weak/medium/strong
     threads:[],           // [{role, status, lastTouch}]
@@ -1001,7 +1004,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v8.7 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v8.8 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1143,12 +1146,13 @@ var flowState = {
 var DRAWER_PANELS = ['prep','handle','roi','next','close','advance','battlecard','wherewewin','objtracker'];
 var MAIN_PANELS = ['dashboard','command'];
 
-function stageOrder(){ return ['prep','discover','position','handle','roi','next','close','advance']; }
+function stageOrder(){ return ['prep','discover','qualify','position','handle','roi','next','close','advance']; }
 function stageIndex(stage){ return stageOrder().indexOf(stage); }
 
 function resolveStage(d){
   if(!d.client||!d.tool||!d.concern||!d.role||!d.size) return 'prep';
   if(!d.discoveryDone) return 'discover';
+  if(!d.qualifyDone) return 'qualify';
   if(flowState.callEnded) return 'advance';
   if(flowState.closeReady) return 'close';
   if(flowState.objectionActive||d.lastObj) return 'handle';
@@ -1263,10 +1267,10 @@ function confirmDeleteDeal(){
 function deleteDeal(){ showDeleteModal(); }
 
 function updateCommandFlowBanner(stage){
-  var labels={prep:'Set up deal',discover:'Run discovery',position:'Position value',handle:'Handle objection',roi:'Show ROI',next:'Lock next step',close:'Close',advance:'Follow up'};
-  var subs={prep:'Understand the client before the call starts',discover:'Understand their operation before pitching',position:'Frame Lazr around their specific gap',handle:'Stay in control of the conversation',roi:'Make the cost of inaction visible',next:'Do not leave without a concrete action',close:'Secure commitment to move forward',advance:'Maintain momentum after the call'};
-  var nexts={prep:'Next: Run discovery',discover:'Next: Position value',position:'Next: Handle objection or Show ROI',handle:'Next: Show ROI',roi:'Next: Lock next step',next:'Next: Close',close:'Next: Follow up',advance:'Next: Return to dashboard'};
-  var coaching={prep:'Top reps prep before every call.',discover:'Top reps ask before they pitch.',position:'Frame around their gap, not your features.',handle:'Acknowledge. Reframe. Control.',roi:'A number on screen beats any claim.',next:'Every call ends with a concrete next step.',close:'Commitment, not interest. Ask for it.',advance:'First follow-up within 2 hours wins.'};
+  var labels={prep:'Set up deal',discover:'Run discovery',qualify:'Qualify the fit',position:'Position value',handle:'Handle objection',roi:'Show ROI',next:'Lock next step',close:'Close',advance:'Follow up'};
+  var subs={prep:'Understand the client before the call starts',discover:'Understand their operation before pitching',qualify:'Determine how much to invest in this deal',position:'Frame Lazr around their specific gap',handle:'Stay in control of the conversation',roi:'Make the cost of inaction visible',next:'Do not leave without a concrete action',close:'Secure commitment to move forward',advance:'Maintain momentum after the call'};
+  var nexts={prep:'Next: Run discovery',discover:'Next: Qualify the fit',qualify:'Next: Position value',position:'Next: Handle objection or Show ROI',handle:'Next: Show ROI',roi:'Next: Lock next step',next:'Next: Close',close:'Next: Follow up',advance:'Next: Return to dashboard'};
+  var coaching={prep:'Top reps prep before every call.',discover:'Top reps ask before they pitch.',qualify:'Not every deal deserves the same effort.',position:'Frame around their gap, not your features.',handle:'Acknowledge. Reframe. Control.',roi:'A number on screen beats any claim.',next:'Every call ends with a concrete next step.',close:'Commitment, not interest. Ask for it.',advance:'First follow-up within 2 hours wins.'};
   var nowEl=document.getElementById('command-stage-now');
   var badgeEl=document.getElementById('command-stage-badge');
   var nxtEl=document.getElementById('command-stage-next');
@@ -1276,7 +1280,7 @@ function updateCommandFlowBanner(stage){
   if(nxtEl)nxtEl.textContent=nexts[stage]||'';
   if(coachEl)coachEl.textContent=coaching[stage]||'';
   var actionEl=document.getElementById('command-stage-action');
-  var actions={prep:'Complete setup before the call.',discover:'Ask these questions now.',position:'Frame around their gap, not your features.',handle:'Acknowledge. Reframe. Control.',roi:'Quantify the cost now.',next:'Lock a concrete next step.',close:'Ask for commitment, not interest.',advance:'Send the follow-up within 2 hours.'};
+  var actions={prep:'Complete setup before the call.',discover:'Ask these questions now.',qualify:'Assess the fit before going deeper.',position:'Frame around their gap, not your features.',handle:'Acknowledge. Reframe. Control.',roi:'Quantify the cost now.',next:'Lock a concrete next step.',close:'Ask for commitment, not interest.',advance:'Send the follow-up within 2 hours.'};
   if(actionEl)actionEl.textContent=actions[stage]||'';
 }
 
@@ -1480,33 +1484,88 @@ function buildDealContext(){
     +(deal.carriers?'\nCarriers/portals: '+deal.carriers:'')
     +(deal.lastObj?'\nLast objection: '+deal.lastObj:'');
 }
-var SYS=`You are LAZR Command OS — an elite real-time Deal Acceleration Engine for LAZR Freight.
+var SYS=`You are LAZR Command OS.
 
-LAZR Freight is a premium Canadian multi-carrier logistics platform:
-- Centralizes LTL, parcel, FTL, cross-border into one platform
+You are NOT a chatbot. You are a strict, real-time Deal Acceleration System and Command Flow Engine.
+
+You control what the user says, what they ask, and what they do next. Your purpose is to eliminate thinking during sales conversations, guide the full deal lifecycle, enforce structure, and move every deal forward with clarity.
+
+CORE PRINCIPLES (NON-NEGOTIABLE):
+- Be decisive, not suggestive. Never provide multiple options.
+- Always choose the strongest next action and push toward it.
+- Keep outputs short — every line must be usable live, mid-call.
+- No fluff. No teaching. No passive states. You are directing, not assisting.
+
+LAZR PRODUCT:
+- One platform for all carriers: LTL, parcel, FTL, cross-border
 - Automated invoice auditing — 80% of invoices have errors, Lazr catches them pre-payment
-- Multi-user role-based access (ops, finance, warehouse, CS)
-- Bring your own carrier contracts + Lazr network access
-- Free to start, no rip-and-replace needed
-- Typical results: 10–30% logistics cost reduction, 40–70% less admin time
+- Multi-user role-based access. Bring your own carriers + Lazr network.
+- Free to start, no rip-and-replace. Typical results: 10–30% cost reduction, 40–70% less admin time
+- Lazr is logistics infrastructure — control, visibility, scalability. NEVER lead with price.
 
-All outputs must adapt to: Client Size × Stakeholder Role × Stage × Industry × Competitor × Deal Memory
+DEAL MEMORY (adapt ALL outputs to this context):
+Client Size: SMB = fast/direct. Large = structured/multi-stakeholder. Whale = strategic/executive language.
+Stakeholder: Logistics = ease/speed. Ops = process/control. Procurement = vendor consolidation. Finance = cost/savings. Executive = strategic impact.
+Competitor: FreightCOM = acknowledge carrier access, expose control gaps. 2Ship = acknowledge automation, expose optimization gaps. Internal = acknowledge familiarity, expose fragmentation cost. Never attack — acknowledge, reframe, reposition.
 
-CLIENT SIZE — SMB: fast, direct, quick wins. Large: structured, operational. Whale: executive, strategic.
-STAKEHOLDER — Logistics: ease/speed. Ops: process/control. Procurement: vendor consolidation. Finance: cost/savings. Executive: strategic impact.
-COMPETITOR — FreightCOM: acknowledge carrier access, expose control gaps. 2Ship: acknowledge automation, expose optimization gaps. Internal: acknowledge familiarity, expose fragmentation cost.
+FLOW (enforce this order):
+Prep → Discover → Qualify → Position → Handle → ROI → Next → Close → Advance
 
-OUTPUT FORMAT — use ONLY these exact markers, no preamble:
-[SAY] [ASK] [MEANS] [RISK] [NEXT] [STATUS]
-PREP: [OPEN] [Q1] [Q2] [Q3] [GAP] [ANGLE]
-HANDLE: [ACK] [REFRAME] [ASK] [NEXT]
-NEXT: [INSIGHT] [ACTION] [LINE] [NEXT]
-CLOSE: [INSIGHT] [CLOSE] [STEP] [NEXT]
-ADVANCE: [FOLLOWUP] [REQUEST] [NEXTSTEP] [STATUS]
-BATTLECARD: [STRENGTH] [GAP] [ANGLE] [DONTSAY]
-WHEREWEWIN: [FIT] [ANGLE] [LINE] [PROOF]
+DISCOVERY ENGINE:
+Discovery is MANDATORY before positioning. Track and ask about:
+- How shipments are executed today
+- Tools/portals used and how many
+- Who handles shipping decisions
+- Where time is lost in the process
+- Services used (LTL, parcel, FTL, cross-border)
+- Carrier count and management method
+- Monthly shipment volume
+- Manual vs automated processes
+- Cost tracking and invoice disputes
+- What happens when volume increases
 
-Rules: max 2 sentences per field. No bullet points. No generic outputs. Tone: confident, human, decisive.`;
+Track answered vs missing. Force next question based on gaps. Progression locks until process is understood and inefficiencies are identified.
+
+QUALIFICATION (auto-assess after discovery):
+Good fit signals: multiple tools, multiple users, complexity, growth, need for visibility.
+Bad fit signals: only cares about price, low volume, no structure, no interest in improvement.
+If bad fit: reduce depth, move faster, do not overinvest.
+
+BATTLECARD OUTPUT FORMAT (when competitor is mentioned):
+1. Headline: "Lazr vs [Competitor] — [core difference in one line]"
+2. Top 3 differentiators: control, visibility, scalability
+3. Best angle based on role + size
+4. What NOT to say
+Tone: conversation ammo, not a report.
+
+NEXT STEP CLARITY RULE (CRITICAL):
+Every output must end with ONE specific, immediately actionable next step.
+BAD: "Follow up with them" / "Consider calling"
+GOOD: "Send follow-up now and request last 5 shipments" / "Call them now"
+The user must NEVER hesitate after reading your output.
+
+OUTPUT FORMAT — use ONLY these exact markers. No preamble. No alternatives.
+
+[SAY] exact sentence to say (max 2 sentences)
+[ASK] exact question to ask (max 1 sentence)
+[MEANS] one-line insight
+[RISK] one-line consequence if nothing changes
+[NEXT] one specific, immediately actionable step
+[STATUS] 🔴 weak / 🟡 neutral / 🟢 strong
+
+For PREP: [OPEN] [Q1] [Q2] [Q3] [GAP] [ANGLE]
+For DISCOVER: [SAY] [Q] [TRACK] [MISSING] [NEXT]
+For HANDLE: [ACK] [REFRAME] [ASK] [NEXT]
+For ROI: [IMPACT] [EXPLAIN] [SAY] [NEXT]
+For NEXT: [INSIGHT] [ACTION] [LINE] [NEXT]
+For CLOSE: [INSIGHT] [CLOSE] [STEP] [NEXT]
+For ADVANCE: [FOLLOWUP] [REQUEST] [NEXTSTEP] [STATUS]
+For BATTLECARD: [HEADLINE] [D1] [D2] [D3] [ANGLE] [DONTSAY]
+For QUALIFY: [FIT] [SIGNAL] [DECISION] [NEXT]
+
+Rules: max 2 sentences per field. No bullet points inside fields. No generic outputs — always use deal context. Tone: confident, human, decisive.`;
+
+
 
 async function callAI(prompt, outputEl, mode, renderFn){
   var apiKey = getApiKey();
@@ -1668,8 +1727,8 @@ function updateDashboard(){
   if(!deal.client) return; // named deals exist but none active yet
   // Flow stage
   var stage=resolveStage(deal);
-  var nowMap={prep:'Set up deal',discover:'Run discovery',position:'Position value',handle:'Handle objection',roi:'Show ROI',next:'Lock next step',close:'Close',advance:'Follow up'};
-  var nextStageMap={prep:'Next: Run discovery',discover:'Next: Position value',position:'Next: Handle objection or Show ROI',handle:'Next: Show ROI',roi:'Next: Lock next step',next:'Next: Close',close:'Next: Follow up',advance:'Next: Return to dashboard'};
+  var nowMap={prep:'Set up deal',discover:'Run discovery',qualify:'Qualify the fit',position:'Position value',handle:'Handle objection',roi:'Show ROI',next:'Lock next step',close:'Close',advance:'Follow up'};
+  var nextStageMap={prep:'Next: Run discovery',discover:'Next: Qualify the fit',qualify:'Next: Position value',position:'Next: Handle objection or Show ROI',handle:'Next: Show ROI',roi:'Next: Lock next step',next:'Next: Close',close:'Next: Follow up',advance:'Next: Return to dashboard'};
   var fnEl=document.getElementById('dash-flow-now');if(fnEl)fnEl.textContent=nowMap[stage]||'Continue the deal';
   var fxEl=document.getElementById('dash-flow-next');if(fxEl)fxEl.textContent=nextStageMap[stage]||'';
   var fbEl=document.getElementById('dash-flow-btn');if(fbEl)fbEl.textContent=(nowMap[stage]||'Continue deal')+' →';
@@ -1782,6 +1841,8 @@ async function runNext(){
     if(line)o.appendChild(makeSayBlock(line));
     if(action)o.appendChild(makeBlock('Your next action',action,'green',action));
     if(next)o.appendChild(makeBlock('Then',next,'',next));
+    // If we were in qualify stage, mark it done
+    if(deal.stage==='qualify'){deal.qualifyDone=true;deal.flowState=Object.assign({},flowState);addEvent('qualify','Qualification complete');saveDeals();updateCommandSurface();}
   });
 }
 
