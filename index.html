@@ -109,8 +109,8 @@ button{cursor:pointer}
 
 /* ── NEXT BAR ── */
 .next-bar{flex-shrink:0;border-top:1px solid var(--border);padding:10px 20px;display:none;align-items:center;justify-content:space-between;gap:12px;background:var(--bg)}
-.nb-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:var(--green);flex-shrink:0}
-.nb-text{font-size:12px;color:var(--muted);font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nb-label{display:none}
+.nb-text{display:none}
 .nb-btn{flex-shrink:0;background:var(--green);border:none;border-radius:7px;padding:7px 14px;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:#050f0b;transition:opacity .15s;white-space:nowrap}
 .nb-btn:hover{opacity:.88}
 
@@ -465,8 +465,7 @@ select.field option{background:var(--bg3)}
               <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green)" id="command-stage-badge">—</div>
             </div>
             <div style="font-size:12px;color:var(--muted)" id="command-stage-next">—</div>
-            <div style="font-size:11px;color:var(--subtle);font-style:italic;margin-top:2px" id="command-stage-coach">—</div>
-            <div style="font-size:12px;color:var(--green);font-weight:700;margin-top:6px" id="command-stage-action">—</div>
+            <div style="font-size:12px;color:var(--green);font-weight:700;margin-top:4px" id="command-stage-action">—</div>
           </div>
 
           <!-- Primary directive -->
@@ -490,11 +489,7 @@ select.field option{background:var(--bg3)}
                 <div class="risk-text" id="d-risk">—</div>
               </div>
             </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-              <div class="dir-field" style="margin-bottom:0;flex:1;opacity:.6">
-                <span class="dir-field-label" style="font-size:8px">Next move</span>
-                <div style="font-size:11px;color:var(--muted)" id="d-next">→ Start in Prep</div>
-              </div>
+            <div style="display:flex;align-items:center;justify-content:flex-end">
               <div class="dir-status" id="d-status">🟡 Set deal first</div>
             </div>
             <button class="copy-btn" onclick="copyDirective()">Copy</button>
@@ -757,9 +752,7 @@ select.field option{background:var(--bg3)}
 
       <!-- NEXT BAR -->
       <div class="next-bar" id="next-bar">
-        <div class="nb-label">▶ Next</div>
-        <div class="nb-text" id="nb-text">—</div>
-        <button class="nb-btn" id="nb-btn">→</button>
+        <button class="nb-btn" id="nb-btn" style="width:100%;padding:13px 20px;font-size:14px;font-family:'Syne',sans-serif;font-weight:800;letter-spacing:.02em">→</button>
       </div>
 
     </div><!-- end main -->
@@ -1004,7 +997,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v9.1 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v9.2 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1176,21 +1169,21 @@ function updateStageBar(){
 }
 
 function setDirective(data){
-  document.getElementById('d-say').textContent   = data.say    || '—';
-  document.getElementById('d-ask').textContent   = data.ask    || '—';
-  document.getElementById('d-means').textContent = data.means  || '—';
-  document.getElementById('d-risk').textContent  = data.risk   || '—';
-  document.getElementById('d-next').textContent  = data.next   || '—';
-  document.getElementById('d-status').textContent= data.status || '🟡';
+  var el;
+  el=document.getElementById('d-say');    if(el)el.textContent=data.say    ||'—';
+  el=document.getElementById('d-ask');    if(el)el.textContent=data.ask    ||'—';
+  el=document.getElementById('d-means'); if(el)el.textContent=data.means  ||'—';
+  el=document.getElementById('d-risk');  if(el)el.textContent=data.risk   ||'—';
+  el=document.getElementById('d-status');if(el)el.textContent=data.status ||'🟡';
+  // d-next removed from UI — next bar is the single action point
 }
 
 function setNextBar(text, btnLabel, action){
   var bar=document.getElementById('next-bar');
-  var t=document.getElementById('nb-text');
   var b=document.getElementById('nb-btn');
   if(!deal.client){if(bar)bar.style.display='none';return;}
   if(bar)bar.style.display='flex';
-  if(t)t.textContent=text;
+  // Next bar = pure action button only. Text param ignored.
   if(b){b.textContent=btnLabel;b.onclick=action;}
 }
 
@@ -1274,13 +1267,11 @@ function updateCommandFlowBanner(stage){
   var nowEl=document.getElementById('command-stage-now');
   var badgeEl=document.getElementById('command-stage-badge');
   var nxtEl=document.getElementById('command-stage-next');
-  var coachEl=document.getElementById('command-stage-coach');
   if(nowEl)nowEl.textContent=labels[stage]||'In flow';
   if(badgeEl)badgeEl.textContent=stage?stage.toUpperCase():'';
   if(nxtEl)nxtEl.textContent=nexts[stage]||'';
-  if(coachEl)coachEl.textContent=coaching[stage]||'';
   var actionEl=document.getElementById('command-stage-action');
-  var actions={prep:'Complete setup before the call.',discover:'Ask these questions now.',qualify:'Assess the fit before going deeper.',position:'Frame around their gap, not your features.',handle:'Acknowledge. Reframe. Control.',roi:'Quantify the cost now.',next:'Lock a concrete next step.',close:'Ask for commitment, not interest.',advance:'Send the follow-up within 2 hours.'};
+  var actions={prep:'Complete setup before the call.',discover:'Ask these questions now.',qualify:'Assess the fit before going deeper.',position:'Frame around their gap.',handle:'Acknowledge. Reframe. Control.',roi:'Quantify the cost now.',next:'Lock a concrete next step.',close:'Ask for commitment.',advance:'Send follow-up within 2 hours.'};
   if(actionEl)actionEl.textContent=actions[stage]||'';
 }
 
@@ -1673,17 +1664,17 @@ async function runPrep(){
 
 // ── DISCOVERY ENGINE — 11 Official Lazr Questions ──
 var DISCOVERY_QUESTIONS = [
-  {level:'L1 Execution',  q:'How are your shipments executed today?',                             area:'execution'},
-  {level:'L2 Tools',      q:'How many tools or portals do you use to manage shipping?',           area:'tools'},
-  {level:'L3 People',     q:'Who is responsible for shipping? Is it more than one person?',       area:'people'},
-  {level:'L4 Process',    q:'Where do you lose the most time in the shipping process?',           area:'time'},
-  {level:'L5 Services',   q:'Which transportation services do you use — LTL, parcel, FTL?',      area:'services'},
-  {level:'L5 Carriers',   q:'Which carriers do you work with?',                                   area:'carriers'},
-  {level:'L6 Volume',     q:'What is your annual shipping volume by service type?',               area:'volume'},
-  {level:'L5 Management', q:'How do you manage your carriers today?',                             area:'management'},
-  {level:'L4 Automation', q:'Are your shipping processes manual or automated?',                   area:'automation'},
-  {level:'L5 Control',    q:'How do you track your shipping costs and performance?',              area:'costs'},
-  {level:'L6 Scale',      q:'What happens to your operation when your volume increases?',        area:'scale'},
+  {level:'L1 Execution',  q:'How are your shipments executed today — walk me through the process from start to finish.',  area:'execution'},
+  {level:'L2 Tools',      q:'How many different systems or portals does your team use to book and manage shipping?',       area:'tools'},
+  {level:'L3 People',     q:'Who owns the shipping process — and is it one person or spread across a team?',              area:'people'},
+  {level:'L4 Process',    q:'Where does the most time get lost — is it booking, tracking, billing, or somewhere else?',   area:'time'},
+  {level:'L5 Control',    q:'How do you track shipping costs and catch invoice errors today?',                             area:'costs'},
+  {level:'L5 Services',   q:'What mix of services are you running — LTL, parcel, FTL, cross-border?',                    area:'services'},
+  {level:'L5 Carriers',   q:'Which carriers do you use, and how do you decide which one to book per shipment?',           area:'carriers'},
+  {level:'L6 Volume',     q:'What is your approximate shipping volume per month, and how consistent is it?',              area:'volume'},
+  {level:'L6 Automation', q:'Which parts of the process are automated versus still done manually?',                       area:'automation'},
+  {level:'L6 Scale',      q:'When volume spikes or you add a new location, how does your current setup handle it?',       area:'scale'},
+  {level:'L6 Fit',        q:'If you had everything in one platform — booking, tracking, billing, reporting — what would that change for your team?', area:'fit'},
 ];
 var discoveryProgress = {answered:[], current:0};
 
@@ -2008,11 +1999,51 @@ async function runAdvance(){
 
 // ── BATTLECARD ──
 var BC_DATA={
-  freightcom:{name:'FreightCOM / ClickShip',strength:'Strong carrier access and booking workflow. Reps in their world know the product.',gap:'Limited optimization logic. No centralized control layer across multi-location or multi-user setups.',angle:'Lazr is not a replacement — it is a control and optimization layer on top of what they already have.',dontsay:'Never say "FreightCOM is bad" or dismiss their current setup.'},
-  '2ship':{name:'2Ship',strength:'Strong automation and integration capabilities. Known for connecting systems.',gap:'Optimization intelligence and decision quality. Control framing is limited.',angle:'Lazr adds visibility, decision quality, and operational control — things automation alone cannot provide.',dontsay:'Never attack 2Ship\'s automation strength — it is real. Reframe around what automation misses.'},
-  eshipper:{name:'eShipper',strength:'Broad carrier network and decent SMB adoption.',gap:'Centralized visibility and optimization across accounts is limited.',angle:'For operations at scale, Lazr provides the control and reporting layer eShipper does not.',dontsay:'Never minimize their carrier network. Focus on control, not breadth.'},
-  shiptime:{name:'ShipTime',strength:'Simple interface and easy onboarding. Good for SMBs.',gap:'Depth of control, optimization logic, and multi-user role management.',angle:'Lazr is built for operations that have outgrown simple booking.',dontsay:'Never say ShipTime is not useful — it is for certain clients. Position Lazr for growth.'},
-  internal:{name:'Internal / Manual Process',strength:'Familiarity, comfort, and zero change friction. They own the process.',gap:'Fragmentation, inconsistency, manual decisions, and hidden cost of time.',angle:'Lazr adds structure and visibility without disrupting any carrier relationship. Free to start.',dontsay:'Never imply they are doing it wrong. Frame it as: you can keep everything — and add control.'},
+  freightcom:{
+    name:'FreightCOM / ClickShip',
+    headline:'Lazr vs FreightCOM — control layer vs booking tool',
+    d1:'Lazr gives you one view across all carriers with cost intelligence. FreightCOM is a booking interface.',
+    d2:'Lazr includes invoice auditing, role-based access, and reporting. FreightCOM does not.',
+    d3:'Lazr scales across locations, users, and carriers without adding complexity.',
+    angle:'FreightCOM gets them in the door. Lazr gives them control of what happens after.',
+    dontsay:'Never say FreightCOM is bad. Say: it works for booking — we work for operations.'
+  },
+  '2ship':{
+    name:'2Ship',
+    headline:'Lazr vs 2Ship — operational control vs automation',
+    d1:'Lazr optimizes decision-making across carriers in real time. 2Ship automates without optimizing.',
+    d2:'Lazr gives finance, ops, and logistics unified visibility. 2Ship is IT-first.',
+    d3:'Lazr is free to start and requires no integration to begin extracting value.',
+    angle:'2Ship moves fast. Lazr moves smart. Ask which one they need more.',
+    dontsay:'Never attack their automation. Reframe around what automation cannot see.'
+  },
+  eshipper:{
+    name:'eShipper',
+    headline:'Lazr vs eShipper — platform vs broker',
+    d1:'Lazr gives the customer ownership of the process. eShipper owns the relationship.',
+    d2:'Lazr provides full transparency — data, invoices, performance. eShipper controls the view.',
+    d3:'Lazr scales with complexity. eShipper is optimized for transactional simplicity.',
+    angle:'eShipper is a service. Lazr is infrastructure. Ask which one they want to build on.',
+    dontsay:'Never lead with rates. Lead with visibility and ownership.'
+  },
+  shiptime:{
+    name:'ShipTime',
+    headline:'Lazr vs ShipTime — enterprise platform vs SMB tool',
+    d1:'Lazr is built for multi-user, multi-location, multi-carrier complexity. ShipTime is not.',
+    d2:'Lazr includes invoice auditing, approvals, and reporting. ShipTime handles booking.',
+    d3:'Lazr grows with the operation. ShipTime has a ceiling.',
+    angle:'ShipTime got them started. Ask if they have outgrown it.',
+    dontsay:'Never dismiss ShipTime. Ask what is missing — they will tell you.'
+  },
+  internal:{
+    name:'Internal / Manual Process',
+    headline:'Lazr vs manual process — infrastructure vs improvised',
+    d1:'Lazr centralizes what is currently fragmented across emails, portals, and spreadsheets.',
+    d2:'Lazr catches invoice errors automatically. Manual processes absorb them silently.',
+    d3:'Lazr adds structure without disrupting a single carrier relationship. Free to start.',
+    angle:'They built something that works. Ask what it costs them in time to maintain it.',
+    dontsay:'Never say their process is wrong. Frame it as: you can keep everything and add control.'
+  },
 };
 function runBattlecard(){
   var sel=val('bc-comp');
@@ -2020,8 +2051,22 @@ function runBattlecard(){
   if(!sel){out.innerHTML='<div class="ph"><div class="ph-icon">🥊</div><div class="ph-t">Select a competitor</div></div>';return;}
   var bc=BC_DATA[sel];if(!bc)return;
   out.innerHTML='';
-  out.appendChild(makeBlock('Their strength (acknowledge this)',bc.strength,'',bc.strength));
-  out.appendChild(makeBlock('Where the gap is (expose this subtly)',bc.gap,'amber',bc.gap));
+  // Lean: headline + 3 diffs + angle + dontsay
+  var headDiv=document.createElement('div');
+  headDiv.style.cssText='background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px';
+  headDiv.innerHTML='<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:6px">Headline</div>'
+    +'<div style="font-family:Syne,sans-serif;font-size:15px;font-weight:800;color:var(--text)">'+bc.headline+'</div>';
+  out.appendChild(headDiv);
+
+  var diffsDiv=document.createElement('div');
+  diffsDiv.style.cssText='background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px';
+  diffsDiv.innerHTML='<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px">Top 3 differentiators</div>'
+    +[bc.d1,bc.d2,bc.d3].map(function(d,i){
+      return '<div style="display:flex;gap:8px;margin-bottom:7px;font-size:13px;color:var(--text)">'
+        +'<span style="color:var(--green);font-weight:800;flex-shrink:0">'+(i+1)+'.</span>'+d+'</div>';
+    }).join('');
+  out.appendChild(diffsDiv);
+
   out.appendChild(makeSayBlock(bc.angle));
   out.appendChild(makeBlock("Don't say",bc.dontsay,'red',bc.dontsay));
 }
