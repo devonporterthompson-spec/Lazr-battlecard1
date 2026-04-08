@@ -450,22 +450,26 @@ select.field option{background:var(--bg3)}
             </div>
           </div>
 
-          <!-- Quick triggers -->
-          <div class="trigger-row">
-            <button class="trigger-btn" onclick="quickTrigger('price')">💰 They mentioned price</button>
-            <button class="trigger-btn" onclick="quickTrigger('competitor')">🥊 They use a competitor</button>
-            <button class="trigger-btn" onclick="quickTrigger('hesitant')">😶 They're hesitant</button>
-            <button class="trigger-btn" onclick="quickTrigger('quiet')">🔇 They've gone quiet</button>
+          <!-- NEXT ACTION — dominant, always first -->
+          <div id="command-next-action" style="background:linear-gradient(135deg,rgba(61,220,132,.13) 0%,rgba(61,220,132,.04) 100%);border:2px solid var(--green);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:14px;display:none">
+            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.16em;color:var(--green);margin-bottom:8px">▶ Ask This Now</div>
+            <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:10px;font-style:italic" id="cna-question">—</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+              <div style="font-size:11px;color:var(--muted)" id="cna-progress">—</div>
+              <button id="cna-btn" style="background:var(--green);border:none;border-radius:8px;padding:9px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer">Ask Question →</button>
+            </div>
           </div>
 
-          <!-- Stage header — unavoidable, single source of truth -->
-          <div id="command-flow-banner" style="margin-bottom:14px">
-            <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:3px">
-              <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:900;color:var(--text);letter-spacing:-.3px" id="command-stage-now">—</div>
-              <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green)" id="command-stage-badge">—</div>
+          <!-- Stage banner — slim: name + badge + next + action -->
+          <div id="command-flow-banner" style="margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+              <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text)" id="command-stage-now">—</div>
+              <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);background:var(--g2);border:1px solid var(--g3);border-radius:4px;padding:2px 7px" id="command-stage-badge">—</div>
             </div>
-            <div style="font-size:12px;color:var(--muted)" id="command-stage-next">—</div>
-            <div style="font-size:12px;color:var(--green);font-weight:700;margin-top:4px" id="command-stage-action">—</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="font-size:11px;color:var(--subtle)" id="command-stage-next">—</div>
+              <div style="font-size:11px;color:var(--green);font-weight:700" id="command-stage-action">—</div>
+            </div>
           </div>
 
           <!-- Primary directive -->
@@ -495,7 +499,16 @@ select.field option{background:var(--bg3)}
             <button class="copy-btn" onclick="copyDirective()">Copy</button>
           </div>
 
-          <!-- Regenerate -->
+          <!-- Quick triggers — context, below directive -->
+          <div style="margin-top:10px">
+            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:7px">Live signals</div>
+            <div class="trigger-row">
+              <button class="trigger-btn" onclick="quickTrigger('price')">💰 Mentioned price</button>
+              <button class="trigger-btn" onclick="quickTrigger('competitor')">🥊 Uses a competitor</button>
+              <button class="trigger-btn" onclick="quickTrigger('hesitant')">😶 Hesitant</button>
+              <button class="trigger-btn" onclick="quickTrigger('quiet')">🔇 Gone quiet</button>
+            </div>
+          </div>
 
         </div>
 
@@ -997,7 +1010,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v9.2 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v9.3 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1267,11 +1280,11 @@ function updateCommandFlowBanner(stage){
   var nowEl=document.getElementById('command-stage-now');
   var badgeEl=document.getElementById('command-stage-badge');
   var nxtEl=document.getElementById('command-stage-next');
-  if(nowEl)nowEl.textContent=labels[stage]||'In flow';
+  if(nowEl)nowEl.textContent=(labels[stage]||'In flow').toUpperCase();
   if(badgeEl)badgeEl.textContent=stage?stage.toUpperCase():'';
   if(nxtEl)nxtEl.textContent=nexts[stage]||'';
   var actionEl=document.getElementById('command-stage-action');
-  var actions={prep:'Complete setup before the call.',discover:'Ask these questions now.',qualify:'Assess the fit before going deeper.',position:'Frame around their gap.',handle:'Acknowledge. Reframe. Control.',roi:'Quantify the cost now.',next:'Lock a concrete next step.',close:'Ask for commitment.',advance:'Send follow-up within 2 hours.'};
+  var actions={prep:'',discover:'Ask. Do not pitch yet.',qualify:'Assess fit.',position:'Expose the gap.',handle:'Acknowledge. Reframe. Control.',roi:'Put a number on it.',next:'Lock the step.',close:'Ask for commitment.',advance:'Send follow-up now.'};
   if(actionEl)actionEl.textContent=actions[stage]||'';
 }
 
@@ -1320,10 +1333,53 @@ function autoRouteStage(stage){
   }
 }
 
+
+// ══ NEXT ACTION BLOCK ══
+var STAGE_NEXT_QUESTIONS = {
+  prep:     {q:'Walk me through how you manage shipping today — start to finish.',           cta:'Open Prep →',    action:function(){openDrawer('prep',document.querySelector('[data-p="prep"]'));}},
+  discover: {q:'How are you currently deciding which carrier to use per shipment?',          cta:'Run Discovery →', action:function(){openDrawer('prep',document.querySelector('[data-p="prep"]'));}},
+  qualify:  {q:'When volume increases or you add a location, how does your setup handle it?',cta:'Qualify →',       action:function(){openDrawer('next',document.querySelector('[data-p="next"]'));}},
+  position: {q:'If everything was in one platform, what would change for your team?',       cta:'Position →',      action:function(){closeDrawer();}},
+  handle:   {q:'What matters more — lowest cost per shipment, or control across the operation?', cta:'Handle Objection →', action:function(){openDrawer('handle',document.querySelector('[data-p="handle"]'));}},
+  roi:      {q:'How many systems is your team using today to manage shipping?',             cta:'Show ROI →',      action:function(){openDrawer('roi',document.querySelector('[data-p="roi"]'));}},
+  next:     {q:'What would need to happen on your end to move forward this week?',          cta:'Lock Next Step →', action:function(){openDrawer('next',document.querySelector('[data-p="next"]'));}},
+  close:    {q:'Can you send over a few recent shipments so I can show you exactly where this applies?', cta:'Close →', action:function(){openDrawer('close',document.querySelector('[data-p="close"]'));}},
+  advance:  {q:'Is there anyone else who should be included in the next step?',             cta:'Follow Up →',     action:function(){openDrawer('advance',document.querySelector('[data-p="advance"]'));}},
+};
+
+function updateNextActionBlock(stage){
+  var block=document.getElementById('command-next-action');
+  var qEl=document.getElementById('cna-question');
+  var progEl=document.getElementById('cna-progress');
+  var btn=document.getElementById('cna-btn');
+  if(!block)return;
+
+  if(!deal.client){block.style.display='none';return;}
+  block.style.display='block';
+
+  var entry=STAGE_NEXT_QUESTIONS[stage];
+  if(!entry){block.style.display='none';return;}
+
+  if(qEl)qEl.textContent='"'+entry.q+'"';
+  if(btn){btn.textContent=entry.cta;btn.onclick=entry.action;}
+
+  // Discovery progress
+  if(progEl){
+    if(stage==='discover'||stage==='qualify'){
+      var answered=discoveryProgress.answered.length;
+      var total=DISCOVERY_QUESTIONS.length;
+      progEl.textContent='Discovery: '+answered+' / '+total+' questions answered · Next focus: '+(answered<2?'Tools':answered<4?'Process':answered<7?'Control':'Scale');
+    } else {
+      progEl.textContent='';
+    }
+  }
+}
+
 function updateCommandSurface(){
   updateStageBar();
   var stage=resolveStage(deal);
   updateCommandFlowBanner(stage);
+  updateNextActionBlock(stage);
 
   if(stage==='prep'){
     setDirective({say:'We do not have enough deal context yet.',ask:'Fill in the deal setup so the system can guide the conversation accurately.',means:'The deal cannot be directed properly without core context.',risk:'You will get weaker positioning and generic responses.',next:'Open Prep and complete the required fields.',status:'🟡 Setup required'});
@@ -1332,8 +1388,15 @@ function updateCommandSurface(){
     return;
   }
   if(stage==='discover'){
-    setDirective({say:'Before I tell you anything about what we do, I want to understand how your shipping operation works today.',ask:'How are you currently deciding which carrier to use per shipment?',means:'You are still diagnosing the gap.',risk:'If you pitch too early, the product will feel optional.',next:'Run discovery and listen for fragmentation, inconsistency, or lack of visibility.',status:'🟡 Discovery active'});
-    setNextBar('You are in DISCOVERY. Ask these questions now.','Set up deal →',function(){openDrawer('prep',document.querySelector('[data-p="prep"]'));});
+    setDirective({say:'Before I tell you anything about what we do — I want to understand how your operation works today.',ask:'How are you currently deciding which carrier to use per shipment?',means:'You are diagnosing the gap. Every answer tells you which problem Lazr solves for them specifically.',risk:'Pitch before you understand their process and the product feels optional, not necessary.',status:'🟡 Discovery'});
+    setNextBar('Run discovery →','Run discovery →',function(){openDrawer('prep',document.querySelector('[data-p="prep"]'));});
+    autoRouteStage(stage);
+    return;
+  }
+  if(stage==='qualify'){
+    setDirective({say:'Based on what I am hearing — you are dealing with multiple tools, multiple people, and not enough visibility. That is exactly where Lazr removes the most friction.',ask:'Is streamlining this something your team is actively looking to solve, or more of a background priority right now?',means:'You are assessing fit and urgency. Complexity signals fit. Active intent signals urgency.',risk:'Pitching without confirming urgency means positioning into a passive audience.',status:'🟡 Qualifying'});
+    setNextBar('Qualify fit →','Qualify fit →',function(){openDrawer('next',document.querySelector('[data-p="next"]'));});
+    autoRouteStage(stage);
     return;
   }
   if(stage==='position'){
