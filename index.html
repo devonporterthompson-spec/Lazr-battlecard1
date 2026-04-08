@@ -510,7 +510,7 @@ select.field option{background:var(--bg3)}
           <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Set the deal. The system adapts everything else.</div>
 
           <div class="field-row">
-            <div><label class="field-label">Client name</label><input class="field" id="p-client" type="text" placeholder="e.g. Acme Inc" oninput="syncDeal()"></div>
+            <div><label class="field-label">Client name</label><input class="field" id="p-client" type="text" placeholder="e.g. Acme Inc" oninput="debouncedSync()"></div>
             <div><label class="field-label">Industry</label>
               <select class="field" id="p-industry" onchange="syncDeal()">
                 <option value="">Unknown</option>
@@ -593,15 +593,15 @@ select.field option{background:var(--bg3)}
 
           <div style="margin-bottom:12px">
             <label class="field-label">Shipments / month</label>
-            <input class="field" id="p-ships" type="number" placeholder="e.g. 200" oninput="syncDeal()">
+            <input class="field" id="p-ships" type="number" placeholder="e.g. 200" oninput="debouncedSync()">
           </div>
           <div style="margin-bottom:12px">
             <label class="field-label">Number of carriers / portals</label>
-            <input class="field" id="p-carriers" type="number" placeholder="e.g. 4" oninput="syncDeal()">
+            <input class="field" id="p-carriers" type="number" placeholder="e.g. 4" oninput="debouncedSync()">
           </div>
           <div style="margin-bottom:16px">
             <label class="field-label">Last objection / statement (optional)</label>
-            <input class="field" id="p-lastobj" type="text" placeholder='e.g. "We already use FreightCOM and it works fine"' oninput="syncDeal()">
+            <input class="field" id="p-lastobj" type="text" placeholder='e.g. "We already use FreightCOM and it works fine"' oninput="debouncedSync()">
           </div>
 
           <button class="gen-btn" onclick="runPrep()">Generate Prep Brief →</button>
@@ -814,7 +814,7 @@ function setActiveDeal(id){
 
 function saveDeals(){
   // Don't persist unnamed placeholder deals
-  var toSave = deals.filter(function(d){ return d.client && d.client.trim(); });
+  var toSave = deals.filter(function(d){ return d.client && d.client.trim().length > 1; });
   localStorage.setItem('cos_deals', JSON.stringify(toSave));
   localStorage.setItem('cos_active_deal', activeDealId||'');
 }
@@ -825,7 +825,7 @@ function loadDeals(){
     if(saved){
       var parsed = JSON.parse(saved);
       // Only load deals with a client name
-      deals = parsed.filter(function(d){ return d.client && d.client.trim(); });
+      deals = parsed.filter(function(d){ return d.client && d.client.trim().length > 1; });
     }
     var activeId = localStorage.getItem('cos_active_deal');
     if(activeId && deals.find(function(d){return d.id===activeId;})){
@@ -887,14 +887,14 @@ function createDeal(){
   var d = newDealObj();
   deals.push(d);
   setActiveDeal(d.id);
-  saveDeals();
+  // Don't saveDeals yet — only save once user enters a client name
   clearPrepFields();
   resetFlowState();
   updateDealBar();
   updateCommandSurface();
   updateDashboard();
   openDrawer('prep', document.querySelector('[data-p="prep"]'));
-  showToast('New deal created');
+  showToast('New deal — fill in Prep to begin');
 }
 
 function handleDealClick(el){switchToDealt(el.getAttribute("data-id"));}
@@ -1004,7 +1004,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v9.0 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v9.1 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1069,15 +1069,15 @@ function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):'';}
 
 
 // ══ DEAL SYNC ══
+var _syncTimer = null;
+function debouncedSync(){
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(syncDeal, 600);
+}
+
 function syncDeal(){
-  if(!activeDealId){
-    // Auto-create first deal if none exists
-    var d = newDealObj();
-    deals.push(d);
-    activeDealId = d.id;
-    deal = d;
-    flowState = d.flowState;
-  }
+  // Don't do anything if no active deal (user hasn't explicitly created one)
+  if(!activeDealId) return;
   deal.client   = val('p-client');
   deal.industry = val('p-industry');
   deal.tool     = val('p-tool');
@@ -1092,7 +1092,7 @@ function syncDeal(){
   deal.priority = calcPriority(deal);
   deal.flowState = Object.assign({}, flowState);
   deal.updatedAt = Date.now();
-  saveDeals();
+  if(deal.client && deal.client.trim().length > 1) saveDeals();
   updateDealBar();
   updateCommandSurface();
   updateDashboard();
@@ -1793,7 +1793,7 @@ function renderDealList(){
 
   // Sort: high priority first, then by health score desc
   // Only show deals with a client name
-  var namedDeals=deals.filter(function(d){return d.client&&d.client.trim();});
+  var namedDeals=deals.filter(function(d){return d.client&&d.client.trim().length>1;});
   if(!namedDeals.length){container.innerHTML='';return;}
   var sorted=namedDeals.slice().sort(function(a,b){
     var pOrder={high:0,medium:1,low:2};
@@ -1830,8 +1830,10 @@ function updateDashboard(){
   var countEl=document.getElementById('dash-deal-count');
 
   // Only count deals with a client name
-  var namedDeals = deals.filter(function(d){ return d.client && d.client.trim(); });
+  var namedDeals = deals.filter(function(d){ return d.client && d.client.trim().length > 1; });
 
+  // Clean up unnamed placeholder deals from memory
+  deals = deals.filter(function(d){ return d.client && d.client.trim().length > 1 || d.id === activeDealId; });
   // Render deal list (named deals only)
   renderDealList();
 
