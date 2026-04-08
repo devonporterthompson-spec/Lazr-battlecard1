@@ -284,15 +284,9 @@ select.field option{background:var(--bg3)}
       <span class="stage-sep">›</span>
       <div class="stage-pip">Discover</div>
       <span class="stage-sep">›</span>
-      <div class="stage-pip">Qualify</div>
-      <span class="stage-sep">›</span>
       <div class="stage-pip">Position</div>
       <span class="stage-sep">›</span>
-      <div class="stage-pip">Handle</div>
-      <span class="stage-sep">›</span>
       <div class="stage-pip">ROI</div>
-      <span class="stage-sep">›</span>
-      <div class="stage-pip">Next</div>
       <span class="stage-sep">›</span>
       <div class="stage-pip">Close</div>
       <span class="stage-sep">›</span>
@@ -784,7 +778,6 @@ function newDealObj(overrides){
     client:'', industry:'', tool:'', concern:'', size:'smb', role:'operations',
     stage:'prep', momentum:'neutral', ships:0, carriers:0, lastObj:'',
     discoveryDone:false,
-    qualifyDone:false,
     priority:'medium',    // high / medium / low
     champion:{ exists:false, name:'', strength:'none' }, // weak/medium/strong
     threads:[],           // [{role, status, lastTouch}]
@@ -1010,7 +1003,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v9.3 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v9.4 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1146,27 +1139,27 @@ var flowState = {
   callEnded: false,
   numbersShown: false,
   objectionActive: false,
+  objectionHandled: false,
   closeReady: false
 };
 
 var DRAWER_PANELS = ['prep','handle','roi','next','close','advance','battlecard','wherewewin','objtracker'];
 var MAIN_PANELS = ['dashboard','command'];
 
-function stageOrder(){ return ['prep','discover','qualify','position','handle','roi','next','close','advance']; }
+function stageOrder(){ return ['prep','discover','position','roi','close','advance']; }
 function stageIndex(stage){ return stageOrder().indexOf(stage); }
 
 function resolveStage(d){
   if(!d.client||!d.tool||!d.concern||!d.role||!d.size) return 'prep';
   if(!d.discoveryDone) return 'discover';
-  if(!d.qualifyDone) return 'qualify';
   if(flowState.callEnded) return 'advance';
   if(flowState.closeReady) return 'close';
-  if(flowState.objectionActive||d.lastObj) return 'handle';
-  if(flowState.explicitNeed==='roi') return 'roi';
-  if(flowState.numbersShown) return 'next';
-  if(flowState.liveSignal&&!flowState.objectionActive&&!flowState.closeReady) return 'next';
+  if(flowState.numbersShown) return 'close';
+  if(flowState.explicitNeed==='roi'||d.lastObj===''&&flowState.objectionHandled) return 'roi';
   return 'position';
 }
+// Handle is a DRAWER triggered from any stage, not a fixed flow stage.
+// After handle: set objectionHandled=true, clear lastObj → resolveStage → roi
 
 function updateStageBar(){
   var current = resolveStage(deal);
@@ -1273,9 +1266,9 @@ function confirmDeleteDeal(){
 function deleteDeal(){ showDeleteModal(); }
 
 function updateCommandFlowBanner(stage){
-  var labels={prep:'Set up deal',discover:'Run discovery',qualify:'Qualify the fit',position:'Position value',handle:'Handle objection',roi:'Show ROI',next:'Lock next step',close:'Close',advance:'Follow up'};
-  var subs={prep:'Understand the client before the call starts',discover:'Understand their operation before pitching',qualify:'Determine how much to invest in this deal',position:'Frame Lazr around their specific gap',handle:'Stay in control of the conversation',roi:'Make the cost of inaction visible',next:'Do not leave without a concrete action',close:'Secure commitment to move forward',advance:'Maintain momentum after the call'};
-  var nexts={prep:'Next: Run discovery',discover:'Next: Qualify the fit',qualify:'Next: Position value',position:'Next: Handle objection or Show ROI',handle:'Next: Show ROI',roi:'Next: Lock next step',next:'Next: Close',close:'Next: Follow up',advance:'Next: Return to dashboard'};
+  var labels={prep:'Set up deal',discover:'Run discovery',position:'Position value',roi:'Show ROI',close:'Close',advance:'Follow up'};
+  var subs={prep:'Understand the client before the call starts',discover:'Ask before you pitch',position:'Frame Lazr around their specific gap',roi:'Make the cost of inaction visible',close:'Secure the next concrete step',advance:'Maintain momentum after the call'};
+  var nexts={prep:'Next: Run discovery',discover:'Next: Position value',position:'Next: Show ROI',roi:'Next: Close',close:'Next: Follow up',advance:'Next: Return to dashboard'};
   var coaching={prep:'Top reps prep before every call.',discover:'Top reps ask before they pitch.',qualify:'Not every deal deserves the same effort.',position:'Frame around their gap, not your features.',handle:'Acknowledge. Reframe. Control.',roi:'A number on screen beats any claim.',next:'Every call ends with a concrete next step.',close:'Commitment, not interest. Ask for it.',advance:'First follow-up within 2 hours wins.'};
   var nowEl=document.getElementById('command-stage-now');
   var badgeEl=document.getElementById('command-stage-badge');
@@ -1284,7 +1277,7 @@ function updateCommandFlowBanner(stage){
   if(badgeEl)badgeEl.textContent=stage?stage.toUpperCase():'';
   if(nxtEl)nxtEl.textContent=nexts[stage]||'';
   var actionEl=document.getElementById('command-stage-action');
-  var actions={prep:'',discover:'Ask. Do not pitch yet.',qualify:'Assess fit.',position:'Expose the gap.',handle:'Acknowledge. Reframe. Control.',roi:'Put a number on it.',next:'Lock the step.',close:'Ask for commitment.',advance:'Send follow-up now.'};
+  var actions={prep:'Fill in what you know.',discover:'Ask. Do not pitch yet.',position:'Expose the gap using their words.',roi:'Put a number on the problem.',close:'Ask for the next step.',advance:'Send follow-up now.'};
   if(actionEl)actionEl.textContent=actions[stage]||'';
 }
 
@@ -1308,7 +1301,7 @@ function continueDealFromDashboard(){
   if(ctaBtn){ctaBtn.textContent=loadText;ctaBtn.disabled=true;}
   setTimeout(function(){
     nav('command',document.querySelector('[data-p="command"]'));
-    var drawerMap={handle:'handle',roi:'roi',next:'next',close:'close',advance:'advance'};
+    var drawerMap={roi:'roi',close:'close',advance:'advance'};
     if(drawerMap[stage]){
       openDrawer(drawerMap[stage],document.querySelector('[data-p="'+drawerMap[stage]+'"]'));
     } else {
@@ -1325,7 +1318,7 @@ function autoRouteStage(stage){
   // Only auto-route when Command panel is the active main panel
   var cmdPanel = document.getElementById('panel-command');
   if(!cmdPanel || !cmdPanel.classList.contains('on')) return;
-  var map={handle:'handle',roi:'roi',next:'next',close:'close',advance:'advance'};
+  var map={roi:'roi',close:'close',advance:'advance'};
   if(map[stage]){
     openDrawer(map[stage], document.querySelector('[data-p="'+map[stage]+'"]'));
   } else {
@@ -1336,12 +1329,10 @@ function autoRouteStage(stage){
 
 // ══ NEXT ACTION BLOCK ══
 var STAGE_NEXT_QUESTIONS = {
-  prep:     {q:'Walk me through how you manage shipping today — start to finish.',           cta:'Open Prep →',    action:function(){openDrawer('prep',document.querySelector('[data-p="prep"]'));}},
-  discover: {q:'How are you currently deciding which carrier to use per shipment?',          cta:'Run Discovery →', action:function(){openDrawer('prep',document.querySelector('[data-p="prep"]'));}},
-  qualify:  {q:'When volume increases or you add a location, how does your setup handle it?',cta:'Qualify →',       action:function(){openDrawer('next',document.querySelector('[data-p="next"]'));}},
-  position: {q:'If everything was in one platform, what would change for your team?',       cta:'Position →',      action:function(){closeDrawer();}},
-  handle:   {q:'What matters more — lowest cost per shipment, or control across the operation?', cta:'Handle Objection →', action:function(){openDrawer('handle',document.querySelector('[data-p="handle"]'));}},
-  roi:      {q:'How many systems is your team using today to manage shipping?',             cta:'Show ROI →',      action:function(){openDrawer('roi',document.querySelector('[data-p="roi"]'));}},
+  prep:     {q:'Walk me through how you manage shipping today — start to finish.',                                    cta:'Set up deal →',    action:function(){openDrawer('prep',document.querySelector('[data-p="prep"]'));}},
+  discover: {q:'How are you currently deciding which carrier to use per shipment?',                                   cta:'Run discovery →',  action:function(){openDrawer('prep',document.querySelector('[data-p="prep"]'));}},
+  position: {q:'If you had everything in one platform — booking, tracking, billing — what would change for your team?',cta:'Position value →', action:function(){closeDrawer();}},
+  roi:      {q:'How many systems or portals is your team using today to manage shipping?',                            cta:'Show ROI →',       action:function(){openDrawer('roi',document.querySelector('[data-p="roi"]'));}},
   next:     {q:'What would need to happen on your end to move forward this week?',          cta:'Lock Next Step →', action:function(){openDrawer('next',document.querySelector('[data-p="next"]'));}},
   close:    {q:'Can you send over a few recent shipments so I can show you exactly where this applies?', cta:'Close →', action:function(){openDrawer('close',document.querySelector('[data-p="close"]'));}},
   advance:  {q:'Is there anyone else who should be included in the next step?',             cta:'Follow Up →',     action:function(){openDrawer('advance',document.querySelector('[data-p="advance"]'));}},
@@ -1382,51 +1373,41 @@ function updateCommandSurface(){
   updateNextActionBlock(stage);
 
   if(stage==='prep'){
-    setDirective({say:'We do not have enough deal context yet.',ask:'Fill in the deal setup so the system can guide the conversation accurately.',means:'The deal cannot be directed properly without core context.',risk:'You will get weaker positioning and generic responses.',next:'Open Prep and complete the required fields.',status:'🟡 Setup required'});
-    setNextBar('Set up deal — the system cannot guide without context.','Set up deal →',function(){openDrawer('prep',document.querySelector('[data-p="prep"]'));});
-    autoRouteStage(stage);
+    setDirective({say:'We need the deal context before the system can guide accurately.',ask:'Can you walk me through how you manage shipping today?',means:'No context = generic output. Specific context = specific direction.',risk:'Without setup, every response will be too broad to use.',status:'🟡 Setup required'});
+    setNextBar('Set up deal →','Set up deal →',function(){openDrawer('prep',document.querySelector('[data-p="prep"]'));});
     return;
   }
+
   if(stage==='discover'){
-    setDirective({say:'Before I tell you anything about what we do — I want to understand how your operation works today.',ask:'How are you currently deciding which carrier to use per shipment?',means:'You are diagnosing the gap. Every answer tells you which problem Lazr solves for them specifically.',risk:'Pitch before you understand their process and the product feels optional, not necessary.',status:'🟡 Discovery'});
+    setDirective({say:'Before I tell you anything about what we do — I want to understand your operation.',ask:'How are you currently deciding which carrier to use per shipment?',means:'Every answer tells you exactly which problem Lazr solves for them. Do not skip this.',risk:'Pitch before you understand their process and the product feels optional, not urgent.',status:'🟡 Discover'});
     setNextBar('Run discovery →','Run discovery →',function(){openDrawer('prep',document.querySelector('[data-p="prep"]'));});
-    autoRouteStage(stage);
     return;
   }
-  if(stage==='qualify'){
-    setDirective({say:'Based on what I am hearing — you are dealing with multiple tools, multiple people, and not enough visibility. That is exactly where Lazr removes the most friction.',ask:'Is streamlining this something your team is actively looking to solve, or more of a background priority right now?',means:'You are assessing fit and urgency. Complexity signals fit. Active intent signals urgency.',risk:'Pitching without confirming urgency means positioning into a passive audience.',status:'🟡 Qualifying'});
-    setNextBar('Qualify fit →','Qualify fit →',function(){openDrawer('next',document.querySelector('[data-p="next"]'));});
-    autoRouteStage(stage);
-    return;
-  }
+
   if(stage==='position'){
-    setDirective({say:'Most teams in your position are not trying to replace what is working — they are trying to get more visibility and control without adding complexity.',ask:'If you had one place to compare and manage all of this, how would that change the way your team operates?',means:'You have enough context to frame Lazr properly.',risk:'If you do not position clearly now, the deal will stay abstract.',next:'Stay on the dashboard and move into Handle or ROI if needed.',status:'🟢 In flow'});
-    setNextBar('You are in POSITION. Frame around their gap.','Handle objection →',function(){openDrawer('handle',document.querySelector('[data-p="handle"]'));});
+    setDirective({say:'Most teams in your position are not trying to replace what is working — they are trying to get control and visibility without adding more tools.',ask:'If you had one place to manage all of this, what would that change for your team?',means:'You have enough context to frame Lazr around their specific gap. Use what they told you.',risk:'Generic positioning feels like a pitch. Use their words back at them.',status:'🟢 Position'});
+    setNextBar('Position value →','Position value →',function(){closeDrawer();});
     return;
   }
-  if(stage==='handle'){
-    setDirective({say:'That is fair. Most teams say that at first — but where we usually find the real gap is in visibility and control across the operation.',ask:'What matters more for you right now — the lowest price on one shipment, or better control across the whole process?',means:'The deal is under objection pressure.',risk:'If you stay defensive, the conversation will flatten.',next:'Open Handle and generate the exact response.',status:'🔴 Objection active'});
-    setNextBar('OBJECTION ACTIVE. Stay in control of the conversation.','Handle objection →',function(){openDrawer('handle',document.querySelector('[data-p="handle"]'));});
-    return;
-  }
+
   if(stage==='roi'){
-    setDirective({say:'Based on what you have described, there is likely meaningful overhead from fragmentation before rate optimization even begins.',ask:'How many systems or carrier portals is your team using today to manage shipping?',means:'The deal now needs quantified pressure.',risk:'Without numbers, interest may stay conceptual.',next:'Open ROI and quantify the cost of inaction.',status:'🟡 Quantify now'});
-    setNextBar('Show the cost of inaction. Numbers hit harder than words.','Show ROI →',function(){openDrawer('roi',document.querySelector('[data-p="roi"]'));});
+    setDirective({say:'Based on what you have described, there is meaningful overhead from fragmentation — before rate optimization even starts.',ask:'How many systems or portals is your team using today to manage shipping?',means:'A number makes the cost real. Without a number, interest stays conceptual.',risk:'If they leave without seeing a cost, urgency fades fast.',status:'🟡 Show ROI'});
+    setNextBar('Show ROI →','Show ROI →',function(){openDrawer('roi',document.querySelector('[data-p="roi"]'));});
+    autoRouteStage(stage);
     return;
   }
-  if(stage==='next'){
-    setDirective({say:"Let's make this practical and look at a few recent shipments so I can show you exactly where this would apply.",ask:'Would you be open to reviewing a couple of recent shipments together?',means:'There is momentum but it needs direction.',risk:'If you do not direct the next step, the momentum will cool.',next:'Open Next and decide the immediate move.',status:'🟢 Momentum available'});
-    setNextBar('LOCK the next step. Do not leave without a concrete action.','Lock next step →',function(){openDrawer('next',document.querySelector('[data-p="next"]'));});
-    return;
-  }
+
   if(stage==='close'){
-    setDirective({say:'Based on everything we have discussed, the logical next step is to review a few recent shipments and show you exactly where Lazr would create value.',ask:'Can you send over a few recent shipments so I can put that together?',means:'The deal is ready for a concrete advance step.',risk:'If you leave without a defined next action, the deal may stall.',next:'Open Close and secure the advancement.',status:'🟢 Close step ready'});
-    setNextBar('Close the loop. Ask for commitment, not interest.','Close →',function(){openDrawer('close',document.querySelector('[data-p="close"]'));});
+    setDirective({say:'Based on everything we have covered, the next step is simple — let me put together a cost analysis using your actual shipments.',ask:'Can you send over a few recent shipments so I can show you exactly where this applies?',means:'The deal is ready to advance. You are not closing a contract — you are closing the next step.',risk:'Leaving without a defined next action is how deals die quietly.',status:'🟢 Close'});
+    setNextBar('Close the loop →','Close the loop →',function(){openDrawer('close',document.querySelector('[data-p="close"]'));});
+    autoRouteStage(stage);
     return;
   }
+
   if(stage==='advance'){
-    setDirective({say:'I will follow up with the summary and the exact materials we discussed.',ask:'Is there anyone else who should be included in the next step?',means:'The live conversation is over and follow-through now matters most.',risk:'Without a strong follow-up, momentum will decay.',next:'Open Advance and send the follow-up now.',status:'🟡 Follow-through required'});
-    setNextBar('First follow-up within 2 hours. Send it now.','Follow up →',function(){openDrawer('advance',document.querySelector('[data-p="advance"]'));});
+    setDirective({say:'I will follow up with the summary and the materials we discussed.',ask:'Is there anyone else who should be on the next conversation?',means:'The call is over. Follow-through in the next 2 hours keeps momentum alive.',risk:'Every hour of delay costs deal velocity. Send the follow-up now.',status:'🟡 Advance'});
+    setNextBar('Follow up →','Follow up →',function(){openDrawer('advance',document.querySelector('[data-p="advance"]'));});
+    autoRouteStage(stage);
     return;
   }
 }
@@ -1494,8 +1475,8 @@ function quickTrigger(type){
   addEvent('trigger', flowState.liveSignal||type);
   saveDeals();
   updateCommandSurface();
-  if(flowState.objectionActive){openDrawer('handle',document.querySelector('[data-p="handle"]'));}
-  else{openDrawer('next',document.querySelector('[data-p="next"]'));}
+  // Handle drawer opens as an overlay — does not change the main stage
+  openDrawer('handle',document.querySelector('[data-p="handle"]'));
 }
 
 
@@ -1698,7 +1679,7 @@ async function callAI(prompt, outputEl, mode, renderFn){
 
 // ── PREP ──
 async function runPrep(){
-  var prompt='MODE: PREP'+buildDealContext();
+  var prompt='MODE: PREP — generate opening brief and ONE strong opening question only. Do not generate discovery questions (those run separately). Focus on: best opening angle, one opening question, key gap to probe.'+buildDealContext();
   var out=document.getElementById('prep-output');
   await callAI(prompt,out,'prep',function(text,o){
     var open=extr(text,'OPEN'),q1=extr(text,'Q1'),q2=extr(text,'Q2'),q3=extr(text,'Q3'),gap=extr(text,'GAP'),angle=extr(text,'ANGLE');
@@ -1833,7 +1814,26 @@ async function runHandle(){
     if(reframe)o.appendChild(makeSayBlock(reframe));
     if(ask)o.appendChild(makeBlock('Regain control — ask this',ask,'blue',ask));
     if(next)o.appendChild(makeBlock('Next move',next,'',next));
-    showToast('Handled — routed to Deal');
+    // After handling: clear objection, set handled flag, push forward to ROI
+    flowState.objectionActive=false;
+    flowState.objectionHandled=true;
+    deal.lastObj='';
+    deal.flowState=Object.assign({},flowState);
+    addEvent('handle','Objection handled');
+    saveDeals();
+    // Add next step block
+    var fwdDiv=document.createElement('div');
+    fwdDiv.style.cssText='margin-top:12px;background:var(--g2);border:1px solid var(--g3);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;justify-content:space-between';
+    fwdDiv.innerHTML='<div style="font-size:12px;font-weight:700;color:var(--green)">Objection handled → Next: Show ROI</div>';
+    var roiBtn=document.createElement('button');
+    roiBtn.textContent='Show ROI →';
+    roiBtn.style.cssText='background:var(--green);border:none;border-radius:7px;padding:8px 16px;font-family:Syne,sans-serif;font-size:12px;font-weight:800;color:#050f0b;cursor:pointer';
+    roiBtn.onclick=function(){closeDrawer();openDrawer('roi',document.querySelector('[data-p="roi"]'));};
+    fwdDiv.appendChild(roiBtn);
+    o.appendChild(fwdDiv);
+    updateCommandSurface();
+    updateDashboard();
+    showToast('Objection handled — move to ROI');
   });
 }
 
@@ -1906,8 +1906,8 @@ function updateDashboard(){
   if(!deal.client) return; // named deals exist but none active yet
   // Flow stage
   var stage=resolveStage(deal);
-  var nowMap={prep:'Set up deal',discover:'Run discovery',qualify:'Qualify the fit',position:'Position value',handle:'Handle objection',roi:'Show ROI',next:'Lock next step',close:'Close',advance:'Follow up'};
-  var nextStageMap={prep:'Next: Run discovery',discover:'Next: Qualify the fit',qualify:'Next: Position value',position:'Next: Handle objection or Show ROI',handle:'Next: Show ROI',roi:'Next: Lock next step',next:'Next: Close',close:'Next: Follow up',advance:'Next: Return to dashboard'};
+  var nowMap={prep:'Set up deal',discover:'Run discovery',position:'Position value',roi:'Show ROI',close:'Close',advance:'Follow up'};
+  var nextStageMap={prep:'Next: Run discovery',discover:'Next: Position value',position:'Next: Show ROI',roi:'Next: Close',close:'Next: Follow up',advance:'Next: Return to dashboard'};
   var fnEl=document.getElementById('dash-flow-now');if(fnEl)fnEl.textContent=nowMap[stage]||'Continue the deal';
   var fxEl=document.getElementById('dash-flow-next');if(fxEl)fxEl.textContent=nextStageMap[stage]||'';
   var fbEl=document.getElementById('dash-flow-btn');if(fbEl)fbEl.textContent=(nowMap[stage]||'Continue deal')+' →';
