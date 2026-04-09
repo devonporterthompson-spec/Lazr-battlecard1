@@ -421,7 +421,7 @@ select.field option{background:var(--bg3)}
                   <div id="more-menu" style="display:none;position:absolute;top:calc(100%+5px);right:0;background:var(--bg2);border:1.5px solid var(--border2);border-radius:10px;min-width:170px;z-index:500;box-shadow:0 8px 30px rgba(0,0,0,.4);overflow:hidden">
                     <div onclick="openDrawer('prep',document.querySelector('[data-p=prep]'));toggleMoreMenu()" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">✏️ Edit prospect</div>
                     <div onclick="archiveProspect();toggleMoreMenu()" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--amber);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">📁 Archive prospect</div>
-                    <div onclick="showDeleteModal();toggleMoreMenu()" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--red);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">🗑 Delete prospect</div>
+                    <div id="status-del-btn" onclick="showDeleteModal();toggleMoreMenu()" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--red);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">🗑 Delete prospect</div>
                   </div>
                 </div>
               </div>
@@ -1047,7 +1047,7 @@ function switchToDealt(id){
   updateDealBar();
   updateCommandSurface();
   updateDashboard();
-  nav('command', document.querySelector('[data-p="command"]'));
+  autoRoute();
   showToast('Switched to '+deal.client);
 }
 
@@ -1149,7 +1149,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v11.4 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v11.5 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1535,8 +1535,7 @@ function continueDealFromDashboard(){
 }
 
 function autoRouteStage(stage){
-  var cmdPanel = document.getElementById('panel-command');
-  if(!cmdPanel || !cmdPanel.classList.contains('on')) return;
+  var cmdEl=document.getElementById('main-command');if(!cmdEl||cmdEl.style.display==='none')return;
   // If discovery not done, don't auto-route in Command
   if(!deal.discoveryDone) return;
   var map={roi:'roi',close:'close',advance:'advance'};
@@ -1672,8 +1671,6 @@ function openDrawer(id, el){
   if(p){p.classList.add('on');document.getElementById('drawer-overlay').classList.add('on');}
   if(el)el.classList.add('on');
   if(id==='battlecard'){if(typeof bcRender==='function')bcRender();}
-  var dm=document.getElementById('dm-mode');
-  if(dm)dm.innerHTML=id==='prep'?'✏️ Edit':'⚡ Live';
 }
 
 function closeDrawer(){
@@ -1689,8 +1686,6 @@ function closeDrawer(){
     if(mainPanel)mainPanel.classList.add('on');
     autoRoute();
   }
-  var dm=document.getElementById('dm-mode');
-  if(dm)dm.innerHTML='⚡ Live';
 }
 
 function quickTrigger(type){
@@ -1715,6 +1710,25 @@ function toggleTheme(){isDark=!isDark;document.getElementById('theme-btn').textC
 function toggleLang(){currentLang=currentLang==='en'?'fr':'en';document.getElementById('lang-btn').textContent=currentLang==='fr'?'🇨🇦':'🇫🇷';showToast(currentLang==='fr'?'Français activé':'English mode');}
 
 // ══ AI UTILITIES ══
+
+
+function showPanel(id){
+  var map={followup:'advance',closingflow:'close',nextmove:'next'};
+  var target=map[id]||id;
+  if(DRAWER_PANELS.indexOf(target)>=0) openDrawer(target,document.querySelector('[data-p="'+target+'"]'));
+  else showToast('Opening '+id+'...');
+}
+
+function copyDirective(){
+  var parts=[];
+  var say=document.getElementById('d-say');if(say&&say.textContent&&say.textContent!=='—')parts.push('Say this: '+say.textContent);
+  var ask=document.getElementById('d-ask');if(ask&&ask.textContent&&ask.textContent!=='—')parts.push('Then ask: '+ask.textContent);
+  var means=document.getElementById('d-means');if(means&&means.textContent&&means.textContent!=='—')parts.push('Means: '+means.textContent);
+  var risk=document.getElementById('d-risk');if(risk&&risk.textContent&&risk.textContent!=='—')parts.push('Risk: '+risk.textContent);
+  var text=parts.join('\n\n');
+  if(text)copyText(text,document.querySelector('.directive .copy-btn'));else showToast('Nothing to copy yet.');
+}
+
 function extr(text,marker){
   var re=new RegExp('\\['+marker+'\\]([\\s\\S]*?)(?=\\[|$)','i');
   var m=text.match(re);return m?m[1].trim():'';
@@ -2002,372 +2016,23 @@ async function runHandle(){
 // ── ROI ──
 
 // ── DEAL LIST ──
-function renderDealList(){
-  var container=document.getElementById('dash-deal-list');
-  if(!container)return;
-  if(!deals.length){container.innerHTML='';return;}
-
-  // Sort: high priority first, then by health score desc
-  // Only show deals with a client name
-  var namedDeals=deals.filter(function(d){return d.client&&d.client.trim().length>1;});
-  if(!namedDeals.length){container.innerHTML='';return;}
-  var sorted=namedDeals.slice().sort(function(a,b){
-    var pOrder={high:0,medium:1,low:2};
-    var pDiff=(pOrder[calcPriority(a)]||1)-(pOrder[calcPriority(b)]||1);
-    if(pDiff!==0)return pDiff;
-    return calculateHealth(b)-calculateHealth(a);
-  });
-
-  container.innerHTML='';
-  sorted.forEach(function(d){
-    var h=calculateHealth(d);
-    var hl=healthLabel(h);
-    var isActive=d.id===activeDealId;
-    var p=calcPriority(d);
-    var div=document.createElement('div');
-    div.setAttribute('data-id',d.id);
-    div.onclick=function(){switchToDealt(d.id);};
-    div.style.cssText='padding:12px 14px;background:'+(isActive?'var(--g2)':'var(--bg2)')+';border:1px solid '+(isActive?'var(--g3)':'var(--border)')+';border-radius:var(--radius);margin-bottom:8px;cursor:pointer;transition:all .15s';
-    div.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">'
-      +'<div style="font-family:Syne,sans-serif;font-size:14px;font-weight:800;color:var(--text)">'+d.client+'</div>'
-      +'<div style="display:flex;align-items:center;gap:6px">'
-      +(p==='high'?'<span style="font-size:9px;font-weight:800;text-transform:uppercase;background:var(--r2);border:1px solid var(--r3);border-radius:4px;padding:2px 6px;color:var(--red)">HIGH</span>':'')
-      +'<span style="font-size:11px;color:var(--'+(hl.cls||'muted')+')">'+hl.icon+' '+h+'</span>'
-      +'</div></div>'
-      +'<div style="font-size:11px;color:var(--muted)">'+cap(d.stage||'prep')+' · '+(d.tool||'--')+' · '+lastTouch(d)+'</div>';
-    container.appendChild(div);
-  });
-}
+function renderDealList(){/* prospect switcher handles deal list */}
 
 // ══ DASHBOARD ══
 function updateDashboard(){
-  var empty=document.getElementById('dash-empty');
-  var pop=document.getElementById('dash-populated');
-  var countEl=document.getElementById('dash-deal-count');
-
-  // Only count deals with a client name
-  var namedDeals = deals.filter(function(d){ return d.client && d.client.trim().length > 1; });
-
-  // Clean up unnamed placeholder deals from memory
-  deals = deals.filter(function(d){ return d.client && d.client.trim().length > 1 || d.id === activeDealId; });
-  // Render deal list (named deals only)
-  renderDealList();
-
-  if(!namedDeals.length){
-    if(empty)empty.style.display='block';
-    if(pop)pop.style.display='none';
-    if(countEl)countEl.textContent='No deals';
-    return;
-  }
-  if(empty)empty.style.display='none';
-  if(pop)pop.style.display='block';
-  if(countEl){
-    var suffix=namedDeals.length===1?' deal':' deals';
-    countEl.textContent=namedDeals.length+suffix+(deal.client?' · '+deal.client+' active':'');
-  }
-  if(!deal.client) return; // named deals exist but none active yet
-  // Flow stage
+  if(!deal.client) return;
   var stage=resolveStage(deal);
-  var stageEl=document.getElementById('dash-stage-chip');
-  if(stageEl)stageEl.textContent=cap(stage);
-
-  // Discovery progress
+  var clientEl=document.getElementById('dash-client');if(clientEl)clientEl.textContent=deal.client;
+  var stageEl=document.getElementById('dash-stage-chip');if(stageEl)stageEl.textContent=cap(stage);
   var answered=discoveryProgress.answered.length;
   var total=DISCOVERY_QUESTIONS.length;
   var progEl=document.getElementById('dash-progress-text');
-  if(progEl){
-    if(deal.discoveryDone) progEl.textContent='Discovery complete';
-    else progEl.textContent='Discovery: '+answered+' / '+total;
-  }
-  var fbEl=document.getElementById('dash-flow-btn');if(fbEl){if(!deal.client)fbEl.textContent='Set up deal →';else if(!deal.discoveryDone)fbEl.textContent='Start discovery →';else fbEl.textContent='Go to Command →';}
-
-  // Health score
-  var health=calculateHealth(deal);
-  var hl=healthLabel(health);
-  var healthEl=document.getElementById('dash-health');
-  var clientEl=document.getElementById('dash-client');if(clientEl)clientEl.textContent=deal.client;
-  var stage=deal.stage||'prep';
-  var stageEl=document.getElementById('dash-stage-chip');if(stageEl)stageEl.innerHTML='Stage <span>'+cap(stage)+'</span>';
+  if(progEl){if(deal.discoveryDone)progEl.textContent='Discovery complete';else progEl.textContent='Discovery: '+answered+' / '+total;}
   var mom=deal.momentum||'neutral';
   var momEl=document.getElementById('dash-momentum-chip');
   if(momEl)momEl.textContent=(mom==='advancing'?'🟢':mom==='stalling'?'🔴':'🟡')+' '+cap(mom);
-  var risk=flowState.objectionActive?'High':flowState.closeReady?'Low':'Medium';
-
-
-  var progressEl=document.getElementById('dash-progress-list');
-  if(progressEl){
-    var si=['prep','discover','position','handle','roi','next','close','advance'].indexOf(stage);
-    var items=[
-      {l:'Prep complete',done:si>0},{l:'Discovery complete',done:deal.discoveryDone||si>1},
-      {l:'Positioning done',done:si>2},{l:'Objection handled',done:si>3&&!flowState.objectionActive},
-      {l:'ROI completed',done:flowState.numbersShown},{l:'Close attempted',done:flowState.closeReady},
-      {l:'Follow-up sent',done:flowState.callEnded}
-    ];
-    progressEl.innerHTML=items.map(function(it){
-      return '<div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:'+(it.done?'var(--green)':'var(--subtle)')+'">'+(it.done?'✅':'○')+'</span><span style="color:'+(it.done?'var(--text)':'var(--muted)')+'">'+it.l+'</span></div>';
-    }).join('');
-  }
-  var stakeholderEl=document.getElementById('dash-stakeholders');
-  if(stakeholderEl){
-    var roles=['Logistics','Operations','Procurement','Finance','Executive'];
-    var active=cap(deal.role||'operations');
-    stakeholderEl.innerHTML=roles.map(function(r){
-      var on=r===active||r.toLowerCase()===(deal.role||'');
-      return '<div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:'+(on?'var(--green)':'var(--subtle)')+'">'+( on?'●':'○')+'</span><span style="color:'+(on?'var(--text)':'var(--muted)')+'">'+r+(on?' (active)':'')+'</span></div>';
-    }).join('');
-  }
-  var blockersEl=document.getElementById('dash-blockers');
-  if(blockersEl){
-    var bl=[];
-    if(deal.lastObj)bl.push({icon:'🔴',text:'Objection: '+deal.lastObj});
-    if(!deal.discoveryDone&&stage!=='prep')bl.push({icon:'🟡',text:'Discovery not confirmed'});
-    if(!flowState.numbersShown&&['close','advance'].indexOf(stage)>=0)bl.push({icon:'🟡',text:'ROI not quantified'});
-    if(!bl.length)bl.push({icon:'🟢',text:'No active blockers'});
-    blockersEl.innerHTML=bl.map(function(b){return '<div style="display:flex;align-items:center;gap:8px;font-size:12px"><span>'+b.icon+'</span><span style="color:var(--text)">'+b.text+'</span></div>';}).join('');
-  }
-  var nextMap={prep:'Complete deal setup in Prep',discover:'Run discovery with the client',position:'Position Lazr around their gap',handle:'Handle the active objection',roi:'Quantify the cost of fragmentation',next:'Confirm the next concrete step',close:'Secure a concrete advancement',advance:'Send follow-up and maintain momentum'};
-  var naEl=document.getElementById('dash-next-action');if(naEl)naEl.textContent=nextMap[stage]||'Continue the flow';
-
-  // Timeline
-  var tlEl=document.getElementById('dash-timeline');
-  if(tlEl&&deal.timeline&&deal.timeline.length){
-    tlEl.innerHTML=deal.timeline.slice(0,4).map(function(ev){
-      var icons={prep:'🎯',roi:'📊',handle:'🛡️',close:'🔐',advance:'🚀',trigger:'⚡'};
-      return '<div style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:6px">'
-        +'<span>'+(icons[ev.type]||'•')+'</span>'
-        +'<span style="color:var(--text)">'+(ev.text||cap(ev.type))+'</span>'
-        +'<span style="color:var(--subtle);margin-left:auto;font-size:11px">'+lastTouch({timeline:[ev]})+'</span>'
-        +'</div>';
-    }).join('');
-  }
-}
-
-
-
-// ══ EFFICIENCY SCORE ══
-var AREA_WEIGHTS = {
-  execution:2, tools:3, people:2, time:3, costs:3,
-  services:1, carriers:2, volume:2, automation:3, scale:2, fit:1
-};
-function calcEfficiencyScore(){
-  if(!deal.discoveryAnswers) return 100;
-  var answers=deal.discoveryAnswers;
-  var deductions=0;
-  // Each answered area deducts points based on what was revealed
-  // More portals, more manual = lower score
-  var tools=answers.tools||''; var auto=answers.automation||'';
-  var costs=answers.costs||''; var time=answers.time||'';
-  var scale=answers.scale||'';
-  if(tools.match(/\d+/)){ var n=parseInt(tools.match(/\d+/)[0]); deductions+=Math.min(n*4,20); }
-  if(/manual|spreadsheet|email|phone|portal|multiple/i.test(auto)) deductions+=15;
-  if(/don't|no tracking|not sure|excel|spreadsheet/i.test(costs)) deductions+=18;
-  if(/hours|days|manual|always|constantly/i.test(time)) deductions+=12;
-  if(/break|problem|struggle|difficult|challenging/i.test(scale)) deductions+=10;
-  // Base: answered questions reduce ignorance bonus
-  var answered=discoveryProgress.answered.length;
-  deductions+=Math.min(answered*2,12); // more questions = more revealed gaps
-  return Math.max(100-deductions, 28);
-}
-
-function updateEfficiencyScore(){
-  var score=calcEfficiencyScore();
-  var scoreEl=document.getElementById('disc-eff-score');
-  var barEl=document.getElementById('disc-eff-bar');
-  var labelEl=document.getElementById('disc-eff-label');
-  if(scoreEl)scoreEl.textContent=score;
-  if(barEl)barEl.style.width=score+'%';
-  var color=score>=75?'var(--green)':score>=50?'var(--amber)':'var(--red)';
-  if(barEl)barEl.style.background=color;
-  if(scoreEl)scoreEl.style.color=color;
-  var label=score>=75?'Efficient':score>=50?'At Risk':'Needs Work';
-  if(labelEl)labelEl.textContent=label;
-}
-
-
-
-// ══ MORE OPTIONS MENU ══
-
-function viewArchivedDeals(){
-  try{
-    var archived=JSON.parse(localStorage.getItem('cos_archived')||'[]');
-    if(!archived.length){showToast('No archived prospects yet.');return;}
-    var existing=document.getElementById('archived-modal');if(existing)existing.remove();
-    var modal=document.createElement('div');
-    modal.id='archived-modal';
-    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;display:flex;align-items:center;justify-content:center;padding:20px';
-    // Build shell
-    var shell=document.createElement('div');
-    shell.style.cssText='background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:0;max-width:420px;width:100%;max-height:80vh;display:flex;flex-direction:column';
-    // Header
-    var hdr=document.createElement('div');
-    hdr.style.cssText='padding:20px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between';
-    var title=document.createElement('div');
-    title.style.cssText='font-family:Syne,sans-serif;font-size:16px;font-weight:900;color:var(--text)';
-    title.textContent='Archived Prospects';
-    var closeBtn=document.createElement('button');
-    closeBtn.style.cssText='background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer';
-    closeBtn.textContent='×';
-    closeBtn.onclick=function(){modal.remove();};
-    hdr.appendChild(title);hdr.appendChild(closeBtn);
-    // List
-    var listEl=document.createElement('div');
-    listEl.style.cssText='overflow-y:auto;flex:1';
-    archived.slice(0,20).forEach(function(d){
-      var row=document.createElement('div');
-      row.style.cssText='padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px';
-      var info=document.createElement('div');
-      var nameDiv=document.createElement('div');nameDiv.style.cssText='font-size:13px;font-weight:600;color:var(--text)';nameDiv.textContent=d.client;
-      var metaDiv=document.createElement('div');metaDiv.style.cssText='font-size:11px;color:var(--subtle)';
-      metaDiv.textContent=cap(d.stage||'prep')+' · '+(d.archivedAt?new Date(d.archivedAt).toLocaleDateString('en-CA',{month:'short',day:'numeric'}):'');
-      info.appendChild(nameDiv);info.appendChild(metaDiv);
-      var btn=document.createElement('button');
-      btn.style.cssText='background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer';
-      btn.textContent='Restore';
-      btn.onclick=(function(id){return function(){restoreArchivedDeal(id);modal.remove();};})(d.id);
-      row.appendChild(info);row.appendChild(btn);
-      listEl.appendChild(row);
-    });
-    shell.appendChild(hdr);shell.appendChild(listEl);
-    modal.appendChild(shell);
-    document.body.appendChild(modal);
-  }catch(e){showToast('No archived prospects.');}
-}
-
-function restoreArchivedDeal(id){
-  try{
-    var archived=JSON.parse(localStorage.getItem('cos_archived')||'[]');
-    var found=archived.find(function(d){return d.id===id;});
-    if(!found){showToast('Could not restore — deal not found.');return;}
-    archived=archived.filter(function(d){return d.id!==id;});
-    localStorage.setItem('cos_archived',JSON.stringify(archived));
-    found.archivedAt=null;
-    deals.push(found);
-    setActiveDeal(found.id);
-    saveDeals();
-    var modal=document.getElementById('archived-modal');if(modal)modal.remove();
-    autoRoute();updateDashboard();
-    showToast(found.client+' restored.');
-  }catch(e){showToast('Restore failed.');}
-}
-function toggleMoreMenu(){
-  var menu=document.getElementById('more-menu');
-  if(!menu)return;
-  if(menu.style.display==='none'){
-    menu.style.display='block';
-    setTimeout(function(){
-      document.addEventListener('click',function closeMore(e){
-        if(!menu.contains(e.target)){menu.style.display='none';}
-        document.removeEventListener('click',closeMore);
-      });
-    },10);
-  } else {
-    menu.style.display='none';
-  }
-}
-
-function archiveProspect(){
-  if(!deal.client){showToast('No active prospect to archive.');return;}
-  var clientName=deal.client;
-  var existing=document.getElementById('archive-modal');if(existing)existing.remove();
-  var inDiscovery=!deal.discoveryDone&&deal.client&&discoveryProgress.answered.length>0;
-  var modal=document.createElement('div');
-  modal.id='archive-modal';
-  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;display:flex;align-items:center;justify-content:center;padding:20px';
-  var box=document.createElement('div');
-  box.style.cssText='background:var(--bg2);border:1px solid var(--am3);border-radius:var(--radius-lg);padding:28px;max-width:360px;width:100%';
-  var label=document.createElement('div');label.style.cssText='font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--amber);margin-bottom:10px';label.textContent='Archive Prospect';
-  var name=document.createElement('div');name.style.cssText='font-family:Syne,sans-serif;font-size:20px;font-weight:900;color:var(--text);margin-bottom:12px';name.textContent=clientName;
-  box.appendChild(label);box.appendChild(name);
-  if(inDiscovery){
-    var warn=document.createElement('div');
-    warn.style.cssText='background:var(--am2);border:1px solid var(--am3);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--amber)';
-    warn.textContent='You are currently in an active discovery session. Archiving will preserve all progress but remove this deal from your active flow.';
-    box.appendChild(warn);
-  } else {
-    var info=document.createElement('div');
-    info.style.cssText='font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6';
-    info.textContent='This prospect and all discovery data will be archived. You can restore it later from archived deals.';
-    box.appendChild(info);
-  }
-  var btns=document.createElement('div');btns.style.cssText='display:flex;gap:8px';
-  var archBtn=document.createElement('button');
-  archBtn.style.cssText='flex:1;background:var(--amber);border:none;border-radius:8px;padding:11px;font-family:Syne,sans-serif;font-size:13px;font-weight:800;color:#fff;cursor:pointer';
-  archBtn.textContent='Archive';
-  archBtn.onclick=function(){confirmArchiveProspect();modal.remove();};
-  var cancelBtn=document.createElement('button');
-  cancelBtn.style.cssText='flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:11px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer';
-  cancelBtn.textContent='Cancel';
-  cancelBtn.onclick=function(){modal.remove();};
-  btns.appendChild(archBtn);btns.appendChild(cancelBtn);
-  box.appendChild(btns);
-  modal.appendChild(box);
-  document.body.appendChild(modal);
-}
-
-function confirmArchiveProspect(){
-  var modal=document.getElementById('archive-modal');if(modal)modal.remove();
-  var clientName=deal.client;
-  // Mark as archived (store in separate localStorage key)
-  try{
-    var archived=JSON.parse(localStorage.getItem('cos_archived')||'[]');
-    archived.unshift(Object.assign({},deal,{archivedAt:Date.now()}));
-    localStorage.setItem('cos_archived',JSON.stringify(archived.slice(0,50)));
-  }catch(e){}
-  // Remove from active deals
-  deals=deals.filter(function(d){return d.id!==activeDealId;});
-  activeDealId=deals.length>0?deals[0].id:null;
-  if(activeDealId){setActiveDeal(activeDealId);}
-  else{deal=newDealObj();flowState={liveSignal:'',explicitNeed:'',callEnded:false,numbersShown:false,objectionActive:false,objectionHandled:false,closeReady:false};}
-  saveDeals();clearPrepFields();closeDrawer();updateDealBar();
-  autoRoute();updateDashboard();
-  showToast(clientName+' archived. Find it in archived deals.');
-}
-
-// ══ PROSPECT SWITCHER ══
-function toggleProspectMenu(){
-  var menu=document.getElementById('prospect-menu');
-  if(!menu)return;
-  if(menu.style.display==='none'){
-    renderProspectMenu();
-    menu.style.display='block';
-    // Close on outside click
-    setTimeout(function(){
-      document.addEventListener('click',closeProspectMenu,{once:true});
-    },10);
-  } else {
-    menu.style.display='none';
-  }
-}
-function closeProspectMenu(e){
-  var menu=document.getElementById('prospect-menu');
-  if(menu&&!menu.contains(e.target))menu.style.display='none';
-}
-function renderProspectMenu(){
-  var list=document.getElementById('prospect-menu-list');
-  if(!list)return;
-  var named=deals.filter(function(d){return d.client&&d.client.trim().length>1;});
-  list.innerHTML='';
-  if(!named.length){
-    list.innerHTML='<div style="padding:12px 14px;font-size:12px;color:var(--subtle)">No prospects yet</div>';
-    return;
-  }
-  named.forEach(function(d){
-    var isActive=d.id===activeDealId;
-    var div=document.createElement('div');
-    div.style.cssText='padding:10px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px'+(isActive?';background:var(--g2)':'');
-    var nameSpan=document.createElement('div');
-    nameSpan.style.cssText='font-size:13px;font-weight:'+(isActive?'700':'500')+';color:var(--text)';
-    nameSpan.textContent=d.client;
-    div.appendChild(nameSpan);
-    if(isActive){
-      var badge=document.createElement('span');
-      badge.style.cssText='font-size:9px;color:var(--green);font-weight:800';
-      badge.textContent='ACTIVE';
-      div.appendChild(badge);
-    }
-    div.onclick=(function(id){return function(){switchToDealt(id);toggleProspectMenu();};})(d.id);
-    list.appendChild(div);
-  });
+  var fbEl=document.getElementById('dash-flow-btn');
+  if(fbEl&&fbEl.style.display!=='none'){fbEl.textContent=deal.discoveryDone?'Go to Command →':'Start discovery →';}
 }
 
 // ══ DISCOVERY PANEL ══
@@ -2392,15 +2057,7 @@ function updateDiscoveryPanel(){
   if(editBtn)editBtn.style.display='none';
   if(delBtn)delBtn.style.display='none';
 
-  var empty=document.getElementById('disc-empty');
-  var active=document.getElementById('disc-active');
-  if(!deal.client){
-    if(empty)empty.style.display='block';
-    if(active)active.style.display='none';
-    return;
-  }
-  if(empty)empty.style.display='none';
-  if(active)active.style.display='block';
+  if(!deal.client) return;
 
   var answered=discoveryProgress.answered.length;
   var total=DISCOVERY_QUESTIONS.length;
@@ -2684,6 +2341,27 @@ async function runAdvance(){
 }
 
 // ── BATTLECARD ──
+
+// ══ BATTLECARD FEATURE DATA ══
+var lazrData=[1,1,1,1,1,1,1,0.3,1,1,1,1,1,1,1];
+var bcFeatures=[
+  {name:'LTL Shipping',detail:'Less-than-truckload freight across Canadian and US carriers.'},
+  {name:'Parcel Shipping',detail:'Multi-carrier parcel booking with rate comparison.'},
+  {name:'FTL / Full Truckload',detail:'Full truckload booking and carrier management.'},
+  {name:'Bring Your Own Carriers',detail:'Load existing carrier contracts alongside Lazr network rates.'},
+  {name:'Multi-User Role Access',detail:'Separate permissions for ops, finance, warehouse, and executive.'},
+  {name:'ERP / API Integration',detail:'Connect ERP or WMS for automated shipment creation.'},
+  {name:'Automated Invoice Audit',detail:'Every invoice checked for billing errors before payment.'},
+  {name:'Pre-Order Tracking',detail:'In-transit visibility across all carriers.'},
+  {name:'Cross-Border Canada/US',detail:'Seamless cross-border shipping with customs documents.'},
+  {name:'Reporting & Analytics',detail:'Carrier performance, cost by lane, spend by department.'},
+  {name:'Rate Intelligence',detail:'Real-time market rate benchmarking.'},
+  {name:'Shipment Rules & Automation',detail:'Auto-assign carriers and trigger alerts automatically.'},
+  {name:'Free to Start',detail:'No implementation fee, no monthly minimum.'},
+  {name:'Strategic Partnership Model',detail:'Dedicated support and proactive optimization.'},
+  {name:'Multi-Location Management',detail:'Manage multiple warehouses from one platform.'},
+];
+
 vsCompetitors = {
   freightcom: {
     name:'FreightCOM / ClickShip',
