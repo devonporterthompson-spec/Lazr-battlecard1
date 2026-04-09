@@ -483,7 +483,7 @@ select.field option{background:var(--bg3)}
               <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:900;color:var(--text);margin-bottom:8px">⚡ Command Locked</div>
               <div style="font-size:13px;color:var(--muted);margin-bottom:6px;max-width:260px;margin-left:auto;margin-right:auto">Complete discovery to unlock live execution guidance.</div>
               <div style="font-size:11px;color:var(--subtle);opacity:.7;margin-bottom:20px;font-style:italic">Every answer you capture sharpens the directive.</div>
-              <button class="gen-btn" style="width:auto;padding:10px 22px;font-size:13px" onclick="showLayer('discovery')">Return to Discovery →</button>
+              <button style="background:var(--green);border:none;border-radius:8px;padding:11px 24px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer" onclick="showLayer('discovery');nav('main',document.querySelector('[data-p=main]'))">Go to Discovery →</button>
             </div>
 
             <!-- Command surface -->
@@ -503,7 +503,7 @@ select.field option{background:var(--bg3)}
 
               <!-- Next action block -->
               <div id="command-next-action" style="background:linear-gradient(135deg,rgba(61,220,132,.13) 0%,rgba(61,220,132,.04) 100%);border:2px solid var(--green);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:14px;display:none">
-                <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.16em;color:var(--green);margin-bottom:8px">▶ Ask This Now</div>
+
                 <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:10px;font-style:italic" id="cna-question">—</div>
                 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
                   <div style="font-size:11px;color:var(--muted)" id="cna-progress">—</div>
@@ -1117,7 +1117,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v11.0 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v11.2 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1375,7 +1375,6 @@ function resetDirective(){
   document.getElementById('d-ask').textContent    = 'Use Prep to start the flow.';
   document.getElementById('d-means').textContent  = '—';
   document.getElementById('d-risk').textContent   = '—';
-  document.getElementById('d-next').textContent   = '→ Start in Prep';
   document.getElementById('d-status').textContent = '🟡 Set deal first';
 }
 
@@ -2042,7 +2041,7 @@ function updateDashboard(){
     if(deal.discoveryDone) progEl.textContent='Discovery complete';
     else progEl.textContent='Discovery: '+answered+' / '+total;
   }
-  var fbEl=document.getElementById('dash-flow-btn');var fbEl=document.getElementById('dash-flow-btn');if(fbEl){if(!deal.client)fbEl.textContent='Set up deal →';else if(!deal.discoveryDone)fbEl.textContent='Start discovery →';else fbEl.textContent='Go to Command →';}
+  var fbEl=document.getElementById('dash-flow-btn');if(fbEl){if(!deal.client)fbEl.textContent='Set up deal →';else if(!deal.discoveryDone)fbEl.textContent='Start discovery →';else fbEl.textContent='Go to Command →';}
 
   // Health score
   var health=calculateHealth(deal);
@@ -2276,9 +2275,6 @@ function discMarkAnswered_advance(){
   discAdvance();
 }
 
-function discMarkAnswered(){
-  discSaveAnswer();
-}
 
 function discSkip(){
   if(!discoveryProgress.skipped) discoveryProgress.skipped=[];
@@ -2640,7 +2636,6 @@ function resetDirective(){
   document.getElementById('d-ask').textContent    = 'Use Prep to start the flow.';
   document.getElementById('d-means').textContent  = '—';
   document.getElementById('d-risk').textContent   = '—';
-  document.getElementById('d-next').textContent   = '→ Start in Prep';
   document.getElementById('d-status').textContent = '🟡 Set deal first';
 }
 
