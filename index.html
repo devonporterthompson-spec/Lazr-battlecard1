@@ -307,8 +307,8 @@ select.field option{background:var(--bg3)}
     <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
       <div class="sb-nav">
-        <div class="sb-sec">Layers</div>
-        <div class="sb-item on" onclick="nav('dashboard',this)" data-p="dashboard"><span class="si-icon">📋</span><span class="si-label">Dashboard</span></div>
+        <div class="sb-item on" onclick="nav('main',this)" data-p="main" style="margin-bottom:4px"><span class="si-icon" style="font-size:18px">⚡</span><span class="si-label" style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--green)">LAZR</span></div>
+        <div class="sb-sec">Flow</div>
         <div class="sb-item" onclick="nav('discovery',this)" data-p="discovery"><span class="si-icon">🔍</span><span class="si-label">Discovery</span></div>
         <div class="sb-item" onclick="nav('command',this)" data-p="command"><span class="si-icon">⚡</span><span class="si-label">Command</span></div>
         <div class="sb-sec">Tools</div>
@@ -330,226 +330,178 @@ select.field option{background:var(--bg3)}
       <div class="panel-wrap">
 
 
-        <!-- ══ DASHBOARD ══ -->
-        <div class="panel on" id="panel-dashboard">
-          <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:900;margin-bottom:16px;color:var(--text)">Dashboard</div>
+        <!-- ══ MAIN (unified: status + discovery + command) ══ -->
+        <div class="panel on" id="panel-main">
 
-          <!-- Deal list header -->
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)" id="dash-deal-count">No deals</div>
-            <button class="gen-btn" style="width:auto;padding:7px 16px;font-size:12px;margin-bottom:0" onclick="createDeal()">+ New Deal</button>
+          <!-- LAYER 0: No deal state -->
+          <div id="main-nodeal" style="text-align:center;padding:60px 20px;display:none">
+            <div style="font-size:36px;margin-bottom:14px;opacity:.25">⚡</div>
+            <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:900;color:var(--muted);margin-bottom:6px">No active deal</div>
+            <div style="font-size:12px;color:var(--subtle);margin-bottom:24px">Create a deal to begin the guided flow.</div>
+            <button class="gen-btn" style="width:auto;padding:11px 28px" onclick="createDeal()">+ New Deal</button>
           </div>
 
-          <!-- Deal list -->
-          <div id="dash-deal-list" style="margin-bottom:16px"></div>
-
-          <!-- Empty state -->
-          <div id="dash-empty" style="text-align:center;padding:40px 20px">
-            <div style="font-size:32px;margin-bottom:12px;opacity:.3">📋</div>
-            <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--muted);margin-bottom:6px">No deals yet</div>
-            <div style="font-size:12px;color:var(--subtle);margin-bottom:20px">Create your first deal to start tracking.</div>
-            <button class="gen-btn" style="width:auto;padding:10px 24px" onclick="createDeal()">Create first deal →</button>
-          </div>
-
-          <!-- Deal populated state -->
-          <div id="dash-populated" style="display:none">
-            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-              <!-- Client + stage -->
-              <div style="flex:1;min-width:160px">
-                <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:900;color:var(--text);line-height:1" id="dash-client">—</div>
-                <div style="display:flex;align-items:center;gap:8px;margin-top:5px">
-                  <span id="dash-stage-chip" style="font-size:10px;font-weight:700;color:var(--green);background:var(--g2);border:1px solid var(--g3);border-radius:5px;padding:2px 8px">Stage —</span>
+          <!-- LAYER 1: Status strip — always visible when deal exists -->
+          <div id="main-status" style="display:none">
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <div style="flex:1;min-width:140px">
+                <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:900;color:var(--text);line-height:1" id="dash-client">—</div>
+                <div style="display:flex;align-items:center;gap:7px;margin-top:4px;flex-wrap:wrap">
+                  <span id="dash-stage-chip" style="font-size:9px;font-weight:800;text-transform:uppercase;color:var(--green);background:var(--g2);border:1px solid var(--g3);border-radius:4px;padding:2px 7px">—</span>
                   <span id="dash-progress-text" style="font-size:11px;color:var(--muted)">—</span>
-                  <span id="dash-momentum-chip" style="font-size:10px;color:var(--subtle)">🟡 Neutral</span>
+                  <span id="dash-momentum-chip" style="font-size:11px;color:var(--subtle)">🟡 Neutral</span>
                 </div>
               </div>
-              <!-- Single CTA -->
-              <button id="dash-flow-btn" onclick="continueDealFromDashboard()" style="background:var(--green);border:none;border-radius:9px;padding:11px 20px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap;flex-shrink:0">Continue →</button>
+              <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+                <button id="dash-flow-btn" onclick="continueDealFromDashboard()" style="background:var(--green);border:none;border-radius:8px;padding:9px 18px;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap">Continue →</button>
+                <button onclick="openDrawer('prep',document.querySelector('[data-p=prep]'))" style="background:none;border:1px solid var(--border2);border-radius:7px;padding:7px 11px;font-size:11px;color:var(--muted);cursor:pointer" title="Edit deal">✏️</button>
+                <button onclick="showDeleteModal()" style="background:none;border:1px solid var(--r3);border-radius:7px;padding:7px 11px;font-size:11px;color:var(--red);cursor:pointer" title="Delete deal">🗑</button>
+              </div>
             </div>
           </div>
 
-            <!-- Flow guidance banner -->
-            <div id="dash-guidance" style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px">
-                <div>
-                  <div style="font-size:12px;font-weight:700;color:var(--text)" id="dash-flow-next">—</div>
-                  <div style="font-size:11px;color:var(--subtle);margin-top:2px" id="dash-flow-now"></div>
-                </div>
-                <button style="background:var(--green);border:none;border-radius:9px;padding:11px 20px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap;flex-shrink:0" onclick="continueDealFromDashboard()" id="dash-flow-btn">Continue →</button>
-              </div>
+          <!-- LAYER 2: Discovery workspace — dominant until discoveryDone -->
+          <div id="main-discovery" style="display:none">
 
-
-          </div>
-        </div>
-
-
-        <!-- ══ DISCOVERY ══ -->
-        <div class="panel" id="panel-discovery">
-
-          <!-- Header -->
-          <div style="margin-bottom:20px">
-            <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;color:var(--text);margin-bottom:4px">Discovery</div>
-            <div style="font-size:13px;color:var(--muted)">Understand the operation before positioning anything.</div>
-          </div>
-
-          <!-- Empty state -->
-          <div id="disc-empty" style="text-align:center;padding:40px 20px">
-            <div style="font-size:32px;margin-bottom:12px;opacity:.3">🔍</div>
-            <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--muted);margin-bottom:6px">Set up the deal first</div>
-            <div style="font-size:12px;color:var(--subtle);margin-bottom:20px">Enter deal context in Setup before running discovery.</div>
-            <button class="gen-btn" style="width:auto;padding:10px 24px" onclick="nav('prep',document.querySelector('[data-p=prep]'))">Set up deal →</button>
-          </div>
-
-          <!-- Active state -->
-          <div id="disc-active" style="display:none">
+            <!-- Discovery header -->
+            <div style="margin-bottom:16px">
+              <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:900;color:var(--text);margin-bottom:3px">Discovery</div>
+              <div style="font-size:12px;color:var(--muted)">Understand the operation before positioning anything.</div>
+            </div>
 
             <!-- Progress bar -->
-            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-                <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Discovery Progress</div>
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Progress</div>
                 <div style="font-size:12px;font-weight:800;color:var(--green)" id="disc-progress-label">0 / 11</div>
               </div>
-              <div style="background:var(--bg3);border-radius:4px;height:5px;overflow:hidden">
+              <div style="background:var(--bg3);border-radius:4px;height:4px;overflow:hidden;margin-bottom:7px">
                 <div id="disc-progress-bar" style="background:var(--green);height:100%;width:0%;border-radius:4px;transition:width .4s ease"></div>
               </div>
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
-                <div style="font-size:11px;color:var(--subtle)" id="disc-current-level">L1 · Execution</div>
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div style="font-size:11px;color:var(--subtle)" id="disc-current-level">L1 · Execution · Q1</div>
                 <div style="font-size:11px;color:var(--green);font-weight:700" id="disc-next-focus">Next focus: Tools</div>
               </div>
+            </div>
+
+            <!-- Insight flash -->
+            <div id="disc-insight-flash" style="display:none;background:var(--bg2);border:1px solid var(--g3);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;animation:fup .3s ease">
+              <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:4px">✔ Saved</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px" id="disc-insight-answer">—</div>
+              <div style="font-size:12px;color:var(--muted);margin-bottom:2px" id="disc-insight-text">—</div>
+              <div style="font-size:11px;color:var(--subtle)" id="disc-insight-next">—</div>
             </div>
 
             <!-- Current question — DOMINANT -->
             <div id="disc-question-block" style="background:linear-gradient(135deg,rgba(61,220,132,.12) 0%,rgba(61,220,132,.04) 100%);border:2px solid var(--green);border-radius:var(--radius-lg);padding:20px 22px;margin-bottom:14px">
               <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.16em;color:var(--green);margin-bottom:10px" id="disc-q-level">L1 · Execution</div>
-              <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:14px" id="disc-q-text">—</div>
-              <div style="font-size:11px;color:var(--subtle);margin-bottom:14px" id="disc-q-hint">—</div>
-              <!-- Answer capture -->
+              <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:12px" id="disc-q-text">—</div>
+              <div style="font-size:11px;color:var(--subtle);margin-bottom:14px;font-style:italic" id="disc-q-hint">—</div>
               <div style="margin-bottom:10px">
                 <label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px;display:block">What they said</label>
                 <textarea id="disc-answer-input" rows="2" placeholder="Type their answer here…" style="width:100%;background:rgba(0,0,0,.25);border:1.5px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;resize:none;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='var(--border2)'"></textarea>
               </div>
-              <div style="display:flex;gap:8px">
-                <button id="disc-answered-btn" onclick="discMarkAnswered()" style="flex:1;background:var(--green);border:none;border-radius:8px;padding:11px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer">Save &amp; Continue →</button>
-                <button id="disc-skip-btn" onclick="discSkip()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:11px 16px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer">Skip</button>
-              </div>
+              <!-- ONE primary action -->
+              <button id="disc-answered-btn" onclick="discMarkAnswered()" style="width:100%;background:var(--green);border:none;border-radius:8px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer">Save &amp; Continue →</button>
+              <button id="disc-skip-btn" onclick="discSkip()" style="width:100%;background:none;border:none;padding:8px;font-size:11px;color:var(--subtle);cursor:pointer;margin-top:4px">Skip this question</button>
             </div>
 
-            <!-- Insight flash — shown after save -->
-            <div id="disc-insight-flash" style="display:none;background:var(--bg2);border:1px solid var(--g3);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;animation:fup .3s ease">
-              <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:5px">✔ Saved</div>
-              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px" id="disc-insight-answer">—</div>
-              <div style="font-size:12px;color:var(--muted)" id="disc-insight-text">—</div>
-              <div style="font-size:11px;color:var(--subtle);margin-top:5px" id="disc-insight-next">→ —</div>
-            </div>
+            <!-- Question checklist (collapsed by default, expandable) -->
+            <details style="margin-bottom:14px">
+              <summary style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);cursor:pointer;padding:8px 0">All questions ▾</summary>
+              <div id="disc-q-list" style="margin-top:8px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px"></div>
+            </details>
 
-            <!-- Question list -->
-            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">
-              <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px">All questions</div>
-              <div id="disc-q-list"></div>
-            </div>
-
-            <!-- Complete button — shows when enough answered -->
+            <!-- Complete button -->
             <div id="disc-complete-area" style="display:none">
-              <div style="background:var(--g2);border:1px solid var(--g3);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;font-size:12px;color:var(--text)">
-                <strong style="color:var(--green)">Discovery complete.</strong> You have enough context to qualify and position.
+              <div style="background:var(--g2);border:1px solid var(--g3);border-radius:var(--radius);padding:10px 14px;margin-bottom:10px;font-size:12px;color:var(--text)">
+                <strong style="color:var(--green)">Discovery complete.</strong> You have enough context to position and execute.
               </div>
-              <button class="gen-btn" onclick="discComplete()" style="width:100%;padding:14px;font-size:14px;font-family:'Syne',sans-serif;font-weight:800">Complete Discovery → Move to Command</button>
+              <button class="gen-btn" onclick="discComplete()" style="width:100%;padding:14px;font-size:14px">Complete Discovery → Unlock Command</button>
             </div>
 
           </div>
-        </div>
 
-        <!-- ══ DEAL (default / command center) ══ -->
-        <div class="panel" id="panel-command">
+          <!-- LAYER 3: Command workspace — locked until discoveryDone -->
+          <div id="main-command" style="display:none">
 
-          <!-- Discovery lock overlay — shown when discovery incomplete -->
-          <div id="cmd-lock" style="display:none;text-align:center;padding:48px 24px">
-            <div style="font-size:28px;margin-bottom:14px;opacity:.3">🔒</div>
-            <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:900;color:var(--muted);margin-bottom:6px">Complete discovery first</div>
-            <div style="font-size:12px;color:var(--subtle);margin-bottom:22px;max-width:280px;margin-left:auto;margin-right:auto">Run discovery to unlock live command. The directive adapts to what you learn.</div>
-            <button class="gen-btn" style="width:auto;padding:10px 24px;font-size:13px" onclick="nav('discovery',document.querySelector('[data-p=discovery]'))">Go to Discovery →</button>
-          </div>
-
-          <!-- Command surface — shown when discovery complete -->
-          <div id="cmd-surface">
-
-          <!-- Deal memory bar -->
-          <div class="deal-bar" id="deal-bar">
-            <div class="dm-chip" id="dm-client">Client <span>—</span></div>
-            <div class="dm-chip" id="dm-tool">Tool <span>—</span></div>
-            <div class="dm-chip" id="dm-concern">Concern <span>—</span></div>
-            <div class="dm-chip" id="dm-size">Size <span>—</span></div>
-            <div class="dm-chip" id="dm-role">Role <span>—</span></div>
-            <div class="dm-chip" id="dm-stage">Stage <span>—</span></div>
-            <div class="dm-chip" id="dm-status">Status <span>🟡</span></div>
-            <div class="dm-chip" id="dm-mode" style="margin-left:4px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em">⚡ Live</div>
-            <div style="margin-left:auto;display:flex;gap:6px">
-              <button style="background:none;border:1px solid var(--border2);border-radius:6px;padding:3px 10px;font-size:11px;color:var(--muted)" onclick="openDrawer('prep',document.querySelector('[data-p=prep]'))">Edit →</button>
-              <button style="background:none;border:1px solid var(--r3);border-radius:6px;padding:3px 10px;font-size:11px;color:var(--red)" onclick="deleteDeal()">Delete</button>
+            <!-- Command locked state -->
+            <div id="cmd-lock" style="display:none;text-align:center;padding:48px 20px">
+              <div style="font-size:28px;margin-bottom:12px;opacity:.3">🔒</div>
+              <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:900;color:var(--muted);margin-bottom:5px">Command locked</div>
+              <div style="font-size:12px;color:var(--subtle);margin-bottom:20px">Complete discovery to unlock live execution.</div>
+              <button class="gen-btn" style="width:auto;padding:10px 22px;font-size:13px" onclick="showLayer('discovery')">Return to Discovery →</button>
             </div>
-          </div>
 
-          <!-- NEXT ACTION — dominant, always first -->
-          <div id="command-next-action" style="background:linear-gradient(135deg,rgba(61,220,132,.13) 0%,rgba(61,220,132,.04) 100%);border:2px solid var(--green);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:14px;display:none">
-            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.16em;color:var(--green);margin-bottom:8px">▶ Ask This Now</div>
-            <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:10px;font-style:italic" id="cna-question">—</div>
-            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-              <div style="font-size:11px;color:var(--muted)" id="cna-progress">—</div>
-              <button id="cna-btn" style="background:var(--green);border:none;border-radius:8px;padding:9px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer">Ask Question →</button>
-            </div>
-          </div>
+            <!-- Command surface -->
+            <div id="cmd-surface">
 
-          <!-- Stage banner — slim: name + badge + next + action -->
-          <div id="command-flow-banner" style="margin-bottom:12px">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
-              <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text)" id="command-stage-now">—</div>
-              <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);background:var(--g2);border:1px solid var(--g3);border-radius:4px;padding:2px 7px" id="command-stage-badge">—</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px">
-              <div style="font-size:11px;color:var(--subtle)" id="command-stage-next">—</div>
-              <div style="font-size:11px;color:var(--green);font-weight:700" id="command-stage-action">—</div>
-            </div>
-          </div>
-
-          <!-- Primary directive -->
-          <div class="directive" id="deal-directive">
-            <span class="dir-eye">▶ Do This Now</span>
-            <div class="dir-field">
-              <span class="dir-field-label">Say this</span>
-              <div class="say-text" id="d-say">Set your deal context in Prep to get your first move.</div>
-            </div>
-            <div class="dir-field">
-              <span class="dir-field-label">Then ask</span>
-              <div class="ask-text" id="d-ask">Use Prep to start the flow.</div>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-              <div class="dir-field" style="margin-bottom:0">
-                <span class="dir-field-label">What this means</span>
-                <div class="insight-text" id="d-means">—</div>
+              <!-- Flow banner -->
+              <div id="command-flow-banner" style="margin-bottom:12px">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+                  <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text)" id="command-stage-now">—</div>
+                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);background:var(--g2);border:1px solid var(--g3);border-radius:4px;padding:2px 7px" id="command-stage-badge">—</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="font-size:11px;color:var(--subtle)" id="command-stage-next">—</div>
+                  <div style="font-size:11px;color:var(--green);font-weight:700" id="command-stage-action">—</div>
+                </div>
               </div>
-              <div class="dir-field" style="margin-bottom:0">
-                <span class="dir-field-label">Risk if unchanged</span>
-                <div class="risk-text" id="d-risk">—</div>
+
+              <!-- Next action block -->
+              <div id="command-next-action" style="background:linear-gradient(135deg,rgba(61,220,132,.13) 0%,rgba(61,220,132,.04) 100%);border:2px solid var(--green);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:14px;display:none">
+                <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.16em;color:var(--green);margin-bottom:8px">▶ Ask This Now</div>
+                <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:10px;font-style:italic" id="cna-question">—</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+                  <div style="font-size:11px;color:var(--muted)" id="cna-progress">—</div>
+                  <button id="cna-btn" style="background:var(--green);border:none;border-radius:8px;padding:9px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer">Continue →</button>
+                </div>
               </div>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:flex-end">
-              <div class="dir-status" id="d-status">🟡 Set deal first</div>
-            </div>
-            <button class="copy-btn" onclick="copyDirective()">Copy</button>
-          </div>
 
-          <!-- Quick triggers — context, below directive -->
-          <div style="margin-top:10px">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:7px">Live signals</div>
-            <div class="trigger-row">
-              <button class="trigger-btn" onclick="quickTrigger('price')">💰 Mentioned price</button>
-              <button class="trigger-btn" onclick="quickTrigger('competitor')">🥊 Uses a competitor</button>
-              <button class="trigger-btn" onclick="quickTrigger('hesitant')">😶 Hesitant</button>
-              <button class="trigger-btn" onclick="quickTrigger('quiet')">🔇 Gone quiet</button>
-            </div>
-          </div>
+              <!-- Directive block -->
+              <div class="directive" id="deal-directive">
+                <span class="dir-eye">▶ Do This Now</span>
+                <div class="dir-field">
+                  <span class="dir-field-label">Say this</span>
+                  <div class="say-text" id="d-say">Complete discovery to get your first directive.</div>
+                </div>
+                <div class="dir-field">
+                  <span class="dir-field-label">Then ask</span>
+                  <div class="ask-text" id="d-ask">—</div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+                  <div class="dir-field" style="margin-bottom:0">
+                    <span class="dir-field-label">What this means</span>
+                    <div class="insight-text" id="d-means">—</div>
+                  </div>
+                  <div class="dir-field" style="margin-bottom:0">
+                    <span class="dir-field-label">Risk if unchanged</span>
+                    <div class="risk-text" id="d-risk">—</div>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:flex-end">
+                  <div class="dir-status" id="d-status">🟡</div>
+                </div>
+                <button class="copy-btn" onclick="copyDirective()">Copy</button>
+              </div>
 
-          </div><!-- end cmd-surface -->
-        </div>
+              <!-- Live signals — lowest priority -->
+              <div style="margin-top:12px">
+                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:6px">Live signals</div>
+                <div class="trigger-row">
+                  <button class="trigger-btn" onclick="quickTrigger('price')">💰 Mentioned price</button>
+                  <button class="trigger-btn" onclick="quickTrigger('competitor')">🥊 Uses a competitor</button>
+                  <button class="trigger-btn" onclick="quickTrigger('hesitant')">😶 Hesitant</button>
+                  <button class="trigger-btn" onclick="quickTrigger('quiet')">🔇 Gone quiet</button>
+                </div>
+              </div>
+
+            </div><!-- end cmd-surface -->
+          </div><!-- end main-command -->
+
+        </div><!-- end panel-main -->
+
+
 
         <!-- ══ PREP ══ -->
         <div class="panel drawer" id="panel-prep"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">PREP</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
@@ -1049,7 +1001,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v10.1 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v10.2 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1190,10 +1142,60 @@ var flowState = {
 };
 
 var DRAWER_PANELS = ['prep','handle','roi','next','close','advance','battlecard','wherewewin','objtracker'];
-var MAIN_PANELS = ['dashboard','discovery','command'];
+var MAIN_PANELS = ['main'];
 
 function stageOrder(){ return ['prep','discover','position','roi','close','advance']; }
 function stageIndex(stage){ return stageOrder().indexOf(stage); }
+
+
+// ══ LAYER ROUTER — the core of the unified panel ══
+function showLayer(layer){
+  // layer: 'nodeal' | 'discovery' | 'command'
+  var layers = ['main-nodeal','main-status','main-discovery','main-command'];
+  layers.forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.style.display='none';
+  });
+
+  if(layer==='nodeal'){
+    var el=document.getElementById('main-nodeal');
+    if(el)el.style.display='block';
+    return;
+  }
+
+  // Status strip always shows when deal exists
+  var statusEl=document.getElementById('main-status');
+  if(statusEl)statusEl.style.display='block';
+
+  if(layer==='discovery'){
+    var discEl=document.getElementById('main-discovery');
+    if(discEl)discEl.style.display='block';
+    updateDiscoveryPanel();
+    updateDashboard();
+  } else if(layer==='command'){
+    var cmdEl=document.getElementById('main-command');
+    if(cmdEl)cmdEl.style.display='block';
+    // Show lock or surface
+    var lockEl=document.getElementById('cmd-lock');
+    var surfaceEl=document.getElementById('cmd-surface');
+    if(!deal.discoveryDone){
+      if(lockEl)lockEl.style.display='block';
+      if(surfaceEl)surfaceEl.style.display='none';
+    } else {
+      if(lockEl)lockEl.style.display='none';
+      if(surfaceEl)surfaceEl.style.display='block';
+      updateCommandSurface();
+    }
+    updateDashboard();
+  }
+}
+
+function autoRoute(){
+  // Determine correct layer based on deal state
+  if(!deal.client){ showLayer('nodeal'); return; }
+  if(!deal.discoveryDone){ showLayer('discovery'); return; }
+  showLayer('command');
+}
 
 function resolveStage(d){
   if(!d.client||!d.tool||!d.concern||!d.role||!d.size) return 'prep';
@@ -1354,12 +1356,10 @@ function continueDealFromDashboard(){
 
   setTimeout(function(){
     if(!deal.discoveryDone){
-      // Not yet discovered — go to Discovery panel
-      nav('discovery',document.querySelector('[data-p="discovery"]'));
-      setTimeout(function(){updateDiscoveryPanel();},100);
+      showLayer('discovery');
     } else {
       // Discovery done — go to Command and open correct drawer
-      nav('command',document.querySelector('[data-p="command"]'));
+      showLayer('command');
       var drawerMap={roi:'roi',close:'close',advance:'advance'};
       if(drawerMap[stage]) openDrawer(drawerMap[stage],document.querySelector('[data-p="'+drawerMap[stage]+'"]'));
       else closeDrawer();
@@ -1433,19 +1433,6 @@ function updateCommandSurface(){
   updateStageBar();
   var stage=resolveStage(deal);
 
-  // Show lock or surface based on discoveryDone
-  var lockEl=document.getElementById('cmd-lock');
-  var surfaceEl=document.getElementById('cmd-surface');
-  if(!deal.discoveryDone && deal.client){
-    if(lockEl)lockEl.style.display='block';
-    if(surfaceEl)surfaceEl.style.display='none';
-    updateCommandFlowBanner(stage);
-    return;
-  } else {
-    if(lockEl)lockEl.style.display='none';
-    if(surfaceEl)surfaceEl.style.display='block';
-  }
-
   updateCommandFlowBanner(stage);
   updateNextActionBlock(stage);
 
@@ -1490,22 +1477,20 @@ function updateCommandSurface(){
 }
 
 function nav(id, el){
-  // Main panels — full surface switch
-  if(id==='dashboard'||id==='discovery'||id==='command'){
+  // Route to unified main panel, use showLayer for sub-routing
+  if(['dashboard','discovery','command','main'].indexOf(id)>=0){
     document.querySelectorAll('.panel:not(.drawer)').forEach(function(p){p.classList.remove('on');});
     document.querySelectorAll('.sb-item').forEach(function(s){s.classList.remove('on');});
     closeDrawer();
-    var p=document.getElementById('panel-'+id);
-    if(p)p.classList.add('on');
+    var mainPanel=document.getElementById('panel-main');
+    if(mainPanel)mainPanel.classList.add('on');
     if(el)el.classList.add('on');
-    if(id==='command')updateCommandSurface();
-    if(id==='dashboard')updateDashboard();
-    if(id==='discovery')updateDiscoveryPanel();
-    var tt=document.getElementById('topbar-title');if(tt)tt.textContent=id==='dashboard'?'Dashboard':'Command';
+    if(id==='command') showLayer('command');
+    else if(id==='discovery') showLayer('discovery');
+    else autoRoute();
     closeSB();
     return;
-  }
-  // Drawer panels
+  }  // Drawer panels
   if(DRAWER_PANELS.indexOf(id)>=0){
     openDrawer(id,el);
     closeSB();
@@ -2142,8 +2127,7 @@ function discComplete(){
   saveDeals();
   var msgs={good:'Good fit — moving to Command.',weak:'Weak fit signals — keep it light.',low:'Low fit — tighten and move fast.'};
   showToast(msgs[fit]||'Discovery complete');
-  nav('command',document.querySelector('[data-p="command"]'));
-  updateCommandSurface();
+  autoRoute();
   updateDashboard();
 }
 
