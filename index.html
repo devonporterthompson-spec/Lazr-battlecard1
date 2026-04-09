@@ -214,7 +214,7 @@ select.field option{background:var(--bg3)}
   .tb-stage-bar{display:none}
   .metric-grid{grid-template-columns:1fr}
   .field-row{grid-template-columns:1fr}
-  .panel.drawer{width:100vw}
+  
 }
 /* ── BATTLECARD ──*/
 .bc-search-wrap{position:relative;margin-bottom:7px}
@@ -1120,7 +1120,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v10.6 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v10.7 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
