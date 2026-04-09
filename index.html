@@ -1120,7 +1120,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v10.7 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v10.8 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1212,8 +1212,8 @@ function syncDeal(){
   updateDealBar();
   updateCommandSurface();
   updateDashboard();
-  if(deal.ships && !document.getElementById('r-ships').value) document.getElementById('r-ships').value = deal.ships;
-  if(deal.carriers && !document.getElementById('r-portals').value) document.getElementById('r-portals').value = deal.carriers;
+  var rs=document.getElementById('r-ships');if(rs&&deal.ships&&!rs.value)rs.value=deal.ships;
+  var rp=document.getElementById('r-portals');if(rp&&deal.carriers&&!rp.value)rp.value=deal.carriers;
 }
 function loadDealFromSession(){
   loadDeals();
@@ -1229,17 +1229,19 @@ function restorePrepFields(d){
 }
 
 function updateDealBar(){
+  // dm-* chips removed from DOM — updateDashboard handles status strip now
   dm('dm-client','Client',deal.client||'—');
   dm('dm-tool','Tool', deal.tool||'—');
   dm('dm-concern','Concern',deal.concern||'—');
   dm('dm-size','Size',(deal.size||'—').toUpperCase());
   dm('dm-role','Role',deal.role||'—');
   dm('dm-stage','Stage',deal.stage||'—');
-  // Status color based on momentum
   var statusEl=document.getElementById('dm-status');
-  var icon=deal.momentum==='advancing'?'🟢':deal.momentum==='stalling'?'🔴':'🟡';
-  statusEl.className='dm-chip'+(deal.momentum==='stalling'?' red':deal.momentum==='advancing'?' green':'');
-  statusEl.innerHTML='Status <span>'+icon+' '+cap(deal.momentum||'neutral')+'</span>';
+  if(statusEl){
+    var icon=deal.momentum==='advancing'?'🟢':deal.momentum==='stalling'?'🔴':'🟡';
+    statusEl.className='dm-chip'+(deal.momentum==='stalling'?' red':deal.momentum==='advancing'?' green':'');
+    statusEl.innerHTML='Status <span>'+icon+' '+cap(deal.momentum||'neutral')+'</span>';
+  }
 }
 function dm(id,label,val){
   var el=document.getElementById(id);
