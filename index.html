@@ -353,28 +353,20 @@ select.field option{background:var(--bg3)}
 
           <!-- Deal populated state -->
           <div id="dash-populated" style="display:none">
-
-            <!-- Top: Deal summary -->
-            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:14px">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px">
-                <div>
-                  <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;color:var(--text);line-height:1" id="dash-client">—</div>
-                  <div style="font-size:12px;color:var(--muted);margin-top:4px" id="dash-meta">—</div>
-                </div>
-                <div style="display:flex;gap:7px;flex-wrap:wrap">
-                  <button class="gen-btn" style="width:auto;padding:8px 16px;font-size:12px;margin-bottom:0" onclick="nav('command',document.querySelector('[data-p=command]'))">⚡ Command →</button>
-                  <button style="background:none;border:1px solid var(--border2);border-radius:7px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer" onclick="openDrawer('prep',document.querySelector('[data-p=prep]'))">✏️ Edit</button>
-                  <button style="background:none;border:1px solid var(--r3);border-radius:7px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--red);cursor:pointer" onclick="deleteDeal()">Delete</button>
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+              <!-- Client + stage -->
+              <div style="flex:1;min-width:160px">
+                <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:900;color:var(--text);line-height:1" id="dash-client">—</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:5px">
+                  <span id="dash-stage-chip" style="font-size:10px;font-weight:700;color:var(--green);background:var(--g2);border:1px solid var(--g3);border-radius:5px;padding:2px 8px">Stage —</span>
+                  <span id="dash-progress-text" style="font-size:11px;color:var(--muted)">—</span>
+                  <span id="dash-momentum-chip" style="font-size:10px;color:var(--subtle)">🟡 Neutral</span>
                 </div>
               </div>
-              <div style="font-size:12px;color:var(--muted);margin-bottom:10px" id="dash-health">—</div>
-              <div style="display:flex;flex-wrap:wrap;gap:7px">
-                <div class="dm-chip green" id="dash-stage-chip">Stage <span>—</span></div>
-                <div class="dm-chip" id="dash-momentum-chip">Momentum <span>—</span></div>
-                <div class="dm-chip" id="dash-risk-chip">Risk <span>—</span></div>
-                <div class="dm-chip" id="dash-tool-chip">Tool <span>—</span></div>
-              </div>
+              <!-- Single CTA -->
+              <button id="dash-flow-btn" onclick="continueDealFromDashboard()" style="background:var(--green);border:none;border-radius:9px;padding:11px 20px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap;flex-shrink:0">Continue →</button>
             </div>
+          </div>
 
             <!-- Flow guidance banner -->
             <div id="dash-guidance" style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px">
@@ -419,7 +411,10 @@ select.field option{background:var(--bg3)}
               <div style="background:var(--bg3);border-radius:4px;height:5px;overflow:hidden">
                 <div id="disc-progress-bar" style="background:var(--green);height:100%;width:0%;border-radius:4px;transition:width .4s ease"></div>
               </div>
-              <div style="font-size:11px;color:var(--subtle);margin-top:8px" id="disc-current-level">Level 1: Execution</div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+                <div style="font-size:11px;color:var(--subtle)" id="disc-current-level">L1 · Execution</div>
+                <div style="font-size:11px;color:var(--green);font-weight:700" id="disc-next-focus">Next focus: Tools</div>
+              </div>
             </div>
 
             <!-- Current question — DOMINANT -->
@@ -436,6 +431,14 @@ select.field option{background:var(--bg3)}
                 <button id="disc-answered-btn" onclick="discMarkAnswered()" style="flex:1;background:var(--green);border:none;border-radius:8px;padding:11px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer">Save &amp; Continue →</button>
                 <button id="disc-skip-btn" onclick="discSkip()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:11px 16px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer">Skip</button>
               </div>
+            </div>
+
+            <!-- Insight flash — shown after save -->
+            <div id="disc-insight-flash" style="display:none;background:var(--bg2);border:1px solid var(--g3);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;animation:fup .3s ease">
+              <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:5px">✔ Saved</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px" id="disc-insight-answer">—</div>
+              <div style="font-size:12px;color:var(--muted)" id="disc-insight-text">—</div>
+              <div style="font-size:11px;color:var(--subtle);margin-top:5px" id="disc-insight-next">→ —</div>
             </div>
 
             <!-- Question list -->
@@ -554,7 +557,7 @@ select.field option{background:var(--bg3)}
           <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Set the deal. The system adapts everything else.</div>
 
           <div class="field-row">
-            <div><label class="field-label">Client name</label><input class="field" id="p-client" type="text" placeholder="e.g. Acme Inc" oninput="debouncedSync()"></div>
+            <div><label class="field-label">Client name</label><input class="field" id="p-client" type="text" placeholder="e.g. Acme Inc" oninput="debouncedSync()" autocapitalize="words" style="text-transform:capitalize"></div>
             <div><label class="field-label">Industry</label>
               <select class="field" id="p-industry" onchange="syncDeal()">
                 <option value="">Unknown</option>
@@ -1046,7 +1049,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v9.9 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v10.1 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1120,7 +1123,7 @@ function debouncedSync(){
 function syncDeal(){
   // Don't do anything if no active deal (user hasn't explicitly created one)
   if(!activeDealId) return;
-  deal.client   = val('p-client');
+  deal.client   = val('p-client').replace(/\b\w/g, function(c){return c.toUpperCase();});
   deal.industry = val('p-industry');
   deal.tool     = val('p-tool');
   deal.concern  = val('p-concern');
@@ -1915,28 +1918,32 @@ function updateDashboard(){
   if(!deal.client) return; // named deals exist but none active yet
   // Flow stage
   var stage=resolveStage(deal);
-  var nowMap={prep:'Set up deal',discover:'Run discovery',position:'Position value',roi:'Show ROI',close:'Close',advance:'Follow up'};
-  var nextStageMap={prep:'Next: Run discovery',discover:'Next: Position value',position:'Next: Show ROI',roi:'Next: Close',close:'Next: Follow up',advance:'Next: Return to dashboard'};
-  var fnEl=document.getElementById('dash-flow-now');if(fnEl)fnEl.style.display='none'; // not used in slim version
-  var fxEl=document.getElementById('dash-flow-next');if(fxEl)fxEl.textContent=(nowMap[stage]||'Continue')+' · '+(nextStageMap[stage]||'');
-  var fbEl=document.getElementById('dash-flow-btn');if(fbEl){if(!deal.client)fbEl.textContent='Set up deal →';else if(!deal.discoveryDone)fbEl.textContent='Start discovery →';else fbEl.textContent='Go to Command →';}
+  var stageEl=document.getElementById('dash-stage-chip');
+  if(stageEl)stageEl.textContent=cap(stage);
+
+  // Discovery progress
+  var answered=discoveryProgress.answered.length;
+  var total=DISCOVERY_QUESTIONS.length;
+  var progEl=document.getElementById('dash-progress-text');
+  if(progEl){
+    if(deal.discoveryDone) progEl.textContent='Discovery complete';
+    else progEl.textContent='Discovery: '+answered+' / '+total;
+  }
+  var fbEl=document.getElementById('dash-flow-btn');var fbEl=document.getElementById('dash-flow-btn');if(fbEl){if(!deal.client)fbEl.textContent='Set up deal →';else if(!deal.discoveryDone)fbEl.textContent='Start discovery →';else fbEl.textContent='Go to Command →';}
 
   // Health score
   var health=calculateHealth(deal);
   var hl=healthLabel(health);
   var healthEl=document.getElementById('dash-health');
-  if(healthEl)healthEl.innerHTML='<span style="color:var(--'+(hl.cls||'muted')+')">'+hl.icon+' '+hl.label+'</span> <span style="font-size:10px;color:var(--subtle)">('+health+')</span>';
-  document.getElementById('dash-client').textContent=deal.client;
-  document.getElementById('dash-meta').textContent=[deal.industry||null,deal.tool||null,deal.ships?(deal.ships+'/mo'):null,deal.carriers?(deal.carriers+' carriers'):null].filter(Boolean).join(' · ');
+  var clientEl=document.getElementById('dash-client');if(clientEl)clientEl.textContent=deal.client;
   var stage=deal.stage||'prep';
   var stageEl=document.getElementById('dash-stage-chip');if(stageEl)stageEl.innerHTML='Stage <span>'+cap(stage)+'</span>';
   var mom=deal.momentum||'neutral';
   var momEl=document.getElementById('dash-momentum-chip');
-  if(momEl){momEl.className='dm-chip'+(mom==='advancing'?' green':mom==='stalling'?' red':'');momEl.innerHTML='Momentum <span>'+(mom==='advancing'?'🟢':mom==='stalling'?'🔴':'🟡')+' '+cap(mom)+'</span>';}
+  if(momEl)momEl.textContent=(mom==='advancing'?'🟢':mom==='stalling'?'🔴':'🟡')+' '+cap(mom);
   var risk=flowState.objectionActive?'High':flowState.closeReady?'Low':'Medium';
-  var riskEl=document.getElementById('dash-risk-chip');
-  if(riskEl){riskEl.className='dm-chip'+(risk==='High'?' red':risk==='Low'?' green':'');riskEl.innerHTML='Risk <span>'+risk+'</span>';}
-  var toolEl=document.getElementById('dash-tool-chip');if(toolEl)toolEl.innerHTML='Tool <span>'+(deal.tool||'—')+'</span>';
+
+
   var progressEl=document.getElementById('dash-progress-list');
   if(progressEl){
     var si=['prep','discover','position','handle','roi','next','close','advance'].indexOf(stage);
@@ -2024,7 +2031,13 @@ function updateDiscoveryPanel(){
   var levelLabel=document.getElementById('disc-current-level');
   if(progBar)progBar.style.width=pct+'%';
   if(progLabel)progLabel.textContent=answered+' / '+total;
-  if(levelLabel)levelLabel.textContent=q?q.level:'Complete';
+  if(levelLabel)levelLabel.textContent=q?(q.level+' · Q'+(cur+1)):'Complete';
+  // Next focus
+  var nfEl=document.getElementById('disc-next-focus');
+  if(nfEl){
+    var nextIdx=cur+1;
+    nfEl.textContent=nextIdx<DISCOVERY_QUESTIONS.length?('Next focus: '+(DISC_FOCUS_LABELS[nextIdx]||DISCOVERY_QUESTIONS[nextIdx].level)):(answered>=DISCOVERY_QUESTIONS.length?'Complete':'Final question');
+  }
 
   // Current question
   var qLevel=document.getElementById('disc-q-level');
@@ -2059,7 +2072,7 @@ function updateDiscoveryPanel(){
   var answBtn=document.getElementById('disc-answered-btn');
   var skipBtn=document.getElementById('disc-skip-btn');
   var qBlock=document.getElementById('disc-question-block');
-  if(answered>=6||(cur>=total-1&&answered>0)){
+  if(answered>=8||(cur>=total-1&&answered>0)){
     if(completeArea)completeArea.style.display='block';
   }
   if(cur>=total){
@@ -2067,24 +2080,38 @@ function updateDiscoveryPanel(){
   }
 }
 
+var DISC_INSIGHTS={"execution":"How they operate today = where the gap will be.","tools":"More portals = more fragmentation. This anchors the ROI.","people":"Multiple people managing shipping = coordination overhead.","time":"Time lost = the specific problem Lazr eliminates first.","costs":"No cost tracking = invoice errors going undetected.","services":"Service mix reveals complexity level and fit signals.","carriers":"Carrier count shows management overhead.","volume":"Volume anchors the ROI calculation directly.","automation":"Manual process + growth = the exact problem Lazr solves.","scale":"Scale anxiety = the strongest long-term closing argument.","fit":"Their language tells you whether to go deep or move fast."};
+var DISC_FOCUS_LABELS=["Tools","People","Process","Control","Services","Carriers","Volume","Automation","Costs","Scale","Done"];
+
 function discMarkAnswered(){
   var cur=discoveryProgress.current;
   var answerEl=document.getElementById('disc-answer-input');
   var answerText=answerEl?answerEl.value.trim():'';
 
-  // Save answer to deal memory
+  // Save answer
   if(!deal.discoveryAnswers) deal.discoveryAnswers={};
   var q=DISCOVERY_QUESTIONS[cur];
   if(q){
     deal.discoveryAnswers[q.area]=answerText;
     if(answerText) addEvent('discover','['+q.area+'] '+answerText.slice(0,60));
   }
-
   if(discoveryProgress.answered.indexOf(cur)<0) discoveryProgress.answered.push(cur);
   discoveryProgress.current=Math.min(cur+1, DISCOVERY_QUESTIONS.length);
-
-  // Clear answer field
   if(answerEl) answerEl.value='';
+
+  // Show insight flash
+  var flash=document.getElementById('disc-insight-flash');
+  var insAnswer=document.getElementById('disc-insight-answer');
+  var insText=document.getElementById('disc-insight-text');
+  var insNext=document.getElementById('disc-insight-next');
+  if(flash&&q){
+    var nextQ=DISCOVERY_QUESTIONS[discoveryProgress.current];
+    if(insAnswer) insAnswer.textContent=answerText?'"'+answerText.slice(0,50)+(answerText.length>50?'…':'')+'"':'(no answer captured)';
+    if(insText) insText.textContent=DISC_INSIGHTS[q.area]||'Noted.';
+    if(insNext) insNext.textContent='→ '+(nextQ?nextQ.q.slice(0,60)+'…':'Discovery complete');
+    flash.style.display='block';
+    setTimeout(function(){flash.style.display='none';},4000);
+  }
 
   saveDeals();
   updateDiscoveryPanel();
