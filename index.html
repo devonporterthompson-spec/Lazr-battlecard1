@@ -318,7 +318,7 @@ select.field option{background:var(--bg3)}
         <button class="lbtn" type="submit">Create Account →</button>
       </form>
       <div class="lerr" id="su-err"></div>
-      <div class="lsuccess" id="su-ok" style="display:none">✅ Created — signing you in…</div>
+      <div class="lsuccess" id="su-ok" style="display:none">✅ Created -- signing you in…</div>
     </div>
     <div class="l-hint">Triple-click LAZR. or Ctrl+Shift+D to bypass</div>
   </div>
@@ -390,31 +390,63 @@ select.field option{background:var(--bg3)}
             <button class="gen-btn" style="width:auto;padding:11px 28px" onclick="createDeal()">+ New Deal</button>
           </div>
 
-          <!-- LAYER 1: Status strip — always visible when deal exists -->
+          <!-- LAYER 1: Status strip -- always visible when deal exists -->
           <div id="main-status" style="display:none">
             <div id="status-strip" style="display:flex;align-items:center;gap:8px;padding:8px 0;margin-bottom:14px;border-bottom:1px solid var(--border);flex-wrap:wrap">
-              <span style="font-family:'Syne',sans-serif;font-size:13px;font-weight:900;color:var(--text)" id="dash-client">—</span>
+              <div style="position:relative">
+                <button onclick="toggleProspectMenu()" style="background:none;border:none;padding:0;font-family:'Syne',sans-serif;font-size:13px;font-weight:900;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:4px">
+                  <span id="dash-client">--</span>
+                  <span style="font-size:10px;color:var(--muted)">▾</span>
+                </button>
+                <div id="prospect-menu" style="display:none;position:absolute;top:calc(100%+6px);left:0;background:var(--bg2);border:1.5px solid var(--border2);border-radius:10px;min-width:200px;z-index:500;box-shadow:0 8px 30px rgba(0,0,0,.4);overflow:hidden">
+                  <div id="prospect-menu-list"></div>
+                  <div style="border-top:1px solid var(--border);padding:8px;display:flex;flex-direction:column;gap:5px">
+                    <button onclick="createDeal();toggleProspectMenu()" style="width:100%;background:var(--green);border:none;border-radius:7px;padding:8px;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:#050f0b;cursor:pointer">+ New Prospect</button>
+                    <button onclick="viewArchivedDeals();toggleProspectMenu()" style="width:100%;background:none;border:1px solid var(--border2);border-radius:7px;padding:6px;font-size:11px;color:var(--subtle);cursor:pointer">📁 View archived</button>
+                  </div>
+                </div>
+              </div>
               <span style="color:var(--border2);font-size:11px">·</span>
-              <span id="dash-stage-chip" style="font-size:9px;font-weight:800;text-transform:uppercase;color:var(--green)">—</span>
+              <span id="dash-stage-chip" style="font-size:9px;font-weight:800;text-transform:uppercase;color:var(--green)">--</span>
               <span style="color:var(--border2);font-size:11px">·</span>
-              <span id="dash-progress-text" style="font-size:11px;color:var(--muted)">—</span>
+              <span id="dash-progress-text" style="font-size:11px;color:var(--muted)">--</span>
               <span style="color:var(--border2);font-size:11px">·</span>
               <span id="dash-momentum-chip" style="font-size:11px;color:var(--subtle)">🟡</span>
               <div style="margin-left:auto;display:flex;align-items:center;gap:4px">
                 <button id="dash-flow-btn" onclick="continueDealFromDashboard()" style="display:none;background:var(--green);border:none;border-radius:7px;padding:6px 14px;font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap">Continue →</button>
                 <button id="status-edit-btn" onclick="openDrawer('prep',document.querySelector('[data-p=prep]'))" style="background:none;border:none;padding:4px 7px;font-size:12px;cursor:pointer" title="Edit deal">✏️</button>
-                <button id="status-del-btn" onclick="showDeleteModal()" style="background:none;border:none;padding:4px 7px;font-size:12px;cursor:pointer" title="Delete deal">🗑</button>
+                <!-- More options -->
+                <div style="position:relative">
+                  <button onclick="toggleMoreMenu()" style="background:none;border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-size:13px;color:var(--muted);cursor:pointer;line-height:1" title="More options">⋯</button>
+                  <div id="more-menu" style="display:none;position:absolute;top:calc(100%+5px);right:0;background:var(--bg2);border:1.5px solid var(--border2);border-radius:10px;min-width:170px;z-index:500;box-shadow:0 8px 30px rgba(0,0,0,.4);overflow:hidden">
+                    <div onclick="openDrawer('prep',document.querySelector('[data-p=prep]'));toggleMoreMenu()" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">✏️ Edit prospect</div>
+                    <div onclick="archiveProspect();toggleMoreMenu()" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--amber);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">📁 Archive prospect</div>
+                    <div onclick="showDeleteModal();toggleMoreMenu()" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--red);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">🗑 Delete prospect</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- LAYER 2: Discovery workspace — dominant until discoveryDone -->
+          <!-- LAYER 2: Discovery workspace -- dominant until discoveryDone -->
           <div id="main-discovery" style="display:none">
 
             <!-- Discovery header -->
-            <div style="margin-bottom:16px">
-              <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:900;color:var(--text);margin-bottom:3px">Discovery</div>
-              <div style="font-size:12px;color:var(--muted)">Understand the operation before positioning anything.</div>
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+              <div>
+                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px">Building your</div>
+                <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:900;color:var(--text);margin-bottom:2px">Shipping Efficiency Score</div>
+                <div style="font-size:12px;color:var(--muted)">Each answer reveals where cost and time are being lost.</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0">
+                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:2px">Score</div>
+                <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:900;color:var(--green);line-height:1" id="disc-eff-score">100</div>
+                <div style="font-size:9px;color:var(--muted);margin-top:1px" id="disc-eff-label">Efficient</div>
+              </div>
+            </div>
+            <!-- Score bar -->
+            <div style="background:var(--bg3);border-radius:3px;height:3px;margin-bottom:16px;overflow:hidden">
+              <div id="disc-eff-bar" style="background:var(--green);height:100%;width:100%;border-radius:3px;transition:width .6s ease,background .4s ease"></div>
             </div>
 
             <!-- Progress bar -->
@@ -435,20 +467,20 @@ select.field option{background:var(--bg3)}
             <!-- Insight flash -->
             <div id="disc-insight-flash" style="display:none;background:var(--bg2);border-left:4px solid var(--green);border:1px solid var(--g3);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;animation:fup .25s ease">
               <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-                <span style="font-size:13px">✔</span>
-                <span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green)">Insight captured</span>
+                <span style="font-size:13px" id="disc-flash-icon">✔</span>
+                <span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green)" id="disc-flash-label">Insight captured</span>
               </div>
-              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px" id="disc-insight-answer">—</div>
-              <div style="font-size:12px;color:var(--muted);margin-bottom:2px" id="disc-insight-text">—</div>
-              <div style="font-size:12px;color:var(--green);font-weight:700;margin-top:5px" id="disc-insight-next">—</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px" id="disc-insight-answer">--</div>
+              <div style="font-size:12px;color:var(--muted);margin-bottom:2px" id="disc-insight-text">--</div>
+              <div style="font-size:12px;color:var(--green);font-weight:700;margin-top:5px" id="disc-insight-next">--</div>
             </div>
 
-            <!-- Current question — DOMINANT -->
+            <!-- Current question -- DOMINANT -->
             <div id="disc-question-block" style="background:linear-gradient(135deg,rgba(61,220,132,.12) 0%,rgba(61,220,132,.04) 100%);border:2px solid var(--green);border-radius:var(--radius-lg);padding:20px 22px;margin-bottom:14px">
               <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:5px">Current Step</div>
               <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:12px" id="disc-q-level">L1 · Execution</div>
-              <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:12px" id="disc-q-text">—</div>
-              <div style="font-size:11px;color:var(--subtle);margin-bottom:14px;font-style:italic" id="disc-q-hint">—</div>
+              <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:12px" id="disc-q-text">--</div>
+              <div style="font-size:11px;color:var(--subtle);margin-bottom:14px;font-style:italic" id="disc-q-hint">--</div>
               <div style="margin-bottom:10px">
                 <label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px;display:block">What they said</label>
                 <textarea id="disc-answer-input" rows="2" placeholder="Type their answer here…" style="width:100%;background:rgba(0,0,0,.25);border:1.5px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;resize:none;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='var(--border2)'"></textarea>
@@ -474,7 +506,7 @@ select.field option{background:var(--bg3)}
 
           </div>
 
-          <!-- LAYER 3: Command workspace — locked until discoveryDone -->
+          <!-- LAYER 3: Command workspace -- locked until discoveryDone -->
           <div id="main-command" style="display:none">
 
             <!-- Command locked state -->
@@ -492,21 +524,21 @@ select.field option{background:var(--bg3)}
               <!-- Flow banner -->
               <div id="command-flow-banner" style="margin-bottom:12px">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
-                  <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text)" id="command-stage-now">—</div>
-                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);background:var(--g2);border:1px solid var(--g3);border-radius:4px;padding:2px 7px" id="command-stage-badge">—</div>
+                  <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text)" id="command-stage-now">--</div>
+                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);background:var(--g2);border:1px solid var(--g3);border-radius:4px;padding:2px 7px" id="command-stage-badge">--</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:10px">
-                  <div style="font-size:11px;color:var(--subtle)" id="command-stage-next">—</div>
-                  <div style="font-size:11px;color:var(--green);font-weight:700" id="command-stage-action">—</div>
+                  <div style="font-size:11px;color:var(--subtle)" id="command-stage-next">--</div>
+                  <div style="font-size:11px;color:var(--green);font-weight:700" id="command-stage-action">--</div>
                 </div>
               </div>
 
               <!-- Next action block -->
               <div id="command-next-action" style="background:linear-gradient(135deg,rgba(61,220,132,.13) 0%,rgba(61,220,132,.04) 100%);border:2px solid var(--green);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:14px;display:none">
 
-                <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:10px;font-style:italic" id="cna-question">—</div>
+                <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:10px;font-style:italic" id="cna-question">--</div>
                 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-                  <div style="font-size:11px;color:var(--muted)" id="cna-progress">—</div>
+                  <div style="font-size:11px;color:var(--muted)" id="cna-progress">--</div>
                   <button id="cna-btn" style="background:var(--green);border:none;border-radius:8px;padding:9px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer">Continue →</button>
                 </div>
               </div>
@@ -520,16 +552,16 @@ select.field option{background:var(--bg3)}
                 </div>
                 <div class="dir-field">
                   <span class="dir-field-label">Then ask</span>
-                  <div class="ask-text" id="d-ask">—</div>
+                  <div class="ask-text" id="d-ask">--</div>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
                   <div class="dir-field" style="margin-bottom:0">
                     <span class="dir-field-label">What this means</span>
-                    <div class="insight-text" id="d-means">—</div>
+                    <div class="insight-text" id="d-means">--</div>
                   </div>
                   <div class="dir-field" style="margin-bottom:0">
                     <span class="dir-field-label">Risk if unchanged</span>
-                    <div class="risk-text" id="d-risk">—</div>
+                    <div class="risk-text" id="d-risk">--</div>
                   </div>
                 </div>
                 <div style="display:flex;align-items:center;justify-content:flex-end">
@@ -538,7 +570,7 @@ select.field option{background:var(--bg3)}
                 <button class="copy-btn" onclick="copyDirective()">Copy</button>
               </div>
 
-              <!-- Live signals — lowest priority -->
+              <!-- Live signals -- lowest priority -->
               <div style="margin-top:12px">
                 <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:6px">Live signals</div>
                 <div class="trigger-row">
@@ -685,7 +717,7 @@ select.field option{background:var(--bg3)}
           <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">ROI</div>
           <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Make the cost of inaction visible. Their numbers, not yours.</div>
           <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">
-            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:8px">Anchor question — ask this first</div>
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:8px">Anchor question -- ask this first</div>
             <div style="font-size:13px;color:var(--text);font-style:italic">"How many different systems or carrier portals does your team use to manage shipping?"</div>
           </div>
           <div class="field-row">
@@ -699,11 +731,11 @@ select.field option{background:var(--bg3)}
           <div style="margin-bottom:16px"><label class="field-label">Locations</label><input class="field" id="r-locs" type="number" placeholder="e.g. 3" oninput="calcROI()"></div>
           <div id="roi-out" style="display:none">
             <div class="metric-grid">
-              <div class="metric"><div class="met-num" id="roi-m1">—</div><div class="met-label">Monthly admin hours wasted</div></div>
-              <div class="metric"><div class="met-num" id="roi-m2">—</div><div class="met-label">Monthly labor cost of fragmentation</div></div>
+              <div class="metric"><div class="met-num" id="roi-m1">--</div><div class="met-label">Monthly admin hours wasted</div></div>
+              <div class="metric"><div class="met-num" id="roi-m2">--</div><div class="met-label">Monthly labor cost of fragmentation</div></div>
               <div class="metric closer">
                 <div class="met-eyebrow">Annual Cost of Staying Fragmented</div>
-                <div class="met-num big" id="roi-m3">—</div>
+                <div class="met-num big" id="roi-m3">--</div>
                 <div style="width:40px;height:2px;background:var(--green);margin:12px auto;opacity:.4"></div>
                 <div style="font-size:13px;color:var(--muted)">Before rate optimization. This is fragmentation cost alone.</div>
                 <button style="margin-top:14px;background:var(--green);border:none;border-radius:8px;padding:10px 22px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer" onclick="nav('close',document.querySelector('[data-p=close]'))">→ Show how we fix this</button>
@@ -712,7 +744,7 @@ select.field option{background:var(--bg3)}
             <div id="roi-compound" style="display:none;background:var(--r2);border:1px solid var(--r3);border-left:4px solid var(--red);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px"></div>
             <div id="roi-script" style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px">
               <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:7px">📞 Say this right now</div>
-              <div style="font-size:13.5px;color:var(--text);line-height:1.72;font-style:italic" id="roi-say">—</div>
+              <div style="font-size:13.5px;color:var(--text);line-height:1.72;font-style:italic" id="roi-say">--</div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
               <button class="gen-btn" style="margin-bottom:0" onclick="nav('close',document.querySelector('[data-p=close]'))">🔐 Close Mode</button>
@@ -726,7 +758,7 @@ select.field option{background:var(--bg3)}
         <div class="panel drawer" id="panel-next"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">NEXT</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
           <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Next</div>
           <div style="font-size:13px;color:var(--muted);margin-bottom:18px">What is happening and what to do right now.</div>
-          <div style="margin-bottom:12px"><label class="field-label">Live signal — what just happened?</label><input class="field" id="nx-signal" type="text" placeholder='e.g. "They said they like it but need to loop in their boss"'></div>
+          <div style="margin-bottom:12px"><label class="field-label">Live signal -- what just happened?</label><input class="field" id="nx-signal" type="text" placeholder='e.g. "They said they like it but need to loop in their boss"'></div>
           <div style="margin-bottom:16px"><label class="field-label">Current tone</label>
             <select class="field" id="nx-tone">
               <option value="neutral">Neutral</option>
@@ -771,7 +803,7 @@ select.field option{background:var(--bg3)}
         <!-- ══ BATTLECARD ══ -->
         <div class="panel drawer" id="panel-battlecard">
 <div class="ptitle">Battlecard</div>
-  <div class="psub">Type a competitor to get the full breakdown — win probability, top angles, what not to say.</div>
+  <div class="psub">Type a competitor to get the full breakdown -- win probability, top angles, what not to say.</div>
   <div id="bc-deal-hint" style="display:none;margin-bottom:14px"></div>
 
   <div class="bc-search-wrap">
@@ -793,17 +825,17 @@ select.field option{background:var(--bg3)}
 
   <div id="bc-results" style="display:none">
     <div class="bc-score">
-      <div class="bc-score-lazr"><div class="bc-score-lbl" style="color:var(--green)">LAZR</div><div class="bc-score-num" style="color:var(--green)" id="bc-lazr-score">—</div><div class="bc-score-sub" style="color:var(--green)">features ✓</div></div>
+      <div class="bc-score-lazr"><div class="bc-score-lbl" style="color:var(--green)">LAZR</div><div class="bc-score-num" style="color:var(--green)" id="bc-lazr-score">--</div><div class="bc-score-sub" style="color:var(--green)">features ✓</div></div>
       <div class="bc-score-mid">VS</div>
-      <div class="bc-score-comp"><div class="bc-score-lbl" style="color:var(--muted)" id="bc-comp-lbl">COMP</div><div class="bc-score-num" style="color:var(--red)" id="bc-comp-score">—</div><div class="bc-score-sub" style="color:var(--muted)">features ✓</div></div>
+      <div class="bc-score-comp"><div class="bc-score-lbl" style="color:var(--muted)" id="bc-comp-lbl">COMP</div><div class="bc-score-num" style="color:var(--red)" id="bc-comp-score">--</div><div class="bc-score-sub" style="color:var(--muted)">features ✓</div></div>
     </div>
     <!-- WIN PROBABILITY -->
     <div class="win-prob" style="margin-bottom:14px">
       <div style="flex:1"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--green);margin-bottom:6px">Win Probability</div><div class="win-prob-bar"><div class="win-prob-fill" id="bc-win-bar"></div></div></div>
-      <div class="win-prob-num" id="bc-win-pct">—%</div>
+      <div class="win-prob-num" id="bc-win-pct">--%</div>
     </div>
     <!-- TOP 3 -->
-    <div class="bc-top3" style="margin-bottom:14px"><div class="bc-top3-card" id="bc-t1"><div class="bc-top3-num">—</div><div class="bc-top3-label">—</div></div><div class="bc-top3-card" id="bc-t2"><div class="bc-top3-num">—</div><div class="bc-top3-label">—</div></div><div class="bc-top3-card" id="bc-t3"><div class="bc-top3-num">—</div><div class="bc-top3-label">—</div></div></div>
+    <div class="bc-top3" style="margin-bottom:14px"><div class="bc-top3-card" id="bc-t1"><div class="bc-top3-num">--</div><div class="bc-top3-label">--</div></div><div class="bc-top3-card" id="bc-t2"><div class="bc-top3-num">--</div><div class="bc-top3-label">--</div></div><div class="bc-top3-card" id="bc-t3"><div class="bc-top3-num">--</div><div class="bc-top3-label">--</div></div></div>
     <!-- ANGLES -->
     <div id="bc-excl" style="margin-bottom:12px"></div>
     <div id="bc-deal-angle-wrap" style="display:none;margin-bottom:10px;background:linear-gradient(135deg,rgba(61,220,132,.11) 0%,rgba(61,220,132,.03) 100%);border:1px solid var(--g3);border-radius:10px;padding:13px 15px">
@@ -811,8 +843,8 @@ select.field option{background:var(--bg3)}
       <div id="bc-deal-angle-text" style="font-size:13px;color:var(--text);line-height:1.7"></div>
     </div>
     <div class="g2" style="margin-bottom:12px">
-      <div class="bc-angle"><div class="bc-angle-title">✅ General best angle</div><div id="bc-angle-text" style="font-size:13px;color:var(--text);line-height:1.7">—</div></div>
-      <div class="bc-dont"><div class="bc-dont-title">🚫 What NOT to say</div><div id="bc-dont-text" style="font-size:13px;color:var(--muted);line-height:1.65">—</div></div>
+      <div class="bc-angle"><div class="bc-angle-title">✅ General best angle</div><div id="bc-angle-text" style="font-size:13px;color:var(--text);line-height:1.7">--</div></div>
+      <div class="bc-dont"><div class="bc-dont-title">🚫 What NOT to say</div><div id="bc-dont-text" style="font-size:13px;color:var(--muted);line-height:1.65">--</div></div>
     </div>
     <!-- VIEW TOGGLE -->
     <div style="display:flex;gap:8px;margin-bottom:11px;flex-wrap:wrap">
@@ -898,7 +930,7 @@ function newDealObj(overrides){
   }, overrides||{});
 }
 
-// Active deal shortcut — always points to the live deal object
+// Active deal shortcut -- always points to the live deal object
 var deal = newDealObj();
 
 function getActiveDeal(){
@@ -1117,7 +1149,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v11.2 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v11.4 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1132,7 +1164,7 @@ function showApiKeyModal(){
   var status=document.getElementById('api-key-status');
   if(modal) modal.style.display='flex';
   if(input) input.value=getApiKey()?'••••••••••••••••••••'+getApiKey().slice(-4):'';
-  if(status) status.textContent=getApiKey()?'✅ Key saved — last 4: ...'+getApiKey().slice(-4):'No key set';
+  if(status) status.textContent=getApiKey()?'✅ Key saved -- last 4: ...'+getApiKey().slice(-4):'No key set';
 }
 function closeApiModal(){
   var modal=document.getElementById('api-modal');
@@ -1160,7 +1192,7 @@ function checkApiKeyStatus(){
   var btn=document.getElementById('api-btn');
   if(!btn) return;
   btn.style.color=getApiKey()?'var(--green)':'var(--red)';
-  btn.title=getApiKey()?'API key set ✓':'API key required — click to set';
+  btn.title=getApiKey()?'API key set ✓':'API key required -- click to set';
 }
 
 // ══ UTILITIES ══
@@ -1226,13 +1258,13 @@ function restorePrepFields(d){
 }
 
 function updateDealBar(){
-  // dm-* chips removed from DOM — updateDashboard handles status strip now
-  dm('dm-client','Client',deal.client||'—');
-  dm('dm-tool','Tool', deal.tool||'—');
-  dm('dm-concern','Concern',deal.concern||'—');
-  dm('dm-size','Size',(deal.size||'—').toUpperCase());
-  dm('dm-role','Role',deal.role||'—');
-  dm('dm-stage','Stage',deal.stage||'—');
+  // dm-* chips removed from DOM -- updateDashboard handles status strip now
+  dm('dm-client','Client',deal.client||'--');
+  dm('dm-tool','Tool', deal.tool||'--');
+  dm('dm-concern','Concern',deal.concern||'--');
+  dm('dm-size','Size',(deal.size||'--').toUpperCase());
+  dm('dm-role','Role',deal.role||'--');
+  dm('dm-stage','Stage',deal.stage||'--');
   var statusEl=document.getElementById('dm-status');
   if(statusEl){
     var icon=deal.momentum==='advancing'?'🟢':deal.momentum==='stalling'?'🔴':'🟡';
@@ -1264,7 +1296,7 @@ function stageOrder(){ return ['prep','discover','position','roi','close','advan
 function stageIndex(stage){ return stageOrder().indexOf(stage); }
 
 
-// ══ LAYER ROUTER — the core of the unified panel ══
+// ══ LAYER ROUTER -- the core of the unified panel ══
 function showLayer(layer){
   // layer: 'nodeal' | 'discovery' | 'command'
   var layers = ['main-nodeal','main-status','main-discovery','main-command'];
@@ -1289,7 +1321,7 @@ function showLayer(layer){
   if(layer==='discovery'){
     var discEl=document.getElementById('main-discovery');
     if(discEl)discEl.style.display='block';
-    // Hide Continue button — discovery IS the action
+    // Hide Continue button -- discovery IS the action
     var fb=document.getElementById('dash-flow-btn');
     if(fb)fb.style.display='none';
     updateDiscoveryPanel();
@@ -1353,12 +1385,12 @@ function updateStageBar(){
 
 function setDirective(data){
   var el;
-  el=document.getElementById('d-say');    if(el)el.textContent=data.say    ||'—';
-  el=document.getElementById('d-ask');    if(el)el.textContent=data.ask    ||'—';
-  el=document.getElementById('d-means'); if(el)el.textContent=data.means  ||'—';
-  el=document.getElementById('d-risk');  if(el)el.textContent=data.risk   ||'—';
+  el=document.getElementById('d-say');    if(el)el.textContent=data.say    ||'--';
+  el=document.getElementById('d-ask');    if(el)el.textContent=data.ask    ||'--';
+  el=document.getElementById('d-means'); if(el)el.textContent=data.means  ||'--';
+  el=document.getElementById('d-risk');  if(el)el.textContent=data.risk   ||'--';
   el=document.getElementById('d-status');if(el)el.textContent=data.status ||'🟡';
-  // d-next removed from UI — next bar is the single action point
+  // d-next removed from UI -- next bar is the single action point
 }
 
 function setNextBar(text, btnLabel, action){
@@ -1373,8 +1405,8 @@ function setNextBar(text, btnLabel, action){
 function resetDirective(){
   document.getElementById('d-say').textContent    = 'Set your deal context in Prep to get your first move.';
   document.getElementById('d-ask').textContent    = 'Use Prep to start the flow.';
-  document.getElementById('d-means').textContent  = '—';
-  document.getElementById('d-risk').textContent   = '—';
+  document.getElementById('d-means').textContent  = '--';
+  document.getElementById('d-risk').textContent   = '--';
   document.getElementById('d-status').textContent = '🟡 Set deal first';
 }
 
@@ -1403,6 +1435,8 @@ function clearPrepFields(){
 
 function showDeleteModal(){
   if(!deal.client){showToast('No active deal to delete.');return;}
+  // Check if mid-discovery
+  var inDiscovery=!deal.discoveryDone&&deal.client&&discoveryProgress.answered.length>0;
   var health = calculateHealth(deal);
   var hl = healthLabel(health);
   // Custom modal
@@ -1411,11 +1445,15 @@ function showDeleteModal(){
   var modal = document.createElement('div');
   modal.id = 'delete-modal';
   modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;display:flex;align-items:center;justify-content:center;padding:20px';
+  var discoveryWarning=inDiscovery
+    ?'<div style="background:var(--r2);border:1px solid var(--r3);border-radius:8px;padding:10px 13px;margin-bottom:12px;font-size:12px;color:var(--red)">⚠️ You are currently in an active discovery session. '+discoveryProgress.answered.length+' answers will be permanently lost.</div>'
+    :'';
   modal.innerHTML='<div style="background:var(--bg2);border:1px solid var(--r3);border-radius:var(--radius-lg);padding:28px;max-width:360px;width:100%">'
-    +'<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--red);margin-bottom:12px">Delete Deal</div>'
+    +'<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--red);margin-bottom:12px">Delete Prospect</div>'
     +'<div style="font-family:Syne,sans-serif;font-size:20px;font-weight:900;color:var(--text);margin-bottom:8px">'+deal.client+'</div>'
-    +'<div style="font-size:12px;color:var(--muted);margin-bottom:16px">'+cap(deal.stage)+' · '+hl.icon+' '+hl.label+' · Last touch: '+lastTouch(deal)+'</div>'
-    +'<div style="font-size:13px;color:var(--text);margin-bottom:20px;padding:12px;background:var(--r2);border-radius:8px">This will permanently remove all deal data, timeline, and progress. This action cannot be undone.</div>'
+    +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">'+cap(deal.stage)+' · '+hl.icon+' '+hl.label+' · Last touch: '+lastTouch(deal)+'</div>'
+    +discoveryWarning
+    +'<div style="font-size:13px;color:var(--muted);margin-bottom:20px;padding:12px;background:var(--r2);border-left:3px solid var(--red);border-radius:8px;line-height:1.6">This will permanently remove all discovery data, timeline, and deal progress.<br><strong style="color:var(--red)">This cannot be undone.</strong></div>'
     +'<div style="display:flex;gap:8px">'
     +'<button onclick="confirmDeleteDeal()" style="flex:1;background:var(--red);border:none;border-radius:8px;padding:11px;font-family:Syne,sans-serif;font-size:13px;font-weight:800;color:#fff;cursor:pointer">Delete permanently</button>'
     +'<button onclick="cancelDeleteModal()" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:11px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer">Cancel</button>'
@@ -1435,8 +1473,8 @@ function confirmDeleteDeal(){
   }
   saveDeals();
   clearPrepFields();
-  closeDrawer();updateDealBar();updateStageBar();resetDirective();
-  var nb=document.getElementById('next-bar');if(nb)nb.style.display=deals.length?'flex':'none';
+  closeDrawer();
+  autoRoute();
   updateDashboard();
   showToast(clientName+' deleted.');
 }
@@ -1486,7 +1524,7 @@ function continueDealFromDashboard(){
     if(!deal.discoveryDone){
       showLayer('discovery');
     } else {
-      // Discovery done — go to Command and open correct drawer
+      // Discovery done -- go to Command and open correct drawer
       showLayer('command');
       var drawerMap={roi:'roi',close:'close',advance:'advance'};
       if(drawerMap[stage]) openDrawer(drawerMap[stage],document.querySelector('[data-p="'+drawerMap[stage]+'"]'));
@@ -1512,9 +1550,9 @@ function autoRouteStage(stage){
 
 // ══ NEXT ACTION BLOCK ══
 var STAGE_NEXT_QUESTIONS = {
-  prep:     {q:'Walk me through how you manage shipping today — start to finish.',                                    cta:'Set up deal →',    action:function(){nav('discovery',document.querySelector('[data-p="discovery"]'));setTimeout(function(){updateDiscoveryPanel();},100);}},
+  prep:     {q:'Walk me through how you manage shipping today -- start to finish.',                                    cta:'Set up deal →',    action:function(){nav('discovery',document.querySelector('[data-p="discovery"]'));setTimeout(function(){updateDiscoveryPanel();},100);}},
   discover: {q:'How are you currently deciding which carrier to use per shipment?',                                   cta:'Run discovery →',  action:function(){nav('discovery',document.querySelector('[data-p="discovery"]'));setTimeout(function(){updateDiscoveryPanel();},100);}},
-  position: {q:'If you had everything in one platform — booking, tracking, billing — what would change for your team?',cta:'Position value →', action:function(){closeDrawer();}},
+  position: {q:'If you had everything in one platform -- booking, tracking, billing -- what would change for your team?',cta:'Position value →', action:function(){closeDrawer();}},
   roi:      {q:'How many systems or portals is your team using today to manage shipping?',                            cta:'Show ROI →',       action:function(){openDrawer('roi',document.querySelector('[data-p="roi"]'));}},
   next:     {q:'What would need to happen on your end to move forward this week?',          cta:'Lock Next Step →', action:function(){openDrawer('next',document.querySelector('[data-p="next"]'));}},
   close:    {q:'Can you send over a few recent shipments so I can show you exactly where this applies?', cta:'Close →', action:function(){openDrawer('close',document.querySelector('[data-p="close"]'));}},
@@ -1571,26 +1609,26 @@ function updateCommandSurface(){
   }
 
   if(stage==='discover'){
-    setDirective({say:'Before I tell you anything about what we do — I want to understand your operation.',ask:'How are you currently deciding which carrier to use per shipment?',means:'Every answer tells you exactly which problem Lazr solves for them. Do not skip this.',risk:'Pitch before you understand their process and the product feels optional, not urgent.',status:'🟡 Discover'});
+    setDirective({say:'Before I tell you anything about what we do -- I want to understand your operation.',ask:'How are you currently deciding which carrier to use per shipment?',means:'Every answer tells you exactly which problem Lazr solves for them. Do not skip this.',risk:'Pitch before you understand their process and the product feels optional, not urgent.',status:'🟡 Discover'});
     setNextBar('Run discovery →','Run discovery →',function(){openDrawer('prep',document.querySelector('[data-p="prep"]'));});
     return;
   }
 
   if(stage==='position'){
-    setDirective({say:'Most teams in your position are not trying to replace what is working — they are trying to get control and visibility without adding more tools.',ask:'If you had one place to manage all of this, what would that change for your team?',means:'You have enough context to frame Lazr around their specific gap. Use what they told you.',risk:'Generic positioning feels like a pitch. Use their words back at them.',status:'🟢 Position'});
+    setDirective({say:'Most teams in your position are not trying to replace what is working -- they are trying to get control and visibility without adding more tools.',ask:'If you had one place to manage all of this, what would that change for your team?',means:'You have enough context to frame Lazr around their specific gap. Use what they told you.',risk:'Generic positioning feels like a pitch. Use their words back at them.',status:'🟢 Position'});
     setNextBar('Position value →','Position value →',function(){closeDrawer();});
     return;
   }
 
   if(stage==='roi'){
-    setDirective({say:'Based on what you have described, there is meaningful overhead from fragmentation — before rate optimization even starts.',ask:'How many systems or portals is your team using today to manage shipping?',means:'A number makes the cost real. Without a number, interest stays conceptual.',risk:'If they leave without seeing a cost, urgency fades fast.',status:'🟡 Show ROI'});
+    setDirective({say:'Based on what you have described, there is meaningful overhead from fragmentation -- before rate optimization even starts.',ask:'How many systems or portals is your team using today to manage shipping?',means:'A number makes the cost real. Without a number, interest stays conceptual.',risk:'If they leave without seeing a cost, urgency fades fast.',status:'🟡 Show ROI'});
     setNextBar('Show ROI →','Show ROI →',function(){openDrawer('roi',document.querySelector('[data-p="roi"]'));});
     autoRouteStage(stage);
     return;
   }
 
   if(stage==='close'){
-    setDirective({say:'Based on everything we have covered, the next step is simple — let me put together a cost analysis using your actual shipments.',ask:'Can you send over a few recent shipments so I can show you exactly where this applies?',means:'The deal is ready to advance. You are not closing a contract — you are closing the next step.',risk:'Leaving without a defined next action is how deals die quietly.',status:'🟢 Close'});
+    setDirective({say:'Based on everything we have covered, the next step is simple -- let me put together a cost analysis using your actual shipments.',ask:'Can you send over a few recent shipments so I can show you exactly where this applies?',means:'The deal is ready to advance. You are not closing a contract -- you are closing the next step.',risk:'Leaving without a defined next action is how deals die quietly.',status:'🟢 Close'});
     setNextBar('Close the loop →','Close the loop →',function(){openDrawer('close',document.querySelector('[data-p="close"]'));});
     autoRouteStage(stage);
     return;
@@ -1665,7 +1703,7 @@ function quickTrigger(type){
   addEvent('trigger', flowState.liveSignal||type);
   saveDeals();
   updateCommandSurface();
-  // Handle drawer opens as an overlay — does not change the main stage
+  // Handle drawer opens as an overlay -- does not change the main stage
   openDrawer('handle',document.querySelector('[data-p="handle"]'));
 }
 
@@ -1692,7 +1730,7 @@ function makeSayBlock(text){
   var d=document.createElement('div');d.className='out-block green';
   var c=document.createElement('button');c.className='copy-btn';c.textContent='Copy';
   c.onclick=function(){copyText(text,c);};
-  d.innerHTML='<span class="ob-eye">▶ Say this — word for word</span><div class="ob-body" style="font-style:italic;font-size:14px">'+text+'</div>';
+  d.innerHTML='<span class="ob-eye">▶ Say this -- word for word</span><div class="ob-body" style="font-style:italic;font-size:14px">'+text+'</div>';
   d.appendChild(c);return d;
 }
 function buildDealContext(){
@@ -1718,7 +1756,7 @@ You control what the user says, what they ask, and what they do next. Your purpo
 CORE PRINCIPLES (NON-NEGOTIABLE):
 - Be decisive, not suggestive. Never provide multiple options.
 - Always choose the best action and push toward it.
-- Keep outputs short — every line usable live, mid-call.
+- Keep outputs short -- every line usable live, mid-call.
 - No fluff. No teaching. No passive states. You are directing, not assisting.
 
 NEXT STEP CLARITY RULE (CRITICAL):
@@ -1730,17 +1768,17 @@ The user must NEVER hesitate after reading your output.
 LAZR PRODUCT (2026 POSITIONING):
 - Lazr is logistics infrastructure, not a transactional tool. Never position as a pricing tool.
 - One platform: LTL, parcel, FTL, cross-border. EDI/API, ERP integrations, automated invoice auditing.
-- 80% of invoices have errors — Lazr catches them pre-payment. Multi-user role-based access.
+- 80% of invoices have errors -- Lazr catches them pre-payment. Multi-user role-based access.
 - Bring your own carriers + Lazr network. Free to start, no rip-and-replace.
 - Lazr is the Airbnb of transportation: centralizes fragmented, complex carrier access into one structured platform.
 - Typical results: 10-30% cost reduction, 40-70% less admin time.
 - Target: larger, more complex, more durable customers. Quality over quantity. We sell a vision, not a price.
 - Golden rule: Shipping simple = Lazr is nice to have. Shipping complex = Lazr is indispensable.
 
-DEAL MEMORY — adapt ALL outputs to context:
+DEAL MEMORY -- adapt ALL outputs to context:
 Client Size: SMB = fast/direct. Large = structured/multi-stakeholder. Whale = strategic/executive/governance.
 Stakeholder: Logistics = ease/speed. Ops = process/control. Procurement = consolidation. Finance = cost/savings. Executive = strategic impact.
-Competitor: FreightCOM = acknowledge carrier access, expose centralized control gaps. 2Ship = acknowledge automation, expose optimization intelligence gaps. Internal = acknowledge familiarity, expose fragmentation/hidden cost. Never attack — acknowledge briefly, reframe, reposition.
+Competitor: FreightCOM = acknowledge carrier access, expose centralized control gaps. 2Ship = acknowledge automation, expose optimization intelligence gaps. Internal = acknowledge familiarity, expose fragmentation/hidden cost. Never attack -- acknowledge briefly, reframe, reposition.
 
 FLOW (enforce this order):
 Prep - Discover - Qualify - Position - Handle - ROI - Next - Close - Advance
@@ -1775,39 +1813,39 @@ L6 Scale (Q11): What happens under growth pressure
 QUALIFICATION ENGINE (auto-assess after discovery):
 GREEN FLAGS (good fit): talks about process / multiple tools / multiple users or locations / mentions growth as a challenge / wants visibility and reporting / has tried to patch together a solution / actively looking for a platform
 RED FLAGS (bad fit): only wants the best rate / no ERP or structure / shops across multiple platforms / no interest in improvement / ultra-fast price-based decision / very low or highly seasonal volume / niche cargo (frozen, oversized, wide loads)
-If good fit: "Move to positioning — frame Lazr as control layer"
-If bad fit: "Reduce depth and move to light close — do not overinvest"
+If good fit: "Move to positioning -- frame Lazr as control layer"
+If bad fit: "Reduce depth and move to light close -- do not overinvest"
 
 BATTLECARD FORMAT (trigger when competitor mentioned):
-[HEADLINE]: "Lazr vs [Competitor] — [core difference in one line]"
+[HEADLINE]: "Lazr vs [Competitor] -- [core difference in one line]"
 [D1][D2][D3]: Control, Visibility, Scalability differentiators
 [ANGLE]: Best angle based on role and size
 [DONTSAY]: What not to say
 Tone: conversation ammo, not a report.
 
 POSITIONING RULE:
-Frame Lazr as logistics infrastructure — control, visibility, scalability, and long-term partnership.
+Frame Lazr as logistics infrastructure -- control, visibility, scalability, and long-term partnership.
 Use discovery insights to expose the specific gap. NEVER lead with price.
-Lazr is not just a vendor — Lazr is the partner with whom the customer upgrades their supply chain.
-Avoid: "Comparing rates" / "Shipping fast" / "A simple platform" / "Feature X" — these are NOT differentiators.
+Lazr is not just a vendor -- Lazr is the partner with whom the customer upgrades their supply chain.
+Avoid: "Comparing rates" / "Shipping fast" / "A simple platform" / "Feature X" -- these are NOT differentiators.
 
 HANDLE: Acknowledge briefly, reframe logically, redirect with a question. Inject battlecard when competitor is mentioned.
 
 ROI: Quantify inefficiency. Use 10-25% baseline if no data. Convert to urgency with a specific dollar amount or time cost.
 
-NEXT: Interpret situation, direct next move. Call trigger — if silence, hesitation, or delay: [NEXT] = "Call them now."
+NEXT: Interpret situation, direct next move. Call trigger -- if silence, hesitation, or delay: [NEXT] = "Call them now."
 
 CLOSE: Define ONE concrete next step. No vague language. Options: data review, rate upload, trial shipment, next meeting.
 
 ADVANCE: Generate follow-up message, data request, next step, and status.
 
-OUTPUT FORMAT — ONLY these markers. No preamble. No alternatives.
+OUTPUT FORMAT -- ONLY these markers. No preamble. No alternatives.
 
 Standard:   [SAY] [ASK] [MEANS] [RISK] [STATUS]
 PREP:       [OPEN] [GAP] [ANGLE]
-            — OPEN: one opening sentence. GAP: the likely gap. ANGLE: best positioning angle. NO questions.
+            -- OPEN: one opening sentence. GAP: the likely gap. ANGLE: best positioning angle. NO questions.
 DISCOVER:   [Q1] [Q2] [Q3] [Q4] [Q5] [Q6] [Q7] [Q8] [Q9] [Q10] [Q11]
-            — Return all 11 official discovery questions in order. Each as one clean sentence.
+            -- Return all 11 official discovery questions in order. Each as one clean sentence.
 HANDLE:     [ACK] [REFRAME] [ASK] [NEXT]
 ROI:        [IMPACT] [EXPLAIN] [SAY] [NEXT]
 CLOSE:      [INSIGHT] [CLOSE] [STEP] [NEXT]
@@ -1886,39 +1924,39 @@ async function runPrep(){
     discBtn.onclick=function(){closeDrawer();nav('discovery',document.querySelector('[data-p="discovery"]'));setTimeout(function(){updateDiscoveryPanel();},50);};
     fwd.appendChild(discBtn);
     o.appendChild(fwd);
-    addEvent('prep','Prep complete');saveDeals();updateDashboard();showToast('Prep ready — start discovery');
+    addEvent('prep','Prep complete');saveDeals();updateDashboard();showToast('Prep ready -- start discovery');
   });
 }
 
-// ── DISCOVERY ENGINE — 11 Official Lazr Questions ──
+// ── DISCOVERY ENGINE -- 11 Official Lazr Questions ──
 var DISCOVERY_QUESTIONS = [
-  {level:'L1 Execution',  q:'How are your shipments executed today — walk me through the process from start to finish.',  area:'execution'},
-  {level:'L2 Tools',      q:'How many different systems or portals does your team use to book and manage shipping?',       area:'tools'},
-  {level:'L3 People',     q:'Who owns the shipping process — and is it one person or spread across a team?',              area:'people'},
-  {level:'L4 Process',    q:'Where does the most time get lost — is it booking, tracking, billing, or somewhere else?',   area:'time'},
-  {level:'L5 Control',    q:'How do you track shipping costs and catch invoice errors today?',                             area:'costs'},
-  {level:'L5 Services',   q:'What mix of services are you running — LTL, parcel, FTL, cross-border?',                    area:'services'},
-  {level:'L5 Carriers',   q:'Which carriers do you use, and how do you decide which one to book per shipment?',           area:'carriers'},
-  {level:'L6 Volume',     q:'What is your approximate shipping volume per month, and how consistent is it?',              area:'volume'},
-  {level:'L6 Automation', q:'Which parts of the process are automated versus still done manually?',                       area:'automation'},
-  {level:'L6 Scale',      q:'When volume spikes or you add a new location, how does your current setup handle it?',       area:'scale'},
-  {level:'L6 Fit',        q:'If you had everything in one platform — booking, tracking, billing, reporting — what would that change for your team?', area:'fit'},
+  {level:'L1 Execution',  q:'Walk me through how a shipment actually gets booked and sent out from your team today.',                                  area:'execution'},
+  {level:'L2 Tools',      q:'How many different systems or portals are being used across your team to manage shipping?',                               area:'tools'},
+  {level:'L3 People',     q:'Who is actually responsible when something goes wrong with a shipment -- and is it always the same person?',               area:'people'},
+  {level:'L4 Process',    q:'Where does the most time disappear in your shipping process -- booking, tracking, billing, or somewhere else?',            area:'time'},
+  {level:'L5 Control',    q:'When a carrier invoices you, how do you verify the charge is correct before paying it?',                                  area:'costs'},
+  {level:'L5 Services',   q:'What modes are you moving -- LTL, parcel, FTL, cross-border -- and does that mix change by season or customer?',           area:'services'},
+  {level:'L5 Carriers',   q:'How is a carrier chosen when a shipment goes out -- is that decision made by a person, a system, or habit?',              area:'carriers'},
+  {level:'L6 Volume',     q:'How many shipments are going out per month on average, and how predictable is that volume?',                              area:'volume'},
+  {level:'L6 Automation', q:'Which parts of your shipping process run automatically -- and which ones still require someone to do it manually?',        area:'automation'},
+  {level:'L6 Scale',      q:'If your volume doubled tomorrow, what would actually break in your current setup first?',                                 area:'scale'},
+  {level:'L6 Fit',        q:'If every carrier, every invoice, every tracking update came through one place -- what would your team stop doing manually?',area:'fit'},
 ];
 var discoveryProgress = {answered:[], current:0};
 
-// runDiscovery removed — use panel-discovery directly
+// runDiscovery removed -- use panel-discovery directly
 
 // markAnswered removed
 
 function completeDiscovery(){
   deal.discoveryDone = true;
   deal.flowState = Object.assign({}, flowState);
-  addEvent('discover', 'Discovery complete — '+discoveryProgress.answered.length+'/11 questions answered');
+  addEvent('discover', 'Discovery complete -- '+discoveryProgress.answered.length+'/11 questions answered');
   saveDeals();
   closeDrawer();
   updateCommandSurface();
   updateDashboard();
-  showToast('Discovery complete — moving to position');
+  showToast('Discovery complete -- moving to position');
 }
 
 // ── HANDLE ──
@@ -1936,7 +1974,7 @@ async function runHandle(){
     var ack=extr(text,'ACK'),reframe=extr(text,'REFRAME'),ask=extr(text,'ASK'),next=extr(text,'NEXT');
     if(ack){var b=makeBlock('Acknowledge first',ack,'amber',ack);b.querySelector('.ob-body').style.fontStyle='italic';o.appendChild(b);}
     if(reframe)o.appendChild(makeSayBlock(reframe));
-    if(ask)o.appendChild(makeBlock('Regain control — ask this',ask,'blue',ask));
+    if(ask)o.appendChild(makeBlock('Regain control -- ask this',ask,'blue',ask));
     if(next)o.appendChild(makeBlock('Next move',next,'',next));
     // After handling: clear objection, set handled flag, push forward to ROI
     flowState.objectionActive=false;
@@ -1957,7 +1995,7 @@ async function runHandle(){
     o.appendChild(fwdDiv);
     updateCommandSurface();
     updateDashboard();
-    showToast('Objection handled — move to ROI');
+    showToast('Objection handled -- move to ROI');
   });
 }
 
@@ -1996,7 +2034,7 @@ function renderDealList(){
       +(p==='high'?'<span style="font-size:9px;font-weight:800;text-transform:uppercase;background:var(--r2);border:1px solid var(--r3);border-radius:4px;padding:2px 6px;color:var(--red)">HIGH</span>':'')
       +'<span style="font-size:11px;color:var(--'+(hl.cls||'muted')+')">'+hl.icon+' '+h+'</span>'
       +'</div></div>'
-      +'<div style="font-size:11px;color:var(--muted)">'+cap(d.stage||'prep')+' · '+(d.tool||'—')+' · '+lastTouch(d)+'</div>';
+      +'<div style="font-size:11px;color:var(--muted)">'+cap(d.stage||'prep')+' · '+(d.tool||'--')+' · '+lastTouch(d)+'</div>';
     container.appendChild(div);
   });
 }
@@ -2105,19 +2143,246 @@ function updateDashboard(){
 }
 
 
+
+// ══ EFFICIENCY SCORE ══
+var AREA_WEIGHTS = {
+  execution:2, tools:3, people:2, time:3, costs:3,
+  services:1, carriers:2, volume:2, automation:3, scale:2, fit:1
+};
+function calcEfficiencyScore(){
+  if(!deal.discoveryAnswers) return 100;
+  var answers=deal.discoveryAnswers;
+  var deductions=0;
+  // Each answered area deducts points based on what was revealed
+  // More portals, more manual = lower score
+  var tools=answers.tools||''; var auto=answers.automation||'';
+  var costs=answers.costs||''; var time=answers.time||'';
+  var scale=answers.scale||'';
+  if(tools.match(/\d+/)){ var n=parseInt(tools.match(/\d+/)[0]); deductions+=Math.min(n*4,20); }
+  if(/manual|spreadsheet|email|phone|portal|multiple/i.test(auto)) deductions+=15;
+  if(/don't|no tracking|not sure|excel|spreadsheet/i.test(costs)) deductions+=18;
+  if(/hours|days|manual|always|constantly/i.test(time)) deductions+=12;
+  if(/break|problem|struggle|difficult|challenging/i.test(scale)) deductions+=10;
+  // Base: answered questions reduce ignorance bonus
+  var answered=discoveryProgress.answered.length;
+  deductions+=Math.min(answered*2,12); // more questions = more revealed gaps
+  return Math.max(100-deductions, 28);
+}
+
+function updateEfficiencyScore(){
+  var score=calcEfficiencyScore();
+  var scoreEl=document.getElementById('disc-eff-score');
+  var barEl=document.getElementById('disc-eff-bar');
+  var labelEl=document.getElementById('disc-eff-label');
+  if(scoreEl)scoreEl.textContent=score;
+  if(barEl)barEl.style.width=score+'%';
+  var color=score>=75?'var(--green)':score>=50?'var(--amber)':'var(--red)';
+  if(barEl)barEl.style.background=color;
+  if(scoreEl)scoreEl.style.color=color;
+  var label=score>=75?'Efficient':score>=50?'At Risk':'Needs Work';
+  if(labelEl)labelEl.textContent=label;
+}
+
+
+
+// ══ MORE OPTIONS MENU ══
+
+function viewArchivedDeals(){
+  try{
+    var archived=JSON.parse(localStorage.getItem('cos_archived')||'[]');
+    if(!archived.length){showToast('No archived prospects yet.');return;}
+    var existing=document.getElementById('archived-modal');if(existing)existing.remove();
+    var modal=document.createElement('div');
+    modal.id='archived-modal';
+    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;display:flex;align-items:center;justify-content:center;padding:20px';
+    // Build shell
+    var shell=document.createElement('div');
+    shell.style.cssText='background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:0;max-width:420px;width:100%;max-height:80vh;display:flex;flex-direction:column';
+    // Header
+    var hdr=document.createElement('div');
+    hdr.style.cssText='padding:20px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between';
+    var title=document.createElement('div');
+    title.style.cssText='font-family:Syne,sans-serif;font-size:16px;font-weight:900;color:var(--text)';
+    title.textContent='Archived Prospects';
+    var closeBtn=document.createElement('button');
+    closeBtn.style.cssText='background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer';
+    closeBtn.textContent='×';
+    closeBtn.onclick=function(){modal.remove();};
+    hdr.appendChild(title);hdr.appendChild(closeBtn);
+    // List
+    var listEl=document.createElement('div');
+    listEl.style.cssText='overflow-y:auto;flex:1';
+    archived.slice(0,20).forEach(function(d){
+      var row=document.createElement('div');
+      row.style.cssText='padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px';
+      var info=document.createElement('div');
+      var nameDiv=document.createElement('div');nameDiv.style.cssText='font-size:13px;font-weight:600;color:var(--text)';nameDiv.textContent=d.client;
+      var metaDiv=document.createElement('div');metaDiv.style.cssText='font-size:11px;color:var(--subtle)';
+      metaDiv.textContent=cap(d.stage||'prep')+' · '+(d.archivedAt?new Date(d.archivedAt).toLocaleDateString('en-CA',{month:'short',day:'numeric'}):'');
+      info.appendChild(nameDiv);info.appendChild(metaDiv);
+      var btn=document.createElement('button');
+      btn.style.cssText='background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer';
+      btn.textContent='Restore';
+      btn.onclick=(function(id){return function(){restoreArchivedDeal(id);modal.remove();};})(d.id);
+      row.appendChild(info);row.appendChild(btn);
+      listEl.appendChild(row);
+    });
+    shell.appendChild(hdr);shell.appendChild(listEl);
+    modal.appendChild(shell);
+    document.body.appendChild(modal);
+  }catch(e){showToast('No archived prospects.');}
+}
+
+function restoreArchivedDeal(id){
+  try{
+    var archived=JSON.parse(localStorage.getItem('cos_archived')||'[]');
+    var found=archived.find(function(d){return d.id===id;});
+    if(!found){showToast('Could not restore — deal not found.');return;}
+    archived=archived.filter(function(d){return d.id!==id;});
+    localStorage.setItem('cos_archived',JSON.stringify(archived));
+    found.archivedAt=null;
+    deals.push(found);
+    setActiveDeal(found.id);
+    saveDeals();
+    var modal=document.getElementById('archived-modal');if(modal)modal.remove();
+    autoRoute();updateDashboard();
+    showToast(found.client+' restored.');
+  }catch(e){showToast('Restore failed.');}
+}
+function toggleMoreMenu(){
+  var menu=document.getElementById('more-menu');
+  if(!menu)return;
+  if(menu.style.display==='none'){
+    menu.style.display='block';
+    setTimeout(function(){
+      document.addEventListener('click',function closeMore(e){
+        if(!menu.contains(e.target)){menu.style.display='none';}
+        document.removeEventListener('click',closeMore);
+      });
+    },10);
+  } else {
+    menu.style.display='none';
+  }
+}
+
+function archiveProspect(){
+  if(!deal.client){showToast('No active prospect to archive.');return;}
+  var clientName=deal.client;
+  var existing=document.getElementById('archive-modal');if(existing)existing.remove();
+  var inDiscovery=!deal.discoveryDone&&deal.client&&discoveryProgress.answered.length>0;
+  var modal=document.createElement('div');
+  modal.id='archive-modal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;display:flex;align-items:center;justify-content:center;padding:20px';
+  var box=document.createElement('div');
+  box.style.cssText='background:var(--bg2);border:1px solid var(--am3);border-radius:var(--radius-lg);padding:28px;max-width:360px;width:100%';
+  var label=document.createElement('div');label.style.cssText='font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--amber);margin-bottom:10px';label.textContent='Archive Prospect';
+  var name=document.createElement('div');name.style.cssText='font-family:Syne,sans-serif;font-size:20px;font-weight:900;color:var(--text);margin-bottom:12px';name.textContent=clientName;
+  box.appendChild(label);box.appendChild(name);
+  if(inDiscovery){
+    var warn=document.createElement('div');
+    warn.style.cssText='background:var(--am2);border:1px solid var(--am3);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--amber)';
+    warn.textContent='You are currently in an active discovery session. Archiving will preserve all progress but remove this deal from your active flow.';
+    box.appendChild(warn);
+  } else {
+    var info=document.createElement('div');
+    info.style.cssText='font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6';
+    info.textContent='This prospect and all discovery data will be archived. You can restore it later from archived deals.';
+    box.appendChild(info);
+  }
+  var btns=document.createElement('div');btns.style.cssText='display:flex;gap:8px';
+  var archBtn=document.createElement('button');
+  archBtn.style.cssText='flex:1;background:var(--amber);border:none;border-radius:8px;padding:11px;font-family:Syne,sans-serif;font-size:13px;font-weight:800;color:#fff;cursor:pointer';
+  archBtn.textContent='Archive';
+  archBtn.onclick=function(){confirmArchiveProspect();modal.remove();};
+  var cancelBtn=document.createElement('button');
+  cancelBtn.style.cssText='flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:11px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer';
+  cancelBtn.textContent='Cancel';
+  cancelBtn.onclick=function(){modal.remove();};
+  btns.appendChild(archBtn);btns.appendChild(cancelBtn);
+  box.appendChild(btns);
+  modal.appendChild(box);
+  document.body.appendChild(modal);
+}
+
+function confirmArchiveProspect(){
+  var modal=document.getElementById('archive-modal');if(modal)modal.remove();
+  var clientName=deal.client;
+  // Mark as archived (store in separate localStorage key)
+  try{
+    var archived=JSON.parse(localStorage.getItem('cos_archived')||'[]');
+    archived.unshift(Object.assign({},deal,{archivedAt:Date.now()}));
+    localStorage.setItem('cos_archived',JSON.stringify(archived.slice(0,50)));
+  }catch(e){}
+  // Remove from active deals
+  deals=deals.filter(function(d){return d.id!==activeDealId;});
+  activeDealId=deals.length>0?deals[0].id:null;
+  if(activeDealId){setActiveDeal(activeDealId);}
+  else{deal=newDealObj();flowState={liveSignal:'',explicitNeed:'',callEnded:false,numbersShown:false,objectionActive:false,objectionHandled:false,closeReady:false};}
+  saveDeals();clearPrepFields();closeDrawer();updateDealBar();
+  autoRoute();updateDashboard();
+  showToast(clientName+' archived. Find it in archived deals.');
+}
+
+// ══ PROSPECT SWITCHER ══
+function toggleProspectMenu(){
+  var menu=document.getElementById('prospect-menu');
+  if(!menu)return;
+  if(menu.style.display==='none'){
+    renderProspectMenu();
+    menu.style.display='block';
+    // Close on outside click
+    setTimeout(function(){
+      document.addEventListener('click',closeProspectMenu,{once:true});
+    },10);
+  } else {
+    menu.style.display='none';
+  }
+}
+function closeProspectMenu(e){
+  var menu=document.getElementById('prospect-menu');
+  if(menu&&!menu.contains(e.target))menu.style.display='none';
+}
+function renderProspectMenu(){
+  var list=document.getElementById('prospect-menu-list');
+  if(!list)return;
+  var named=deals.filter(function(d){return d.client&&d.client.trim().length>1;});
+  list.innerHTML='';
+  if(!named.length){
+    list.innerHTML='<div style="padding:12px 14px;font-size:12px;color:var(--subtle)">No prospects yet</div>';
+    return;
+  }
+  named.forEach(function(d){
+    var isActive=d.id===activeDealId;
+    var div=document.createElement('div');
+    div.style.cssText='padding:10px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px'+(isActive?';background:var(--g2)':'');
+    var nameSpan=document.createElement('div');
+    nameSpan.style.cssText='font-size:13px;font-weight:'+(isActive?'700':'500')+';color:var(--text)';
+    nameSpan.textContent=d.client;
+    div.appendChild(nameSpan);
+    if(isActive){
+      var badge=document.createElement('span');
+      badge.style.cssText='font-size:9px;color:var(--green);font-weight:800';
+      badge.textContent='ACTIVE';
+      div.appendChild(badge);
+    }
+    div.onclick=(function(id){return function(){switchToDealt(id);toggleProspectMenu();};})(d.id);
+    list.appendChild(div);
+  });
+}
+
 // ══ DISCOVERY PANEL ══
 var DISC_HINTS = [
-  'Listen for: manual steps, multiple portals, no single source of truth.',
-  'More portals = more fragmentation. 3+ is a strong fit signal.',
-  'Multiple people = coordination overhead. Ask who makes the final call.',
-  'Time lost = where Lazr creates the most visible value.',
-  'Service mix tells you complexity level and carrier diversity.',
-  'Carrier count shows how much management overhead exists.',
-  'Volume anchors the ROI calculation. Get a real number.',
-  'Manual carrier management = clear inefficiency to quantify.',
-  'Manual process + growth = the exact problem Lazr solves.',
-  'No cost tracking = invoices errors going undetected.',
-  'Scale anxiety = the strongest long-term closing argument.',
+  'Most teams describe a process with 3-5 manual steps they have never questioned. Listen for the ones they say "we just always do it that way."',
+  'Operations using 3+ portals lose an average of 6-12 hours per week to system-switching alone. Every portal added is compounding overhead.',
+  'When more than one person touches shipping decisions without a shared system, errors multiply. Listen for "we usually ask so-and-so."',
+  'Most teams lose 8-18% in hidden shipping inefficiencies at the process level -- before rate optimization even begins.',
+  '80% of freight invoices contain at least one billing error. Without automated audit, those errors get paid silently every month.',
+  'Companies running 3+ modes without a unified platform are making carrier decisions in silos. That creates inconsistency and hidden cost.',
+  'When carrier selection is based on habit rather than data, the cheapest option is rarely chosen. Listen for "we usually use whoever we know."',
+  'At 200+ shipments per month, fragmentation cost compounds. A 20% volume spike on a broken process costs exponentially more to absorb.',
+  'Manual processes don\'t scale. Every new hire, location, or customer added to a manual operation multiplies the error surface.',
+  'Without real-time cost tracking, overcharges go unnoticed for months. Most companies discover this only after a financial audit.',
+  'Teams that can\'t immediately answer this question are already feeling the friction. The gap they describe is exactly where Lazr operates.',
 ];
 
 function updateDiscoveryPanel(){
@@ -2198,7 +2463,21 @@ function updateDiscoveryPanel(){
   }
 }
 
-var DISC_INSIGHTS={"execution":"How they operate today = where the gap will be.","tools":"More portals = more fragmentation. This anchors the ROI.","people":"Multiple people managing shipping = coordination overhead.","time":"Time lost = the specific problem Lazr eliminates first.","costs":"No cost tracking = invoice errors going undetected.","services":"Service mix reveals complexity level and fit signals.","carriers":"Carrier count shows management overhead.","volume":"Volume anchors the ROI calculation directly.","automation":"Manual process + growth = the exact problem Lazr solves.","scale":"Scale anxiety = the strongest long-term closing argument.","fit":"Their language tells you whether to go deep or move fast."};
+var DISC_INSIGHTS={
+  "execution": {text:"Their current process is your baseline gap. Everything they described manually is a Lazr feature.", level:1},
+  "tools":     {text:"Multiple portals = confirmed fragmentation. This is a direct ROI input -- every portal adds management cost.", level:2},
+  "people":    {text:"Shared ownership without a shared system creates errors. This is a major source of operational inconsistency.", level:2},
+  "time":      {text:"Time lost at this step is the most visible cost. This is where Lazr creates immediate, measurable impact.", level:3},
+  "costs":     {text:"If they can't verify invoices automatically, they're paying errors every month. This is a major source of cost leakage.", level:3},
+  "services":  {text:"Multi-mode without a unified platform means siloed decisions. Every mode managed separately is margin left on the table.", level:2},
+  "carriers":  {text:"Habit-based carrier selection means they're not optimizing. This introduces inconsistency in pricing and service.", level:2},
+  "volume":    {text:"Volume confirmed. This anchors the ROI calculation -- fragmentation cost scales directly with shipment count.", level:1},
+  "automation":{text:"Manual processes at this volume are compounding the problem. Every manual step is a scaling failure waiting to happen.", level:3},
+  "scale":     {text:"If they struggled to answer this, the gap is real and live. Scale pressure is the strongest closing argument.", level:3},
+  "fit":       {text:"Their answer reveals their pain point and their vision. Use their exact words when you position.", level:1}
+};
+var DISC_INSIGHT_ICONS={1:"✔",2:"⚠",3:"🚨"};
+var DISC_INSIGHT_COLORS={1:"var(--green)",2:"var(--amber)",3:"var(--red)"};
 var DISC_FOCUS_LABELS=["Tools","People","Process","Control","Services","Carriers","Volume","Automation","Costs","Scale","Done"];
 
 function discSaveAnswer(){
@@ -2223,10 +2502,26 @@ function discSaveAnswer(){
   var insNext=document.getElementById('disc-insight-next');
   var nextQ=DISCOVERY_QUESTIONS[Math.min(cur+1, DISCOVERY_QUESTIONS.length-1)];
   var nextFocus=DISC_FOCUS_LABELS[cur+1]||'Complete';
-  if(insAnswer) insAnswer.textContent=answerText?'"'+answerText.slice(0,60)+(answerText.length>60?'…':'')+'"':'(no answer — skipping)';
-  if(insText) insText.textContent=DISC_INSIGHTS[q?q.area:'']||'Noted.';
+  var insight=DISC_INSIGHTS[q?q.area:'']||{text:'Noted.',level:1};
+  var insLevel=insight.level||1;
+  var insIcon=DISC_INSIGHT_ICONS[insLevel]||'✔';
+  var insColor=DISC_INSIGHT_COLORS[insLevel]||'var(--green)';
+  // Update flash styling based on severity
+  if(flash){
+    flash.style.borderColor=insColor;
+    var insLabel=flash.querySelector('span:last-child');
+    if(insLabel)insLabel.style.color=insColor;
+  }
+  var insIconEl=document.getElementById('disc-flash-icon');
+  var insLabelEl=document.getElementById('disc-flash-label');
+  if(insIconEl)insIconEl.textContent=insIcon;
+  if(insLabelEl){insLabelEl.style.color=insColor;insLabelEl.textContent=insLevel===3?'Major gap detected':insLevel===2?'Inefficiency identified':'Insight captured';}
+  if(insAnswer) insAnswer.textContent=answerText?'"'+answerText.slice(0,60)+(answerText.length>60?'…':'')+'"':'(no answer -- skipping)';
+  if(insText){insText.textContent=insight.text;insText.style.color=insColor;}
   if(insNext) insNext.textContent='→ Moving to: '+nextFocus;
   if(flash) flash.style.display='block';
+  // Update efficiency score
+  updateEfficiencyScore();
 
   // Phase 2: change button to "Next Question →"
   if(btn){
@@ -2240,7 +2535,7 @@ function discSaveAnswer(){
   if(answerEl) answerEl.disabled=true;
   saveDeals();
 
-  // Auto-advance after 2.2s — system pulls user forward
+  // Auto-advance after 2.2s -- system pulls user forward
   setTimeout(function(){ discAdvance(); }, 2200);
 }
 
@@ -2298,7 +2593,7 @@ function discComplete(){
   var fit = answered >= 6 ? 'good' : answered >= 3 ? 'weak' : 'low';
   deal.qualFit = fit;
   saveDeals();
-  var msgs={good:'Good fit — moving to Command.',weak:'Weak fit signals — keep it light.',low:'Low fit — tighten and move fast.'};
+  var msgs={good:'Good fit -- moving to Command.',weak:'Weak fit signals -- keep it light.',low:'Low fit -- tighten and move fast.'};
   showToast(msgs[fit]||'Discovery complete');
   autoRoute();
   updateDashboard();
@@ -2329,10 +2624,10 @@ function calcROI(){
   document.getElementById('roi-m3').textContent='$'+annual.toLocaleString();
   // Compound
   var cEl=document.getElementById('roi-compound');
-  if(ships>=200){cEl.style.display='block';cEl.innerHTML='<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--red);margin-bottom:6px">⚠️ At your volume this compounds</div><div style="font-size:13px;color:var(--text);line-height:1.68">At '+ships+' shipments/month, a 20% growth quarter takes this to <strong style="color:var(--red)">$'+Math.round(annual*1.2).toLocaleString()+'</strong>/yr — same process, more volume, more waste.</div>';}
+  if(ships>=200){cEl.style.display='block';cEl.innerHTML='<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--red);margin-bottom:6px">⚠️ At your volume this compounds</div><div style="font-size:13px;color:var(--text);line-height:1.68">At '+ships+' shipments/month, a 20% growth quarter takes this to <strong style="color:var(--red)">$'+Math.round(annual*1.2).toLocaleString()+'</strong>/yr -- same process, more volume, more waste.</div>';}
   else cEl.style.display='none';
   // Script
-  var say=portals>=4?'You are running '+portals+' separate systems to manage one freight operation. Based on what you have shared, that is costing roughly $'+annual.toLocaleString()+' a year just in management overhead — before we even look at rates.':'Based on your numbers, the fragmentation overhead is approximately $'+annual.toLocaleString()+' a year. That is not the cost of shipping — that is the cost of managing shipping the hard way.';
+  var say=portals>=4?'You are running '+portals+' separate systems to manage one freight operation. Based on what you have shared, that is costing roughly $'+annual.toLocaleString()+' a year just in management overhead -- before we even look at rates.':'Based on your numbers, the fragmentation overhead is approximately $'+annual.toLocaleString()+' a year. That is not the cost of shipping -- that is the cost of managing shipping the hard way.';
   document.getElementById('roi-say').textContent=say;
 }
 
@@ -2393,113 +2688,113 @@ vsCompetitors = {
   freightcom: {
     name:'FreightCOM / ClickShip',
     data:[1,1,0.5,1,0.5,0,0.5,0,0.5,0.5,0,0,1,0.5,1],
-    hook:"FreightCOM has LTL, parcel, and spot FTL quotes — a real Canadian platform. But they lock you into their carrier network, no multi-user role-based ecosystem, no pre-order tracking, no automated invoice audit, and no strategic partnership model. Complaints on Trustpilot include slow claims resolution (8+ months unresolved in 2025).",
+    hook:"FreightCOM has LTL, parcel, and spot FTL quotes -- a real Canadian platform. But they lock you into their carrier network, no multi-user role-based ecosystem, no pre-order tracking, no automated invoice audit, and no strategic partnership model. Complaints on Trustpilot include slow claims resolution (8+ months unresolved in 2025).",
     angle:"Ask if they can fully customize which carriers appear. Ask if accounting, warehouse, and ops all have separate role-based access. Ask if every invoice is automatically audited before payment. Those are the gaps Lazr was built around.",
-    dont:"Don't say FreightCOM is bad — they're a legitimate Canadian platform. Don't compete on carrier breadth alone. Don't ignore ClickShip — it's their eCommerce play and a real strength."
+    dont:"Don't say FreightCOM is bad -- they're a legitimate Canadian platform. Don't compete on carrier breadth alone. Don't ignore ClickShip -- it's their eCommerce play and a real strength."
   },
   eshipper: {
     name:'eShipper',
     data:[1,1,1,1,0,0,0.5,0,0.5,0.5,0,0,1,1,1],
-    hook:"eShipper is capable — LTL, FTL, parcel, cross-border, ERP API, Shopify, free to start. Real gaps: no bring-your-own contracts, no customizable carrier roster, limited multi-user access, no pre-order tracking, no automated invoice audit. Transactional by design.",
+    hook:"eShipper is capable -- LTL, FTL, parcel, cross-border, ERP API, Shopify, free to start. Real gaps: no bring-your-own contracts, no customizable carrier roster, limited multi-user access, no pre-order tracking, no automated invoice audit. Transactional by design.",
     angle:"Who runs the platform day-to-day? With eShipper, the account manager does. With Lazr, your ops, finance, and warehouse team all run it themselves. Also: can they load their own Purolator contract and see it alongside eShipper's rates?",
-    dont:"Don't dismiss eShipper's freight breadth — they have LTL and FTL. Don't lead with rate comparisons. Don't call them expensive — they're free to start too."
+    dont:"Don't dismiss eShipper's freight breadth -- they have LTL and FTL. Don't lead with rate comparisons. Don't call them expensive -- they're free to start too."
   },
   totalship: {
     name:'TotalShip',
     data:[0,1,0,0,0,0,0,0,0,0,0,0,1,0,0],
     hook:"Parcel-only specialist. Deep expertise in UPS, FedEx, and Purolator billing. The moment they ship anything on a pallet, TotalShip is done.",
     angle:"Ask what they do for pallet freight. TotalShip literally cannot process it. Lazr handles parcel through FTL with one login for every team member.",
-    dont:"Don't compete on parcel billing expertise — TotalShip knows UPS/FedEx tariffs deeply. Don't lead with features TotalShip doesn't even attempt."
+    dont:"Don't compete on parcel billing expertise -- TotalShip knows UPS/FedEx tariffs deeply. Don't lead with features TotalShip doesn't even attempt."
   },
   flagship: {
     name:'Flagship',
     data:[0,1,0,0,0,0,0,0,0,0,0,0,1,0.5,0],
     hook:"Strong Canadian parcel brand with competitive SMB rates. Almost exclusively small parcel. No LTL, no FTL, no bring-your-own contracts, no multi-user ecosystem, no invoice audit.",
-    angle:"The moment your prospect ships anything heavier than a box — pallets, LTL, FTL — Flagship cannot process it. Lazr starts where Flagship stops.",
-    dont:"Don't compete on parcel rates — Flagship has good SMB parcel pricing. Don't ignore that they have real brand recognition with small Canadian businesses."
+    angle:"The moment your prospect ships anything heavier than a box -- pallets, LTL, FTL -- Flagship cannot process it. Lazr starts where Flagship stops.",
+    dont:"Don't compete on parcel rates -- Flagship has good SMB parcel pricing. Don't ignore that they have real brand recognition with small Canadian businesses."
   },
   shiptime: {
     name:'ShipTime',
     data:[0.5,1,0,0.5,1,0,0,0,0.5,0,0.5,0,1,1,1],
-    hook:"ShipTime has genuine strengths: BYOR, Shopify, free to use. Real gaps: no FTL, no multi-user role-based access, no ERP integration, invoice audit is a paid third-party add-on (BYOR only). Documented overcharge: May 2025 — $349.46 charged with no breakdown, still unresolved 2 months later.",
+    hook:"ShipTime has genuine strengths: BYOR, Shopify, free to use. Real gaps: no FTL, no multi-user role-based access, no ERP integration, invoice audit is a paid third-party add-on (BYOR only). Documented overcharge: May 2025 -- $349.46 charged with no breakdown, still unresolved 2 months later.",
     angle:"Their invoice audit (ShipAudit) is a paid add-on via a third party, only for BYOR accounts. Lazr audits every invoice automatically as part of the platform. Also: no FTL, no ERP, no multi-user role access.",
-    dont:"Don't ignore that ShipTime has BYOR and is free — those are real strengths. Don't lead with price. Don't claim better parcel rates without proof."
+    dont:"Don't ignore that ShipTime has BYOR and is free -- those are real strengths. Don't lead with price. Don't claim better parcel rates without proof."
   },
   shipstation: {
     name:'ShipStation',
     data:[0,1,0,0,0,0.5,0.5,0,0,0,0,0,0,0,1],
     hook:"US-first eCommerce parcel platform. Zero LTL or FTL capability. Subscription fees scale sharply. Built entirely for consumer eCommerce, not B2B freight.",
     angle:"Ask your prospect: do you ship anything on a pallet? ShipStation literally cannot process that shipment. Lazr starts exactly where ShipStation stops.",
-    dont:"Don't compete on eCommerce order management — ShipStation is strong there. Don't dismiss their Shopify integration — it's genuinely good."
+    dont:"Don't compete on eCommerce order management -- ShipStation is strong there. Don't dismiss their Shopify integration -- it's genuinely good."
   },
   freightview: {
     name:'Freightview',
     data:[1,1,1,0.5,1,1,1,0,1,1,0.5,0,0,0,0],
-    hook:"Legitimate, well-reviewed US TMS — LTL, parcel, FTL, BYOC, ERP API, multi-user, analytics. Invoice audit is an add-on, not standard. No Canada-first focus, no free-to-start tier, no cross-border Canada depth.",
+    hook:"Legitimate, well-reviewed US TMS -- LTL, parcel, FTL, BYOC, ERP API, multi-user, analytics. Invoice audit is an add-on, not standard. No Canada-first focus, no free-to-start tier, no cross-border Canada depth.",
     angle:"Canadian-specific: their Canadian carrier depth is limited, cross-border Canada-US isn't their strength, and there's no free-to-start tier. Also confirm: is their invoice audit standard or an add-on?",
-    dont:"Don't dismiss Freightview — it's one of the stronger US TMS tools. Don't lead with Canada unless you've confirmed they're Canadian-focused. Don't claim more ERP depth without specifics."
+    dont:"Don't dismiss Freightview -- it's one of the stronger US TMS tools. Don't lead with Canada unless you've confirmed they're Canadian-focused. Don't claim more ERP depth without specifics."
   },
   freightera: {
     name:'Freightera',
     data:[1,0,1,1,0,0,0,0,0,0,0,0,1,0,0],
-    hook:"Canadian freight marketplace — you post a shipment and carriers bid. Strong for FTL spot freight. No parcel. No BYOC, no multi-user tools, no ERP, no invoice audit. A rate discovery tool, not a logistics management platform.",
+    hook:"Canadian freight marketplace -- you post a shipment and carriers bid. Strong for FTL spot freight. No parcel. No BYOC, no multi-user tools, no ERP, no invoice audit. A rate discovery tool, not a logistics management platform.",
     angle:"Freightera is a marketplace where you get bids on freight. Lazr is a platform where you manage your entire operation. They have zero parcel capability.",
-    dont:"Don't compete on FTL spot rates — Freightera's marketplace model can find good spot rates. Don't underestimate their Canadian carrier relationships."
+    dont:"Don't compete on FTL spot rates -- Freightera's marketplace model can find good spot rates. Don't underestimate their Canadian carrier relationships."
   },
   freightpop: {
     name:'FreightPOP',
     data:[1,1,1,0.5,1,0.5,1,0,1,1,1,0,0,0,0],
     hook:"Capable US TMS with parcel, LTL, FTL, ERP integration, and genuine automated invoice auditing via EDI. US-first with weak Canadian carrier coverage, complex implementation, no free-to-start.",
     angle:"Acknowledge their invoice audit strength. Your angles: built for the US market, Canadian carrier coverage is limited, setup takes significant implementation time, no free tier.",
-    dont:"Don't dismiss FreightPOP's invoice audit — it's real and deep. Don't claim better ERP integration without specifics. Don't underestimate their enterprise credibility."
+    dont:"Don't dismiss FreightPOP's invoice audit -- it's real and deep. Don't claim better ERP integration without specifics. Don't underestimate their enterprise credibility."
   },
   kuebix: {
     name:'Kuebix / Trimble',
     data:[1,0.5,1,0,1,0.5,1,0,1,1,1,0,0,0.5,0],
-    hook:"Kuebix (now Trimble TMS) is an enterprise US TMS with freight audit. Heavy implementation — Trimble states typical go-live is 6-8 weeks. Documented account manager turnover. No Canada-first, weak Canadian carrier depth.",
-    angle:"For a Canadian mid-market shipper who needs to be running in days — not weeks — and wants a strategic partner rather than an enterprise implementation project, Lazr is the right fit.",
-    dont:"Don't mock the Trimble brand — it's enterprise credible. Don't compete on features they don't use anyway. Don't underestimate the power of their existing customer base."
+    hook:"Kuebix (now Trimble TMS) is an enterprise US TMS with freight audit. Heavy implementation -- Trimble states typical go-live is 6-8 weeks. Documented account manager turnover. No Canada-first, weak Canadian carrier depth.",
+    angle:"For a Canadian mid-market shipper who needs to be running in days -- not weeks -- and wants a strategic partner rather than an enterprise implementation project, Lazr is the right fit.",
+    dont:"Don't mock the Trimble brand -- it's enterprise credible. Don't compete on features they don't use anyway. Don't underestimate the power of their existing customer base."
   },
   mycarrier: {
     name:'MyCarrierTMS',
     data:[1,0.5,1,0,1,1,1,0,1,1,1,0,0,0.5,0],
-    hook:"More capable than many assume — LTL, FTL, BYOC, ERP API, multi-user, and MyInvoiceHub freight audit. US-focused with limited Canadian carrier depth, no cross-border Canada strength, limited parcel.",
+    hook:"More capable than many assume -- LTL, FTL, BYOC, ERP API, multi-user, and MyInvoiceHub freight audit. US-focused with limited Canadian carrier depth, no cross-border Canada strength, limited parcel.",
     angle:"Give them credit for invoice audit and ERP. Your angles: built for the US market, Canadian carrier coverage is thin, parcel is very limited. If they ship mixed freight in Canada, Lazr covers all modes with Canadian carrier depth from day one.",
-    dont:"Don't dismiss MyCarrierTMS — they have real invoice audit. Don't compete on LTL breadth without Canadian specifics. Don't claim parcel if they're LTL-heavy."
+    dont:"Don't dismiss MyCarrierTMS -- they have real invoice audit. Don't compete on LTL breadth without Canadian specifics. Don't claim parcel if they're LTL-heavy."
   },
   shippo: {
     name:'Shippo',
     data:[0,1,0,0,0,0,0,0,0.5,0,0,0,0,0.5,1],
     hook:"US-first eCommerce parcel platform. Zero LTL or FTL capability confirmed. No BYOC, no multi-user ecosystem, no invoice audit, no ERP. Built for DTC eCommerce parcels.",
-    angle:"Shippo is excellent for eCommerce parcel labels. The moment your prospect ships a pallet — Shippo cannot process it. No LTL, no FTL, no freight capability at all.",
-    dont:"Don't compete on global carrier network — Shippo has 40+ carriers. Don't dismiss their API — developers love it. Don't claim better eCommerce UX."
+    angle:"Shippo is excellent for eCommerce parcel labels. The moment your prospect ships a pallet -- Shippo cannot process it. No LTL, no FTL, no freight capability at all.",
+    dont:"Don't compete on global carrier network -- Shippo has 40+ carriers. Don't dismiss their API -- developers love it. Don't claim better eCommerce UX."
   },
   chitchats: {
     name:'Chit Chats',
     data:[0,1,0,1,0,0,0,0,0,0,0,0,1,1,0.5],
     hook:"Canadian eCommerce parcel drop-off service. Excellent for Canada-to-US consumer parcels at low rates via USPS. Purely a consumer/SMB eCommerce parcel service. No LTL, no FTL, no team tools, no ERP.",
-    angle:"Chit Chats is a consumer parcel drop-off service. If your prospect uses it, ask what they do for their pallet freight — that's where the Lazr conversation starts.",
-    dont:"Don't try to compete on Canada-to-US consumer parcel rates — Chit Chats wins that. Don't position Lazr as a drop-off alternative."
+    angle:"Chit Chats is a consumer parcel drop-off service. If your prospect uses it, ask what they do for their pallet freight -- that's where the Lazr conversation starts.",
+    dont:"Don't try to compete on Canada-to-US consumer parcel rates -- Chit Chats wins that. Don't position Lazr as a drop-off alternative."
   },
   netparcel: {
     name:'NetParcel',
     data:[1,1,0,1,1,0,0,0,0.5,0,0,0,1,1,1],
-    hook:"Canadian rate broker for parcel and LTL — BYOC supported, 40+ LTL carriers, Shopify, cross-border, free to start. No FTL, no multi-user role-based access, no ERP integration, no automated invoice audit. A rate comparison tool, not a logistics management platform.",
-    angle:"NetParcel is a good rate comparison tool — BYOC and free to start are real strengths. Your angle: it's a rate broker, not a platform your team runs their business on. No multi-user access, no ERP connection, no invoice audit running in the background.",
-    dont:"Don't dismiss NetParcel's BYOC or free tier — they're real. Don't compete on Canadian parcel rate access alone. Don't overclaim ERP depth."
+    hook:"Canadian rate broker for parcel and LTL -- BYOC supported, 40+ LTL carriers, Shopify, cross-border, free to start. No FTL, no multi-user role-based access, no ERP integration, no automated invoice audit. A rate comparison tool, not a logistics management platform.",
+    angle:"NetParcel is a good rate comparison tool -- BYOC and free to start are real strengths. Your angle: it's a rate broker, not a platform your team runs their business on. No multi-user access, no ERP connection, no invoice audit running in the background.",
+    dont:"Don't dismiss NetParcel's BYOC or free tier -- they're real. Don't compete on Canadian parcel rate access alone. Don't overclaim ERP depth."
   },
   easyship: {
     name:'EasyShip',
     data:[0,1,0,0,0,0,0,0,0,0,0,0,0,0.5,1],
     hook:"Global eCommerce parcel platform. Strong international rates, Shopify integration, good DTC features. Zero LTL or FTL capability. No BYOC, no multi-user ecosystem, no invoice audit, not Canada-first.",
-    angle:"EasyShip is built for brands shipping consumer parcels internationally. There is no freight capability at all — no LTL, no FTL. If your prospect has any B2B freight or pallet shipments, EasyShip doesn't exist for that part of their business.",
-    dont:"Don't compete on international consumer parcel rates — EasyShip is strong there. Don't dismiss their eCommerce ecosystem integrations."
+    angle:"EasyShip is built for brands shipping consumer parcels internationally. There is no freight capability at all -- no LTL, no FTL. If your prospect has any B2B freight or pallet shipments, EasyShip doesn't exist for that part of their business.",
+    dont:"Don't compete on international consumer parcel rates -- EasyShip is strong there. Don't dismiss their eCommerce ecosystem integrations."
   }
 };
 
 var bcSearchList=Object.keys(vsCompetitors).map(function(k){return{key:k,label:vsCompetitors[k].name};});
 var bcFocusIdx=-1,bcCurrentKey=null,bcCurrentView='wins';
-// Safe getter — prevents "ships is not defined" in any context
+// Safe getter -- prevents "ships is not defined" in any context
 function getShips(){var el=document.getElementById('r-ships')||document.getElementById('dw-ships');return el?parseInt(el.value)||0:0;}
 var winProb={freightcom:72,eshipper:68,totalship:85,flagship:82,shiptime:70,shipstation:90,freightview:65,freightera:78,freightpop:60,kuebix:63,mycarrier:62,shippo:92,chitchats:88,netparcel:75,easyship:91};
 function bcFilter(val){
@@ -2574,16 +2869,16 @@ function bcRender(key){
   });
   var exWrap=document.getElementById('bc-excl');
   exWrap.innerHTML=exc.length
-    ?'<div style="background:var(--g2);border:1px solid var(--g3);border-radius:10px;padding:12px 14px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--green);margin-bottom:8px">✅ '+exc.length+' feature'+(exc.length!==1?'s':'')+' Lazr has — '+comp.name.split(/[/,]/)[0].trim()+' does not</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+exc.map(function(w){return '<span style="background:var(--bg2);border:1px solid var(--g3);border-radius:5px;padding:3px 10px;font-size:12px;color:var(--green);font-weight:500">'+w+'</span>';}).join('')+'</div></div>'
+    ?'<div style="background:var(--g2);border:1px solid var(--g3);border-radius:10px;padding:12px 14px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--green);margin-bottom:8px">✅ '+exc.length+' feature'+(exc.length!==1?'s':'')+' Lazr has -- '+comp.name.split(/[/,]/)[0].trim()+' does not</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+exc.map(function(w){return '<span style="background:var(--bg2);border:1px solid var(--g3);border-radius:5px;padding:3px 10px;font-size:12px;color:var(--green);font-weight:500">'+w+'</span>';}).join('')+'</div></div>'
     :'';
   // Build deal-context angle if active deal exists
   var dealAngle = '';
   if(activeDeal){
     var dc = activeDeal;
-    if(dc.carriers>=4) dealAngle = 'Best angle for this deal: '+dc.company+' has '+dc.carriers+' carriers — lead hard on centralization and run the fragmentation ROI live. Their portal count is your opener.';
-    else if(dc.locs>=3) dealAngle = 'Best angle for this deal: '+dc.company+' has '+dc.locs+' locations — emphasize centralized visibility and the coordination cost. That is concrete and personal.';
-    else if(dc.ships>=200) dealAngle = 'Best angle for this deal: '+dc.company+' ships '+dc.ships+'/mo — emphasize scale inefficiency. Small gaps compound fast at that volume.';
-    else if(dc.pain) dealAngle = 'Best angle for this deal: They mentioned — \"'+dc.pain.substring(0,80)+'\". Lead with that specific pain, not a generic pitch.';
+    if(dc.carriers>=4) dealAngle = 'Best angle for this deal: '+dc.company+' has '+dc.carriers+' carriers -- lead hard on centralization and run the fragmentation ROI live. Their portal count is your opener.';
+    else if(dc.locs>=3) dealAngle = 'Best angle for this deal: '+dc.company+' has '+dc.locs+' locations -- emphasize centralized visibility and the coordination cost. That is concrete and personal.';
+    else if(dc.ships>=200) dealAngle = 'Best angle for this deal: '+dc.company+' ships '+dc.ships+'/mo -- emphasize scale inefficiency. Small gaps compound fast at that volume.';
+    else if(dc.pain) dealAngle = 'Best angle for this deal: They mentioned -- \"'+dc.pain.substring(0,80)+'\". Lead with that specific pain, not a generic pitch.';
   }
   var angleEl = document.getElementById('bc-angle-text');
   if(angleEl) angleEl.textContent = dealAngle || comp.angle || '';
@@ -2618,7 +2913,7 @@ function logObj(){
   var input=document.getElementById('ot-input');
   var text=input.value.trim();
   if(!text)return;
-  objLog.unshift({text:text,ts:Date.now(),deal:deal.client||'—'});
+  objLog.unshift({text:text,ts:Date.now(),deal:deal.client||'--'});
   input.value='';
   renderObjLog();
   showToast('Logged');
@@ -2634,8 +2929,8 @@ function renderObjLog(){
 function resetDirective(){
   document.getElementById('d-say').textContent    = 'Set your deal context in Prep to get your first move.';
   document.getElementById('d-ask').textContent    = 'Use Prep to start the flow.';
-  document.getElementById('d-means').textContent  = '—';
-  document.getElementById('d-risk').textContent   = '—';
+  document.getElementById('d-means').textContent  = '--';
+  document.getElementById('d-risk').textContent   = '--';
   document.getElementById('d-status').textContent = '🟡 Set deal first';
 }
 
@@ -2668,7 +2963,7 @@ function clearPrepFields(){
   });
   document.getElementById('roi-placeholder').style.display='block';
   // Clear ROI metric displays
-  ['roi-m1','roi-m2','roi-m3'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent='—';});
+  ['roi-m1','roi-m2','roi-m3'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent='--';});
   document.getElementById('roi-compound').style.display='none';
 }
 
