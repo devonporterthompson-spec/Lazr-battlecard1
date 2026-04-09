@@ -385,33 +385,6 @@ select.field option{background:var(--bg3)}
                 <button style="background:var(--green);border:none;border-radius:9px;padding:11px 20px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap;flex-shrink:0" onclick="continueDealFromDashboard()" id="dash-flow-btn">Continue →</button>
               </div>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-
-              <!-- Progress -->
-              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
-                <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:12px">Progress</div>
-                <div id="dash-progress-list" style="display:flex;flex-direction:column;gap:7px"></div>
-              </div>
-
-              <!-- Stakeholders -->
-              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
-                <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:12px">Stakeholders</div>
-                <div id="dash-stakeholders" style="display:flex;flex-direction:column;gap:7px"></div>
-              </div>
-
-            </div>
-
-            <!-- Blockers -->
-            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px">
-              <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px">Blockers & Gaps</div>
-              <div id="dash-blockers" style="display:flex;flex-direction:column;gap:7px"></div>
-            </div>
-
-            <!-- Activity (compact) -->
-            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px">
-              <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px">Activity</div>
-              <div id="dash-timeline"><div style="font-size:12px;color:var(--subtle)">No activity yet.</div></div>
-            </div>
 
           </div>
         </div>
@@ -484,6 +457,17 @@ select.field option{background:var(--bg3)}
 
         <!-- ══ DEAL (default / command center) ══ -->
         <div class="panel" id="panel-command">
+
+          <!-- Discovery lock overlay — shown when discovery incomplete -->
+          <div id="cmd-lock" style="display:none;text-align:center;padding:48px 24px">
+            <div style="font-size:28px;margin-bottom:14px;opacity:.3">🔒</div>
+            <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:900;color:var(--muted);margin-bottom:6px">Complete discovery first</div>
+            <div style="font-size:12px;color:var(--subtle);margin-bottom:22px;max-width:280px;margin-left:auto;margin-right:auto">Run discovery to unlock live command. The directive adapts to what you learn.</div>
+            <button class="gen-btn" style="width:auto;padding:10px 24px;font-size:13px" onclick="nav('discovery',document.querySelector('[data-p=discovery]'))">Go to Discovery →</button>
+          </div>
+
+          <!-- Command surface — shown when discovery complete -->
+          <div id="cmd-surface">
 
           <!-- Deal memory bar -->
           <div class="deal-bar" id="deal-bar">
@@ -561,6 +545,7 @@ select.field option{background:var(--bg3)}
             </div>
           </div>
 
+          </div><!-- end cmd-surface -->
         </div>
 
         <!-- ══ PREP ══ -->
@@ -1061,7 +1046,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v9.8 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v9.9 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1444,6 +1429,20 @@ function updateNextActionBlock(stage){
 function updateCommandSurface(){
   updateStageBar();
   var stage=resolveStage(deal);
+
+  // Show lock or surface based on discoveryDone
+  var lockEl=document.getElementById('cmd-lock');
+  var surfaceEl=document.getElementById('cmd-surface');
+  if(!deal.discoveryDone && deal.client){
+    if(lockEl)lockEl.style.display='block';
+    if(surfaceEl)surfaceEl.style.display='none';
+    updateCommandFlowBanner(stage);
+    return;
+  } else {
+    if(lockEl)lockEl.style.display='none';
+    if(surfaceEl)surfaceEl.style.display='block';
+  }
+
   updateCommandFlowBanner(stage);
   updateNextActionBlock(stage);
 
@@ -1920,7 +1919,7 @@ function updateDashboard(){
   var nextStageMap={prep:'Next: Run discovery',discover:'Next: Position value',position:'Next: Show ROI',roi:'Next: Close',close:'Next: Follow up',advance:'Next: Return to dashboard'};
   var fnEl=document.getElementById('dash-flow-now');if(fnEl)fnEl.style.display='none'; // not used in slim version
   var fxEl=document.getElementById('dash-flow-next');if(fxEl)fxEl.textContent=(nowMap[stage]||'Continue')+' · '+(nextStageMap[stage]||'');
-  var fbEl=document.getElementById('dash-flow-btn');if(fbEl){if(!deal.discoveryDone&&deal.client)fbEl.textContent='Start discovery →';else fbEl.textContent=(nowMap[stage]||'Continue deal')+' →';}
+  var fbEl=document.getElementById('dash-flow-btn');if(fbEl){if(!deal.client)fbEl.textContent='Set up deal →';else if(!deal.discoveryDone)fbEl.textContent='Start discovery →';else fbEl.textContent='Go to Command →';}
 
   // Health score
   var health=calculateHealth(deal);
