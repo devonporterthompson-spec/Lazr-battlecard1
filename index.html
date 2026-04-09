@@ -216,6 +216,58 @@ select.field option{background:var(--bg3)}
   .field-row{grid-template-columns:1fr}
   .panel.drawer{width:100vw}
 }
+/* ── BATTLECARD ──*/
+.bc-search-wrap{position:relative;margin-bottom:7px}
+.bc-search{width:100%;background:var(--bg3);border:2px solid var(--border2);border-radius:11px;padding:12px 44px 12px 44px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s}
+.bc-search:focus{border-color:var(--green)}
+.bc-search-ico{position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;color:var(--muted)}
+.bc-clear{display:none;position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:4px}
+.bc-drop{display:none;position:absolute;top:calc(100% + 5px);left:0;right:0;background:var(--bg2);border:1.5px solid var(--border2);border-radius:11px;z-index:300;box-shadow:0 12px 40px rgba(0,0,0,.45);overflow:hidden;max-height:280px;overflow-y:auto}
+.bc-di{display:flex;align-items:center;gap:12px;padding:11px 15px;cursor:pointer;transition:background .1s;border-bottom:1px solid var(--border)}
+.bc-di:last-child{border-bottom:none}
+.bc-di:hover,.bc-di.focus{background:var(--bg3)}
+.bc-di-name{font-size:13px;font-weight:600;color:var(--text);flex:1}
+.bc-di-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.bc-di-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:99px;background:var(--bg4);color:var(--muted);border:1px solid var(--border2);white-space:nowrap}
+.bc-score{display:grid;grid-template-columns:1fr 50px 1fr;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px}
+.bc-score-lazr{padding:18px;text-align:center;background:var(--g2);border-right:1px solid var(--g3)}
+.bc-score-mid{display:flex;align-items:center;justify-content:center;background:var(--bg3);font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:var(--subtle)}
+.bc-score-comp{padding:18px;text-align:center;border-left:1px solid var(--border)}
+.bc-score-num{font-family:'Syne',sans-serif;font-size:44px;font-weight:800;line-height:1}
+.bc-score-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.bc-score-sub{font-size:10px;margin-top:4px;opacity:.75}
+.win-prob{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--g2);border:1px solid var(--g3);border-radius:9px;margin-bottom:14px}
+.win-prob-bar{flex:1;height:8px;background:var(--bg4);border-radius:99px;overflow:hidden}
+.win-prob-fill{height:100%;border-radius:99px;background:var(--green);transition:width .6s ease}
+.win-prob-num{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--green);white-space:nowrap}
+.bc-top3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:14px}
+.bc-top3-card{background:var(--bg3);border:1px solid var(--g3);border-radius:9px;padding:11px;text-align:center}
+.bc-top3-num{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--green);margin-bottom:4px}
+.bc-top3-label{font-size:11px;color:var(--muted);line-height:1.4}
+.bc-angle{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:9px}
+.bc-angle-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--green);margin-bottom:7px}
+.bc-dont{background:var(--r2);border:1px solid var(--r3);border-radius:10px;padding:13px 14px;margin-bottom:9px}
+.bc-dont-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--red);margin-bottom:6px}
+.bc-view-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:6px 13px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s}
+.bc-view-btn:hover{color:var(--text);border-color:var(--border3)}
+.bc-view-btn.on{color:var(--green);border-color:var(--green);background:var(--g2)}
+.bc-row{display:grid;grid-template-columns:1fr 100px 100px;align-items:start;padding:11px 14px;border-bottom:1px solid var(--border);gap:8px;cursor:pointer;transition:background .1s}
+.bc-row:last-child{border-bottom:none}
+.bc-row:hover{background:var(--bg3)}
+.bc-row.win{background:rgba(61,220,132,.05)}
+.bc-row.win:hover{background:rgba(61,220,132,.09)}
+.bc-feat-name{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;flex-wrap:wrap;gap:5px;line-height:1.35}
+.bc-feat-detail{display:none;margin-top:7px;padding:8px 10px;background:var(--g2);border-radius:7px;font-size:12px;color:var(--green);line-height:1.55}
+.bc-row.open .bc-feat-detail{display:block}
+.bc-cell{text-align:center;padding-top:2px}
+.bc-yes{color:var(--green);font-size:16px;font-weight:700;display:block;text-align:center}
+.bc-no{color:var(--red);font-size:16px;display:block;text-align:center}
+.bc-part{font-size:10px;font-weight:700;color:var(--amber);display:block;text-align:center}
+.bc-road{font-size:9px;font-weight:700;color:var(--amber);text-transform:uppercase;display:block;text-align:center;line-height:1.4}
+.bc-win-pill{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:99px;background:var(--g2);color:var(--green);border:1px solid var(--g3)}
+.bc-both-pill{font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 7px;border-radius:99px;background:var(--bg4);color:var(--muted);border:1px solid var(--border2)}
+
+/* ══ DISCOVERY ══ */
 </style>
 </head>
 <body>
@@ -317,7 +369,7 @@ select.field option{background:var(--bg3)}
         <div class="sb-item" onclick="nav('roi',this)" data-p="roi"><span class="si-icon">📊</span><span class="si-label">ROI</span></div>
         <div class="sb-item" onclick="nav('close',this)" data-p="close"><span class="si-icon">🔐</span><span class="si-label">Close</span></div>
         <div class="sb-item" onclick="nav('advance',this)" data-p="advance"><span class="si-icon">🚀</span><span class="si-label">Advance</span></div>
-        <div class="sb-item" onclick="nav('battlecard',this)" data-p="battlecard" style="opacity:.5"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
+        <div class="sb-item" onclick="nav('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
         <div class="sb-ver" id="sb-ver">v6.0</div>
@@ -720,21 +772,76 @@ select.field option{background:var(--bg3)}
         </div>
 
         <!-- ══ BATTLECARD ══ -->
-        <div class="panel drawer" id="panel-battlecard"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">BATTLECARD</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
-          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Battlecard</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Deep competitor framing. Use to support Handle.</div>
-          <div style="margin-bottom:16px"><label class="field-label">Competitor</label>
-            <select class="field" id="bc-comp" onchange="runBattlecard()">
-              <option value="">Select competitor…</option>
-              <option value="freightcom">FreightCOM / ClickShip</option>
-              <option value="2ship">2Ship</option>
-              <option value="eshipper">eShipper</option>
-              <option value="shiptime">ShipTime</option>
-              <option value="internal">Internal / Manual</option>
-            </select>
-          </div>
-          <div id="bc-output"><div class="ph"><div class="ph-icon">🥊</div><div class="ph-t">Select a competitor</div><div class="ph-s">Pick the competitor and the battlecard generates instantly.</div></div></div>
-        </div>
+        <div class="panel drawer" id="panel-battlecard">
+<div class="ptitle">Battlecard</div>
+  <div class="psub">Type a competitor to get the full breakdown — win probability, top angles, what not to say.</div>
+  <div id="bc-deal-hint" style="display:none;margin-bottom:14px"></div>
+
+  <div class="bc-search-wrap">
+    <span class="bc-search-ico">🔍</span>
+    <input class="bc-search" id="bc-input" type="text" placeholder="Type a competitor name…" autocomplete="off" oninput="bcFilter(this.value)" onkeydown="bcKey(event)">
+    <button class="bc-clear" id="bc-clear" onclick="bcClear()">✕</button>
+    <div class="bc-drop" id="bc-drop">
+      <div id="bc-drop-list"></div>
+      <div id="bc-drop-empty" style="display:none;padding:16px;text-align:center;font-size:13px;color:var(--muted)">No match found.</div>
+    </div>
+  </div>
+  <div style="font-size:11px;color:var(--subtle);margin-bottom:18px;padding-left:3px">15 platforms: FreightCOM · eShipper · ShipTime · Freightview · ShipStation · Shippo · NetParcel and more</div>
+
+  <div class="bc-placeholder" id="bc-placeholder" style="background:var(--bg3);border:1.5px dashed var(--border2);border-radius:var(--radius-lg);padding:48px 24px;text-align:center">
+    <div style="font-size:40px;margin-bottom:11px">🥊</div>
+    <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:5px">Type a competitor to load the battlecard</div>
+    <div style="font-size:12px;color:var(--muted);max-width:340px;margin:0 auto;line-height:1.6">Win probability, top 3 angles, what not to say, and full feature comparison.</div>
+  </div>
+
+  <div id="bc-results" style="display:none">
+    <div class="bc-score">
+      <div class="bc-score-lazr"><div class="bc-score-lbl" style="color:var(--green)">LAZR</div><div class="bc-score-num" style="color:var(--green)" id="bc-lazr-score">—</div><div class="bc-score-sub" style="color:var(--green)">features ✓</div></div>
+      <div class="bc-score-mid">VS</div>
+      <div class="bc-score-comp"><div class="bc-score-lbl" style="color:var(--muted)" id="bc-comp-lbl">COMP</div><div class="bc-score-num" style="color:var(--red)" id="bc-comp-score">—</div><div class="bc-score-sub" style="color:var(--muted)">features ✓</div></div>
+    </div>
+    <!-- WIN PROBABILITY -->
+    <div class="win-prob" style="margin-bottom:14px">
+      <div style="flex:1"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--green);margin-bottom:6px">Win Probability</div><div class="win-prob-bar"><div class="win-prob-fill" id="bc-win-bar"></div></div></div>
+      <div class="win-prob-num" id="bc-win-pct">—%</div>
+    </div>
+    <!-- TOP 3 -->
+    <div class="bc-top3" style="margin-bottom:14px"><div class="bc-top3-card" id="bc-t1"><div class="bc-top3-num">—</div><div class="bc-top3-label">—</div></div><div class="bc-top3-card" id="bc-t2"><div class="bc-top3-num">—</div><div class="bc-top3-label">—</div></div><div class="bc-top3-card" id="bc-t3"><div class="bc-top3-num">—</div><div class="bc-top3-label">—</div></div></div>
+    <!-- ANGLES -->
+    <div id="bc-excl" style="margin-bottom:12px"></div>
+    <div id="bc-deal-angle-wrap" style="display:none;margin-bottom:10px;background:linear-gradient(135deg,rgba(61,220,132,.11) 0%,rgba(61,220,132,.03) 100%);border:1px solid var(--g3);border-radius:10px;padding:13px 15px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--green);margin-bottom:6px">🎯 Best Angle For This Deal</div>
+      <div id="bc-deal-angle-text" style="font-size:13px;color:var(--text);line-height:1.7"></div>
+    </div>
+    <div class="g2" style="margin-bottom:12px">
+      <div class="bc-angle"><div class="bc-angle-title">✅ General best angle</div><div id="bc-angle-text" style="font-size:13px;color:var(--text);line-height:1.7">—</div></div>
+      <div class="bc-dont"><div class="bc-dont-title">🚫 What NOT to say</div><div id="bc-dont-text" style="font-size:13px;color:var(--muted);line-height:1.65">—</div></div>
+    </div>
+    <!-- VIEW TOGGLE -->
+    <div style="display:flex;gap:8px;margin-bottom:11px;flex-wrap:wrap">
+      <button class="bc-view-btn on" onclick="bcSetView('wins',this)">🏆 Where Lazr Wins</button>
+      <button class="bc-view-btn" onclick="bcSetView('all',this)">📋 All Features</button>
+      <button class="bc-view-btn" onclick="bcSetView('tied',this)">🤝 Where They Match</button>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:13px">
+      <div style="display:grid;grid-template-columns:1fr 100px 100px;background:var(--bg3);border-bottom:1px solid var(--border);padding:9px 14px;gap:8px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">Feature</div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--green);text-align:center">Lazr</div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);text-align:center" id="bc-col-hdr">Competitor</div>
+      </div>
+      <div id="bc-rows"></div>
+    </div>
+    <div style="padding:12px 15px;background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:10px;font-size:13px;color:var(--text);line-height:1.75;margin-bottom:12px" id="bc-hook"></div>
+  <div style="display:flex;gap:9px;flex-wrap:wrap">
+    <button class="btn btn-ghost btn-sm" onclick="showPanel('followup')">✉️ Write follow-up</button>
+    <button class="btn btn-ghost btn-sm" onclick="showPanel('closingflow')">🎯 Closing Flow</button>
+    <button class="btn btn-ghost btn-sm" onclick="showPanel('nextmove')">🧭 Next Move</button>
+  </div>
+  </div>
+</div>
+
+<!-- ══ ROI CALCULATOR ══ -->
+      
 
         <!-- ══ WHERE WE WIN ══ -->
         <div class="panel drawer" id="panel-wherewewin"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">WHERE WE WIN</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
@@ -894,8 +1001,11 @@ function createDeal(){
   updateDealBar();
   updateCommandSurface();
   updateDashboard();
+  // Show main panel and route to discovery layer
+  var mainPanel=document.getElementById('panel-main');
+  if(mainPanel)mainPanel.classList.add('on');
   openDrawer('prep', document.querySelector('[data-p="prep"]'));
-  showToast('New deal — fill in Prep to begin');
+  showToast('New deal — fill in deal setup to begin');
 }
 
 function handleDealClick(el){switchToDealt(el.getAttribute("data-id"));}
@@ -965,11 +1075,14 @@ function doLogin(user){
   document.getElementById('l-err').textContent='';
   loadDealFromSession();
   checkApiKeyStatus();
-  updateCommandSurface();
+  // Show the main panel and route to correct layer
+  var mainPanel=document.getElementById('panel-main');
+  if(mainPanel)mainPanel.classList.add('on');
+  autoRoute();
   updateDashboard();
-  // Start reactive update interval
+  // Reactive update interval
   setInterval(function(){
-    if(deal.client){ updateDashboard(); updateCommandSurface(); }
+    if(deal.client){ updateDashboard(); }
   }, 5000);
 }
 function doLogout(){
@@ -1001,11 +1114,15 @@ document.addEventListener('keydown',function(e){
 
 // ── SESSION ──
 document.addEventListener('DOMContentLoaded',function(){
+  // Ensure main panel is the default visible panel
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on');});
+  var mainPanel=document.getElementById('panel-main');
+  if(mainPanel)mainPanel.classList.add('on');
   var saved=sessionStorage.getItem('cos_auth');
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v10.3 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v10.5 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -2260,77 +2377,211 @@ async function runAdvance(){
 }
 
 // ── BATTLECARD ──
-var BC_DATA={
-  freightcom:{
+vsCompetitors = {
+  freightcom: {
     name:'FreightCOM / ClickShip',
-    headline:'Lazr vs FreightCOM — control layer vs booking tool',
-    d1:'Lazr gives you one view across all carriers with cost intelligence. FreightCOM is a booking interface.',
-    d2:'Lazr includes invoice auditing, role-based access, and reporting. FreightCOM does not.',
-    d3:'Lazr scales across locations, users, and carriers without adding complexity.',
-    angle:'FreightCOM gets them in the door. Lazr gives them control of what happens after.',
-    dontsay:'Never say FreightCOM is bad. Say: it works for booking — we work for operations.'
+    data:[1,1,0.5,1,0.5,0,0.5,0,0.5,0.5,0,0,1,0.5,1],
+    hook:"FreightCOM has LTL, parcel, and spot FTL quotes — a real Canadian platform. But they lock you into their carrier network, no multi-user role-based ecosystem, no pre-order tracking, no automated invoice audit, and no strategic partnership model. Complaints on Trustpilot include slow claims resolution (8+ months unresolved in 2025).",
+    angle:"Ask if they can fully customize which carriers appear. Ask if accounting, warehouse, and ops all have separate role-based access. Ask if every invoice is automatically audited before payment. Those are the gaps Lazr was built around.",
+    dont:"Don't say FreightCOM is bad — they're a legitimate Canadian platform. Don't compete on carrier breadth alone. Don't ignore ClickShip — it's their eCommerce play and a real strength."
   },
-  '2ship':{
-    name:'2Ship',
-    headline:'Lazr vs 2Ship — operational control vs automation',
-    d1:'Lazr optimizes decision-making across carriers in real time. 2Ship automates without optimizing.',
-    d2:'Lazr gives finance, ops, and logistics unified visibility. 2Ship is IT-first.',
-    d3:'Lazr is free to start and requires no integration to begin extracting value.',
-    angle:'2Ship moves fast. Lazr moves smart. Ask which one they need more.',
-    dontsay:'Never attack their automation. Reframe around what automation cannot see.'
-  },
-  eshipper:{
+  eshipper: {
     name:'eShipper',
-    headline:'Lazr vs eShipper — platform vs broker',
-    d1:'Lazr gives the customer ownership of the process. eShipper owns the relationship.',
-    d2:'Lazr provides full transparency — data, invoices, performance. eShipper controls the view.',
-    d3:'Lazr scales with complexity. eShipper is optimized for transactional simplicity.',
-    angle:'eShipper is a service. Lazr is infrastructure. Ask which one they want to build on.',
-    dontsay:'Never lead with rates. Lead with visibility and ownership.'
+    data:[1,1,1,1,0,0,0.5,0,0.5,0.5,0,0,1,1,1],
+    hook:"eShipper is capable — LTL, FTL, parcel, cross-border, ERP API, Shopify, free to start. Real gaps: no bring-your-own contracts, no customizable carrier roster, limited multi-user access, no pre-order tracking, no automated invoice audit. Transactional by design.",
+    angle:"Who runs the platform day-to-day? With eShipper, the account manager does. With Lazr, your ops, finance, and warehouse team all run it themselves. Also: can they load their own Purolator contract and see it alongside eShipper's rates?",
+    dont:"Don't dismiss eShipper's freight breadth — they have LTL and FTL. Don't lead with rate comparisons. Don't call them expensive — they're free to start too."
   },
-  shiptime:{
+  totalship: {
+    name:'TotalShip',
+    data:[0,1,0,0,0,0,0,0,0,0,0,0,1,0,0],
+    hook:"Parcel-only specialist. Deep expertise in UPS, FedEx, and Purolator billing. The moment they ship anything on a pallet, TotalShip is done.",
+    angle:"Ask what they do for pallet freight. TotalShip literally cannot process it. Lazr handles parcel through FTL with one login for every team member.",
+    dont:"Don't compete on parcel billing expertise — TotalShip knows UPS/FedEx tariffs deeply. Don't lead with features TotalShip doesn't even attempt."
+  },
+  flagship: {
+    name:'Flagship',
+    data:[0,1,0,0,0,0,0,0,0,0,0,0,1,0.5,0],
+    hook:"Strong Canadian parcel brand with competitive SMB rates. Almost exclusively small parcel. No LTL, no FTL, no bring-your-own contracts, no multi-user ecosystem, no invoice audit.",
+    angle:"The moment your prospect ships anything heavier than a box — pallets, LTL, FTL — Flagship cannot process it. Lazr starts where Flagship stops.",
+    dont:"Don't compete on parcel rates — Flagship has good SMB parcel pricing. Don't ignore that they have real brand recognition with small Canadian businesses."
+  },
+  shiptime: {
     name:'ShipTime',
-    headline:'Lazr vs ShipTime — enterprise platform vs SMB tool',
-    d1:'Lazr is built for multi-user, multi-location, multi-carrier complexity. ShipTime is not.',
-    d2:'Lazr includes invoice auditing, approvals, and reporting. ShipTime handles booking.',
-    d3:'Lazr grows with the operation. ShipTime has a ceiling.',
-    angle:'ShipTime got them started. Ask if they have outgrown it.',
-    dontsay:'Never dismiss ShipTime. Ask what is missing — they will tell you.'
+    data:[0.5,1,0,0.5,1,0,0,0,0.5,0,0.5,0,1,1,1],
+    hook:"ShipTime has genuine strengths: BYOR, Shopify, free to use. Real gaps: no FTL, no multi-user role-based access, no ERP integration, invoice audit is a paid third-party add-on (BYOR only). Documented overcharge: May 2025 — $349.46 charged with no breakdown, still unresolved 2 months later.",
+    angle:"Their invoice audit (ShipAudit) is a paid add-on via a third party, only for BYOR accounts. Lazr audits every invoice automatically as part of the platform. Also: no FTL, no ERP, no multi-user role access.",
+    dont:"Don't ignore that ShipTime has BYOR and is free — those are real strengths. Don't lead with price. Don't claim better parcel rates without proof."
   },
-  internal:{
-    name:'Internal / Manual Process',
-    headline:'Lazr vs manual process — infrastructure vs improvised',
-    d1:'Lazr centralizes what is currently fragmented across emails, portals, and spreadsheets.',
-    d2:'Lazr catches invoice errors automatically. Manual processes absorb them silently.',
-    d3:'Lazr adds structure without disrupting a single carrier relationship. Free to start.',
-    angle:'They built something that works. Ask what it costs them in time to maintain it.',
-    dontsay:'Never say their process is wrong. Frame it as: you can keep everything and add control.'
+  shipstation: {
+    name:'ShipStation',
+    data:[0,1,0,0,0,0.5,0.5,0,0,0,0,0,0,0,1],
+    hook:"US-first eCommerce parcel platform. Zero LTL or FTL capability. Subscription fees scale sharply. Built entirely for consumer eCommerce, not B2B freight.",
+    angle:"Ask your prospect: do you ship anything on a pallet? ShipStation literally cannot process that shipment. Lazr starts exactly where ShipStation stops.",
+    dont:"Don't compete on eCommerce order management — ShipStation is strong there. Don't dismiss their Shopify integration — it's genuinely good."
   },
+  freightview: {
+    name:'Freightview',
+    data:[1,1,1,0.5,1,1,1,0,1,1,0.5,0,0,0,0],
+    hook:"Legitimate, well-reviewed US TMS — LTL, parcel, FTL, BYOC, ERP API, multi-user, analytics. Invoice audit is an add-on, not standard. No Canada-first focus, no free-to-start tier, no cross-border Canada depth.",
+    angle:"Canadian-specific: their Canadian carrier depth is limited, cross-border Canada-US isn't their strength, and there's no free-to-start tier. Also confirm: is their invoice audit standard or an add-on?",
+    dont:"Don't dismiss Freightview — it's one of the stronger US TMS tools. Don't lead with Canada unless you've confirmed they're Canadian-focused. Don't claim more ERP depth without specifics."
+  },
+  freightera: {
+    name:'Freightera',
+    data:[1,0,1,1,0,0,0,0,0,0,0,0,1,0,0],
+    hook:"Canadian freight marketplace — you post a shipment and carriers bid. Strong for FTL spot freight. No parcel. No BYOC, no multi-user tools, no ERP, no invoice audit. A rate discovery tool, not a logistics management platform.",
+    angle:"Freightera is a marketplace where you get bids on freight. Lazr is a platform where you manage your entire operation. They have zero parcel capability.",
+    dont:"Don't compete on FTL spot rates — Freightera's marketplace model can find good spot rates. Don't underestimate their Canadian carrier relationships."
+  },
+  freightpop: {
+    name:'FreightPOP',
+    data:[1,1,1,0.5,1,0.5,1,0,1,1,1,0,0,0,0],
+    hook:"Capable US TMS with parcel, LTL, FTL, ERP integration, and genuine automated invoice auditing via EDI. US-first with weak Canadian carrier coverage, complex implementation, no free-to-start.",
+    angle:"Acknowledge their invoice audit strength. Your angles: built for the US market, Canadian carrier coverage is limited, setup takes significant implementation time, no free tier.",
+    dont:"Don't dismiss FreightPOP's invoice audit — it's real and deep. Don't claim better ERP integration without specifics. Don't underestimate their enterprise credibility."
+  },
+  kuebix: {
+    name:'Kuebix / Trimble',
+    data:[1,0.5,1,0,1,0.5,1,0,1,1,1,0,0,0.5,0],
+    hook:"Kuebix (now Trimble TMS) is an enterprise US TMS with freight audit. Heavy implementation — Trimble states typical go-live is 6-8 weeks. Documented account manager turnover. No Canada-first, weak Canadian carrier depth.",
+    angle:"For a Canadian mid-market shipper who needs to be running in days — not weeks — and wants a strategic partner rather than an enterprise implementation project, Lazr is the right fit.",
+    dont:"Don't mock the Trimble brand — it's enterprise credible. Don't compete on features they don't use anyway. Don't underestimate the power of their existing customer base."
+  },
+  mycarrier: {
+    name:'MyCarrierTMS',
+    data:[1,0.5,1,0,1,1,1,0,1,1,1,0,0,0.5,0],
+    hook:"More capable than many assume — LTL, FTL, BYOC, ERP API, multi-user, and MyInvoiceHub freight audit. US-focused with limited Canadian carrier depth, no cross-border Canada strength, limited parcel.",
+    angle:"Give them credit for invoice audit and ERP. Your angles: built for the US market, Canadian carrier coverage is thin, parcel is very limited. If they ship mixed freight in Canada, Lazr covers all modes with Canadian carrier depth from day one.",
+    dont:"Don't dismiss MyCarrierTMS — they have real invoice audit. Don't compete on LTL breadth without Canadian specifics. Don't claim parcel if they're LTL-heavy."
+  },
+  shippo: {
+    name:'Shippo',
+    data:[0,1,0,0,0,0,0,0,0.5,0,0,0,0,0.5,1],
+    hook:"US-first eCommerce parcel platform. Zero LTL or FTL capability confirmed. No BYOC, no multi-user ecosystem, no invoice audit, no ERP. Built for DTC eCommerce parcels.",
+    angle:"Shippo is excellent for eCommerce parcel labels. The moment your prospect ships a pallet — Shippo cannot process it. No LTL, no FTL, no freight capability at all.",
+    dont:"Don't compete on global carrier network — Shippo has 40+ carriers. Don't dismiss their API — developers love it. Don't claim better eCommerce UX."
+  },
+  chitchats: {
+    name:'Chit Chats',
+    data:[0,1,0,1,0,0,0,0,0,0,0,0,1,1,0.5],
+    hook:"Canadian eCommerce parcel drop-off service. Excellent for Canada-to-US consumer parcels at low rates via USPS. Purely a consumer/SMB eCommerce parcel service. No LTL, no FTL, no team tools, no ERP.",
+    angle:"Chit Chats is a consumer parcel drop-off service. If your prospect uses it, ask what they do for their pallet freight — that's where the Lazr conversation starts.",
+    dont:"Don't try to compete on Canada-to-US consumer parcel rates — Chit Chats wins that. Don't position Lazr as a drop-off alternative."
+  },
+  netparcel: {
+    name:'NetParcel',
+    data:[1,1,0,1,1,0,0,0,0.5,0,0,0,1,1,1],
+    hook:"Canadian rate broker for parcel and LTL — BYOC supported, 40+ LTL carriers, Shopify, cross-border, free to start. No FTL, no multi-user role-based access, no ERP integration, no automated invoice audit. A rate comparison tool, not a logistics management platform.",
+    angle:"NetParcel is a good rate comparison tool — BYOC and free to start are real strengths. Your angle: it's a rate broker, not a platform your team runs their business on. No multi-user access, no ERP connection, no invoice audit running in the background.",
+    dont:"Don't dismiss NetParcel's BYOC or free tier — they're real. Don't compete on Canadian parcel rate access alone. Don't overclaim ERP depth."
+  },
+  easyship: {
+    name:'EasyShip',
+    data:[0,1,0,0,0,0,0,0,0,0,0,0,0,0.5,1],
+    hook:"Global eCommerce parcel platform. Strong international rates, Shopify integration, good DTC features. Zero LTL or FTL capability. No BYOC, no multi-user ecosystem, no invoice audit, not Canada-first.",
+    angle:"EasyShip is built for brands shipping consumer parcels internationally. There is no freight capability at all — no LTL, no FTL. If your prospect has any B2B freight or pallet shipments, EasyShip doesn't exist for that part of their business.",
+    dont:"Don't compete on international consumer parcel rates — EasyShip is strong there. Don't dismiss their eCommerce ecosystem integrations."
+  }
 };
-function runBattlecard(){
-  var sel=val('bc-comp');
-  var out=document.getElementById('bc-output');
-  if(!sel){out.innerHTML='<div class="ph"><div class="ph-icon">🥊</div><div class="ph-t">Select a competitor</div></div>';return;}
-  var bc=BC_DATA[sel];if(!bc)return;
-  out.innerHTML='';
-  // Lean: headline + 3 diffs + angle + dontsay
-  var headDiv=document.createElement('div');
-  headDiv.style.cssText='background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px';
-  headDiv.innerHTML='<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:6px">Headline</div>'
-    +'<div style="font-family:Syne,sans-serif;font-size:15px;font-weight:800;color:var(--text)">'+bc.headline+'</div>';
-  out.appendChild(headDiv);
 
-  var diffsDiv=document.createElement('div');
-  diffsDiv.style.cssText='background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px';
-  diffsDiv.innerHTML='<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px">Top 3 differentiators</div>'
-    +[bc.d1,bc.d2,bc.d3].map(function(d,i){
-      return '<div style="display:flex;gap:8px;margin-bottom:7px;font-size:13px;color:var(--text)">'
-        +'<span style="color:var(--green);font-weight:800;flex-shrink:0">'+(i+1)+'.</span>'+d+'</div>';
+var bcSearchList=Object.keys(vsCompetitors).map(function(k){return{key:k,label:vsCompetitors[k].name};});
+var bcFocusIdx=-1,bcCurrentKey=null,bcCurrentView='wins';
+// Safe getter — prevents "ships is not defined" in any context
+function getShips(){var el=document.getElementById('r-ships')||document.getElementById('dw-ships');return el?parseInt(el.value)||0:0;}
+var winProb={freightcom:72,eshipper:68,totalship:85,flagship:82,shiptime:70,shipstation:90,freightview:65,freightera:78,freightpop:60,kuebix:63,mycarrier:62,shippo:92,chitchats:88,netparcel:75,easyship:91};
+function bcFilter(val){
+  var drop=document.getElementById('bc-drop'),list=document.getElementById('bc-drop-list'),empty=document.getElementById('bc-drop-empty'),clr=document.getElementById('bc-clear');
+  bcFocusIdx=-1;if(clr)clr.style.display=val.length?'block':'none';
+  if(!val||!val.trim()){drop.style.display='none';return;}
+  var q=val.trim().toLowerCase();
+  var hits=bcSearchList.filter(function(c){return c.label.toLowerCase().includes(q)||c.key.includes(q);});
+  if(!hits.length){list.innerHTML='';list.style.display='none';empty.style.display='block';}
+  else{
+    list.innerHTML=hits.map(function(c){
+      var hl=c.label.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<b style="color:var(--green)">$1</b>');
+      return '<div class="bc-di" data-key="'+c.key+'" onclick="bcPick(\'' +c.key+ '\')">'
+        +'<div><div class="bc-di-name">'+hl+'</div></div><span class="bc-di-tag">Compare →</span></div>';
     }).join('');
-  out.appendChild(diffsDiv);
-
-  out.appendChild(makeSayBlock(bc.angle));
-  out.appendChild(makeBlock("Don't say",bc.dontsay,'red',bc.dontsay));
+    list.style.display='block';empty.style.display='none';
+  }
+  drop.style.display='block';
+}
+function bcKey(e){
+  var items=document.querySelectorAll('.bc-di');
+  if(e.key==='ArrowDown'){e.preventDefault();bcFocusIdx=Math.min(bcFocusIdx+1,items.length-1);items.forEach(function(el,i){el.classList.toggle('focus',i===bcFocusIdx);});if(items[bcFocusIdx])items[bcFocusIdx].scrollIntoView({block:'nearest'});}
+  else if(e.key==='ArrowUp'){e.preventDefault();bcFocusIdx=Math.max(bcFocusIdx-1,0);items.forEach(function(el,i){el.classList.toggle('focus',i===bcFocusIdx);});if(items[bcFocusIdx])items[bcFocusIdx].scrollIntoView({block:'nearest'});}
+  else if(e.key==='Enter'){if(bcFocusIdx>=0&&items[bcFocusIdx])items[bcFocusIdx].click();else if(items.length===1)items[0].click();}
+  else if(e.key==='Escape')bcCloseDrop();
+}
+function bcPick(key){var comp=vsCompetitors[key];if(!comp)return;bcCurrentKey=key;document.getElementById('bc-input').value=comp.name;document.getElementById('bc-clear').style.display='block';bcCloseDrop();bcRender(key);}
+function bcClear(){document.getElementById('bc-input').value='';document.getElementById('bc-clear').style.display='none';bcCurrentKey=null;document.getElementById('bc-placeholder').style.display='block';document.getElementById('bc-results').style.display='none';}
+function bcCloseDrop(){document.getElementById('bc-drop').style.display='none';bcFocusIdx=-1;}
+document.addEventListener('click',function(e){var inp=document.getElementById('bc-input'),drop=document.getElementById('bc-drop');if(inp&&drop&&!inp.contains(e.target)&&!drop.contains(e.target))bcCloseDrop();});
+function bcSetView(view,el){bcCurrentView=view;document.querySelectorAll('.bc-view-btn').forEach(function(b){b.classList.remove('on');});if(el)el.classList.add('on');if(bcCurrentKey)bcDrawRows(vsCompetitors[bcCurrentKey]);}
+function bcDrawRows(comp){
+  var html='';
+  bcFeatures.forEach(function(feat,i){
+    var lv=lazrData[i],cv=comp.data[i],win=lv>cv,tied=lv===cv;
+    if(bcCurrentView==='wins'&&!win)return;
+    if(bcCurrentView==='tied'&&!tied)return;
+    function cell(val,isLazr){
+      if(isLazr&&val===0.3)return '<div class="bc-cell"><span class="bc-road">Soon</span></div>';
+      if(val>=1)return '<div class="bc-cell bc-yes">✓</div>';
+      if(val===0.5)return '<div class="bc-cell"><span class="bc-part">~</span></div>';
+      return '<div class="bc-cell bc-no">✗</div>';
+    }
+    html+='<div class="bc-row'+(win?' win':'')+'" onclick="this.classList.toggle(\'open\')">'
+      +'<div><div class="bc-feat-name">'+feat.name+(win?'<span class="bc-win-pill">Lazr wins</span>':'')
+      +(!win&&tied&&lv>=1?'<span class="bc-both-pill">Both</span>':'')+'</div>'
+      +'<div class="bc-feat-detail">'+feat.detail+'</div></div>'
+      +cell(lv,true)+cell(cv,false)+'</div>';
+  });
+  if(!html)html='<div style="padding:16px;text-align:center;font-size:13px;color:var(--muted)">No features match this filter.</div>';
+  document.getElementById('bc-rows').innerHTML=html;
+}
+function bcRender(key){
+  var comp=vsCompetitors[key];if(!comp)return;
+  document.getElementById('bc-placeholder').style.display='none';
+  document.getElementById('bc-results').style.display='block';
+  var ls=0,cs=0;
+  lazrData.forEach(function(v,i){if(v>=1&&v!==0.3)ls++;if(comp.data[i]>=1)cs++;});
+  document.getElementById('bc-lazr-score').textContent=ls;
+  document.getElementById('bc-comp-score').textContent=cs;
+  var short=comp.name.split(/[/,]/)[0].trim().toUpperCase();
+  document.getElementById('bc-comp-lbl').textContent=short;
+  document.getElementById('bc-col-hdr').textContent=short;
+  var wp=winProb[key]||70;
+  document.getElementById('bc-win-pct').textContent=wp+'%';
+  document.getElementById('bc-win-bar').style.width=wp+'%';
+  var exc=[];lazrData.forEach(function(v,i){if(v>=1&&v!==0.3&&comp.data[i]===0)exc.push(bcFeatures[i].name);});
+  ['bc-t1','bc-t2','bc-t3'].forEach(function(id,i){
+    var el=document.getElementById(id);if(!el)return;
+    if(exc[i]){el.querySelector('.bc-top3-num').textContent='#'+(i+1);el.querySelector('.bc-top3-label').textContent=exc[i];el.style.display='';}
+    else el.style.display='none';
+  });
+  var exWrap=document.getElementById('bc-excl');
+  exWrap.innerHTML=exc.length
+    ?'<div style="background:var(--g2);border:1px solid var(--g3);border-radius:10px;padding:12px 14px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--green);margin-bottom:8px">✅ '+exc.length+' feature'+(exc.length!==1?'s':'')+' Lazr has — '+comp.name.split(/[/,]/)[0].trim()+' does not</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+exc.map(function(w){return '<span style="background:var(--bg2);border:1px solid var(--g3);border-radius:5px;padding:3px 10px;font-size:12px;color:var(--green);font-weight:500">'+w+'</span>';}).join('')+'</div></div>'
+    :'';
+  // Build deal-context angle if active deal exists
+  var dealAngle = '';
+  if(activeDeal){
+    var dc = activeDeal;
+    if(dc.carriers>=4) dealAngle = 'Best angle for this deal: '+dc.company+' has '+dc.carriers+' carriers — lead hard on centralization and run the fragmentation ROI live. Their portal count is your opener.';
+    else if(dc.locs>=3) dealAngle = 'Best angle for this deal: '+dc.company+' has '+dc.locs+' locations — emphasize centralized visibility and the coordination cost. That is concrete and personal.';
+    else if(dc.ships>=200) dealAngle = 'Best angle for this deal: '+dc.company+' ships '+dc.ships+'/mo — emphasize scale inefficiency. Small gaps compound fast at that volume.';
+    else if(dc.pain) dealAngle = 'Best angle for this deal: They mentioned — \"'+dc.pain.substring(0,80)+'\". Lead with that specific pain, not a generic pitch.';
+  }
+  var angleEl = document.getElementById('bc-angle-text');
+  if(angleEl) angleEl.textContent = dealAngle || comp.angle || '';
+  var dealAngleWrap = document.getElementById('bc-deal-angle-wrap');
+  if(dealAngleWrap) dealAngleWrap.style.display = dealAngle ? 'block' : 'none';
+  var dalEl = document.getElementById('bc-deal-angle-text');
+  if(dalEl) dalEl.textContent = dealAngle;
+  document.getElementById('bc-dont-text').textContent=comp.dont||'Acknowledge their strengths before pivoting to gaps.';
+  document.getElementById('bc-hook').innerHTML='<b style="color:var(--amber)">Bottom line:</b> '+comp.hook;
+  bcDrawRows(comp);
 }
 
 // ── WHERE WE WIN ──
