@@ -360,9 +360,6 @@ select.field option{background:var(--bg3)}
     <div class="sidebar" id="sidebar">
       <div class="sb-nav">
         <div class="sb-item on" onclick="nav('main',this)" data-p="main" style="margin-bottom:4px"><span class="si-icon" style="font-size:18px">⚡</span><span class="si-label" style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--green)">LAZR</span></div>
-        <div class="sb-sec">Flow</div>
-        <div class="sb-item" onclick="nav('discovery',this)" data-p="discovery"><span class="si-icon">🔍</span><span class="si-label">Discovery</span></div>
-        <div class="sb-item" onclick="nav('command',this)" data-p="command"><span class="si-icon">⚡</span><span class="si-label">Command</span></div>
         <div class="sb-sec">Tools</div>
         <div class="sb-item" onclick="nav('prep',this)" data-p="prep"><span class="si-icon">🎯</span><span class="si-label">Deal Setup</span></div>
         <div class="sb-item" onclick="nav('handle',this)" data-p="handle"><span class="si-icon">🛡️</span><span class="si-label">Handle</span></div>
@@ -395,18 +392,18 @@ select.field option{background:var(--bg3)}
 
           <!-- LAYER 1: Status strip — always visible when deal exists -->
           <div id="main-status" style="display:none">
-            <div id="status-strip" style="display:flex;align-items:center;gap:10px;padding:10px 0;margin-bottom:16px;border-bottom:1px solid var(--border)">
-              <span style="font-family:'Syne',sans-serif;font-size:14px;font-weight:900;color:var(--text)" id="dash-client">—</span>
-              <span style="color:var(--subtle);font-size:12px">|</span>
+            <div id="status-strip" style="display:flex;align-items:center;gap:8px;padding:8px 0;margin-bottom:14px;border-bottom:1px solid var(--border);flex-wrap:wrap">
+              <span style="font-family:'Syne',sans-serif;font-size:13px;font-weight:900;color:var(--text)" id="dash-client">—</span>
+              <span style="color:var(--border2);font-size:11px">·</span>
               <span id="dash-stage-chip" style="font-size:9px;font-weight:800;text-transform:uppercase;color:var(--green)">—</span>
-              <span style="color:var(--subtle);font-size:12px">|</span>
+              <span style="color:var(--border2);font-size:11px">·</span>
               <span id="dash-progress-text" style="font-size:11px;color:var(--muted)">—</span>
-              <span style="color:var(--subtle);font-size:12px">|</span>
+              <span style="color:var(--border2);font-size:11px">·</span>
               <span id="dash-momentum-chip" style="font-size:11px;color:var(--subtle)">🟡</span>
-              <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
-                <button id="dash-flow-btn" onclick="continueDealFromDashboard()" style="background:var(--green);border:none;border-radius:7px;padding:7px 16px;font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap">Continue →</button>
-                <button id="status-edit-btn" onclick="openDrawer('prep',document.querySelector('[data-p=prep]'))" style="background:none;border:none;padding:4px 7px;font-size:11px;color:var(--subtle);cursor:pointer;opacity:.5" title="Edit">✏️</button>
-                <button id="status-del-btn" onclick="showDeleteModal()" style="background:none;border:none;padding:4px 7px;font-size:11px;color:var(--subtle);cursor:pointer;opacity:.5" title="Delete">🗑</button>
+              <div style="margin-left:auto;display:flex;align-items:center;gap:4px">
+                <button id="dash-flow-btn" onclick="continueDealFromDashboard()" style="display:none;background:var(--green);border:none;border-radius:7px;padding:6px 14px;font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap">Continue →</button>
+                <button id="status-edit-btn" onclick="openDrawer('prep',document.querySelector('[data-p=prep]'))" style="background:none;border:none;padding:4px 7px;font-size:12px;cursor:pointer" title="Edit deal">✏️</button>
+                <button id="status-del-btn" onclick="showDeleteModal()" style="background:none;border:none;padding:4px 7px;font-size:12px;cursor:pointer" title="Delete deal">🗑</button>
               </div>
             </div>
           </div>
@@ -1120,7 +1117,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v10.9 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v11.0 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1279,6 +1276,9 @@ function showLayer(layer){
   if(layer==='nodeal'){
     var el=document.getElementById('main-nodeal');
     if(el)el.style.display='block';
+    // Hide Continue in nodeal (+ New Deal button is the action)
+    var fb=document.getElementById('dash-flow-btn');
+    if(fb)fb.style.display='none';
     return;
   }
 
@@ -1289,6 +1289,9 @@ function showLayer(layer){
   if(layer==='discovery'){
     var discEl=document.getElementById('main-discovery');
     if(discEl)discEl.style.display='block';
+    // Hide Continue button — discovery IS the action
+    var fb=document.getElementById('dash-flow-btn');
+    if(fb)fb.style.display='none';
     updateDiscoveryPanel();
     updateDashboard();
   } else if(layer==='command'){
@@ -1297,11 +1300,13 @@ function showLayer(layer){
     // Show lock or surface
     var lockEl=document.getElementById('cmd-lock');
     var surfaceEl=document.getElementById('cmd-surface');
-    // Restore edit/delete when command is active
+    // Restore edit/delete when command is active, show continue btn
     var editBtn=document.getElementById('status-edit-btn');
     var delBtn=document.getElementById('status-del-btn');
     if(editBtn)editBtn.style.display='';
     if(delBtn)delBtn.style.display='';
+    var fb=document.getElementById('dash-flow-btn');
+    if(fb)fb.style.display='block';
     if(!deal.discoveryDone){
       if(lockEl)lockEl.style.display='block';
       if(surfaceEl)surfaceEl.style.display='none';
