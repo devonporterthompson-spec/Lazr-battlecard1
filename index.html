@@ -343,19 +343,18 @@ select.field option{background:var(--bg3)}
 
           <!-- LAYER 1: Status strip — always visible when deal exists -->
           <div id="main-status" style="display:none">
-            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-              <div style="flex:1;min-width:140px">
-                <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:900;color:var(--text);line-height:1" id="dash-client">—</div>
-                <div style="display:flex;align-items:center;gap:7px;margin-top:4px;flex-wrap:wrap">
-                  <span id="dash-stage-chip" style="font-size:9px;font-weight:800;text-transform:uppercase;color:var(--green);background:var(--g2);border:1px solid var(--g3);border-radius:4px;padding:2px 7px">—</span>
-                  <span id="dash-progress-text" style="font-size:11px;color:var(--muted)">—</span>
-                  <span id="dash-momentum-chip" style="font-size:11px;color:var(--subtle)">🟡 Neutral</span>
-                </div>
-              </div>
-              <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
-                <button id="dash-flow-btn" onclick="continueDealFromDashboard()" style="background:var(--green);border:none;border-radius:8px;padding:9px 18px;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap">Continue →</button>
-                <button onclick="openDrawer('prep',document.querySelector('[data-p=prep]'))" style="background:none;border:1px solid var(--border2);border-radius:7px;padding:7px 11px;font-size:11px;color:var(--muted);cursor:pointer" title="Edit deal">✏️</button>
-                <button onclick="showDeleteModal()" style="background:none;border:1px solid var(--r3);border-radius:7px;padding:7px 11px;font-size:11px;color:var(--red);cursor:pointer" title="Delete deal">🗑</button>
+            <div id="status-strip" style="display:flex;align-items:center;gap:10px;padding:10px 0;margin-bottom:16px;border-bottom:1px solid var(--border)">
+              <span style="font-family:'Syne',sans-serif;font-size:14px;font-weight:900;color:var(--text)" id="dash-client">—</span>
+              <span style="color:var(--subtle);font-size:12px">|</span>
+              <span id="dash-stage-chip" style="font-size:9px;font-weight:800;text-transform:uppercase;color:var(--green)">—</span>
+              <span style="color:var(--subtle);font-size:12px">|</span>
+              <span id="dash-progress-text" style="font-size:11px;color:var(--muted)">—</span>
+              <span style="color:var(--subtle);font-size:12px">|</span>
+              <span id="dash-momentum-chip" style="font-size:11px;color:var(--subtle)">🟡</span>
+              <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+                <button id="dash-flow-btn" onclick="continueDealFromDashboard()" style="background:var(--green);border:none;border-radius:7px;padding:7px 16px;font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap">Continue →</button>
+                <button id="status-edit-btn" onclick="openDrawer('prep',document.querySelector('[data-p=prep]'))" style="background:none;border:none;padding:4px 7px;font-size:11px;color:var(--subtle);cursor:pointer;opacity:.5" title="Edit">✏️</button>
+                <button id="status-del-btn" onclick="showDeleteModal()" style="background:none;border:none;padding:4px 7px;font-size:11px;color:var(--subtle);cursor:pointer;opacity:.5" title="Delete">🗑</button>
               </div>
             </div>
           </div>
@@ -385,16 +384,20 @@ select.field option{background:var(--bg3)}
             </div>
 
             <!-- Insight flash -->
-            <div id="disc-insight-flash" style="display:none;background:var(--bg2);border:1px solid var(--g3);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;animation:fup .3s ease">
-              <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:4px">✔ Saved</div>
+            <div id="disc-insight-flash" style="display:none;background:var(--bg2);border-left:4px solid var(--green);border:1px solid var(--g3);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;animation:fup .25s ease">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+                <span style="font-size:13px">✔</span>
+                <span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green)">Answer saved</span>
+              </div>
               <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px" id="disc-insight-answer">—</div>
               <div style="font-size:12px;color:var(--muted);margin-bottom:2px" id="disc-insight-text">—</div>
-              <div style="font-size:11px;color:var(--subtle)" id="disc-insight-next">—</div>
+              <div style="font-size:12px;color:var(--green);font-weight:700;margin-top:5px" id="disc-insight-next">—</div>
             </div>
 
             <!-- Current question — DOMINANT -->
             <div id="disc-question-block" style="background:linear-gradient(135deg,rgba(61,220,132,.12) 0%,rgba(61,220,132,.04) 100%);border:2px solid var(--green);border-radius:var(--radius-lg);padding:20px 22px;margin-bottom:14px">
-              <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.16em;color:var(--green);margin-bottom:10px" id="disc-q-level">L1 · Execution</div>
+              <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:5px">Current Step</div>
+              <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:12px" id="disc-q-level">L1 · Execution</div>
               <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:12px" id="disc-q-text">—</div>
               <div style="font-size:11px;color:var(--subtle);margin-bottom:14px;font-style:italic" id="disc-q-hint">—</div>
               <div style="margin-bottom:10px">
@@ -402,7 +405,7 @@ select.field option{background:var(--bg3)}
                 <textarea id="disc-answer-input" rows="2" placeholder="Type their answer here…" style="width:100%;background:rgba(0,0,0,.25);border:1.5px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;resize:none;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='var(--border2)'"></textarea>
               </div>
               <!-- ONE primary action -->
-              <button id="disc-answered-btn" onclick="discMarkAnswered()" style="width:100%;background:var(--green);border:none;border-radius:8px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer">Save &amp; Continue →</button>
+              <button id="disc-answered-btn" onclick="discSaveAnswer()" style="width:100%;background:var(--green);border:none;border-radius:8px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer">Save Answer →</button>
               <button id="disc-skip-btn" onclick="discSkip()" style="width:100%;background:none;border:none;padding:8px;font-size:11px;color:var(--subtle);cursor:pointer;margin-top:4px">Skip this question</button>
             </div>
 
@@ -429,7 +432,8 @@ select.field option{background:var(--bg3)}
             <div id="cmd-lock" style="display:none;text-align:center;padding:48px 20px">
               <div style="font-size:28px;margin-bottom:12px;opacity:.3">🔒</div>
               <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:900;color:var(--muted);margin-bottom:5px">Command locked</div>
-              <div style="font-size:12px;color:var(--subtle);margin-bottom:20px">Complete discovery to unlock live execution.</div>
+              <div style="font-size:13px;color:var(--subtle);margin-bottom:6px;max-width:260px;margin-left:auto;margin-right:auto">Complete discovery to unlock execution guidance.</div>
+              <div style="font-size:11px;color:var(--subtle);opacity:.6;margin-bottom:20px;font-style:italic">The directive adapts to everything you learn in discovery.</div>
               <button class="gen-btn" style="width:auto;padding:10px 22px;font-size:13px" onclick="showLayer('discovery')">Return to Discovery →</button>
             </div>
 
@@ -1001,7 +1005,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v10.2 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v10.3 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -2068,12 +2072,13 @@ function updateDiscoveryPanel(){
 var DISC_INSIGHTS={"execution":"How they operate today = where the gap will be.","tools":"More portals = more fragmentation. This anchors the ROI.","people":"Multiple people managing shipping = coordination overhead.","time":"Time lost = the specific problem Lazr eliminates first.","costs":"No cost tracking = invoice errors going undetected.","services":"Service mix reveals complexity level and fit signals.","carriers":"Carrier count shows management overhead.","volume":"Volume anchors the ROI calculation directly.","automation":"Manual process + growth = the exact problem Lazr solves.","scale":"Scale anxiety = the strongest long-term closing argument.","fit":"Their language tells you whether to go deep or move fast."};
 var DISC_FOCUS_LABELS=["Tools","People","Process","Control","Services","Carriers","Volume","Automation","Costs","Scale","Done"];
 
-function discMarkAnswered(){
-  var cur=discoveryProgress.current;
+function discSaveAnswer(){
   var answerEl=document.getElementById('disc-answer-input');
   var answerText=answerEl?answerEl.value.trim():'';
+  var btn=document.getElementById('disc-answered-btn');
 
-  // Save answer
+  // Phase 1: save and show insight
+  var cur=discoveryProgress.current;
   if(!deal.discoveryAnswers) deal.discoveryAnswers={};
   var q=DISCOVERY_QUESTIONS[cur];
   if(q){
@@ -2081,26 +2086,65 @@ function discMarkAnswered(){
     if(answerText) addEvent('discover','['+q.area+'] '+answerText.slice(0,60));
   }
   if(discoveryProgress.answered.indexOf(cur)<0) discoveryProgress.answered.push(cur);
-  discoveryProgress.current=Math.min(cur+1, DISCOVERY_QUESTIONS.length);
-  if(answerEl) answerEl.value='';
 
-  // Show insight flash
+  // Show insight flash IMMEDIATELY
   var flash=document.getElementById('disc-insight-flash');
   var insAnswer=document.getElementById('disc-insight-answer');
   var insText=document.getElementById('disc-insight-text');
   var insNext=document.getElementById('disc-insight-next');
-  if(flash&&q){
-    var nextQ=DISCOVERY_QUESTIONS[discoveryProgress.current];
-    if(insAnswer) insAnswer.textContent=answerText?'"'+answerText.slice(0,50)+(answerText.length>50?'…':'')+'"':'(no answer captured)';
-    if(insText) insText.textContent=DISC_INSIGHTS[q.area]||'Noted.';
-    if(insNext) insNext.textContent='→ '+(nextQ?nextQ.q.slice(0,60)+'…':'Discovery complete');
-    flash.style.display='block';
-    setTimeout(function(){flash.style.display='none';},4000);
-  }
+  var nextQ=DISCOVERY_QUESTIONS[Math.min(cur+1, DISCOVERY_QUESTIONS.length-1)];
+  var nextFocus=DISC_FOCUS_LABELS[cur+1]||'Complete';
+  if(insAnswer) insAnswer.textContent=answerText?'"'+answerText.slice(0,60)+(answerText.length>60?'…':'')+'"':'(no answer — skipping)';
+  if(insText) insText.textContent=DISC_INSIGHTS[q?q.area:'']||'Noted.';
+  if(insNext) insNext.textContent='→ Moving to: '+nextFocus;
+  if(flash) flash.style.display='block';
 
+  // Phase 2: change button to "Next Question →"
+  if(btn){
+    btn.textContent='Next Question →';
+    btn.onclick=discAdvance;
+    btn.style.background='var(--bg3)';
+    btn.style.color='var(--green)';
+    btn.style.border='2px solid var(--green)';
+  }
+  if(answerEl) answerEl.value='';
+  if(answerEl) answerEl.disabled=true;
   saveDeals();
+}
+
+function discAdvance(){
+  var cur=discoveryProgress.current;
+  discoveryProgress.current=Math.min(cur+1, DISCOVERY_QUESTIONS.length);
+
+  // Reset button
+  var btn=document.getElementById('disc-answered-btn');
+  if(btn){
+    btn.textContent='Save Answer →';
+    btn.onclick=discSaveAnswer;
+    btn.style.background='var(--green)';
+    btn.style.color='#050f0b';
+    btn.style.border='none';
+  }
+  var answerEl=document.getElementById('disc-answer-input');
+  if(answerEl) answerEl.disabled=false;
+
+  // Hide flash
+  var flash=document.getElementById('disc-insight-flash');
+  if(flash) flash.style.display='none';
+
   updateDiscoveryPanel();
   updateNextActionBlock(resolveStage(deal));
+}
+
+function discMarkAnswered(){  // legacy alias
+  discSaveAnswer();
+}
+function discMarkAnswered_advance(){
+  discAdvance();
+}
+
+function discMarkAnswered(){
+  discSaveAnswer();
 }
 
 function discSkip(){
