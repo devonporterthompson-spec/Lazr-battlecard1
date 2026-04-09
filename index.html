@@ -307,20 +307,17 @@ select.field option{background:var(--bg3)}
     <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
       <div class="sb-nav">
-        <div class="sb-sec">Main</div>
+        <div class="sb-sec">Layers</div>
         <div class="sb-item on" onclick="nav('dashboard',this)" data-p="dashboard"><span class="si-icon">📋</span><span class="si-label">Dashboard</span></div>
+        <div class="sb-item" onclick="nav('discovery',this)" data-p="discovery"><span class="si-icon">🔍</span><span class="si-label">Discovery</span></div>
         <div class="sb-item" onclick="nav('command',this)" data-p="command"><span class="si-icon">⚡</span><span class="si-label">Command</span></div>
-        <div class="sb-sec">Helpers</div>
-        <div class="sb-item" onclick="nav('prep',this)" data-p="prep"><span class="si-icon">🎯</span><span class="si-label">Prep</span></div>
+        <div class="sb-sec">Tools</div>
+        <div class="sb-item" onclick="nav('prep',this)" data-p="prep"><span class="si-icon">🎯</span><span class="si-label">Deal Setup</span></div>
         <div class="sb-item" onclick="nav('handle',this)" data-p="handle"><span class="si-icon">🛡️</span><span class="si-label">Handle</span></div>
         <div class="sb-item" onclick="nav('roi',this)" data-p="roi"><span class="si-icon">📊</span><span class="si-label">ROI</span></div>
-        <div class="sb-item" onclick="nav('next',this)" data-p="next"><span class="si-icon">🧭</span><span class="si-label">Next</span></div>
         <div class="sb-item" onclick="nav('close',this)" data-p="close"><span class="si-icon">🔐</span><span class="si-label">Close</span></div>
         <div class="sb-item" onclick="nav('advance',this)" data-p="advance"><span class="si-icon">🚀</span><span class="si-label">Advance</span></div>
-        <div class="sb-sec">More</div>
         <div class="sb-item" onclick="nav('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
-        <div class="sb-item" onclick="nav('wherewewin',this)" data-p="wherewewin"><span class="si-icon">🏆</span><span class="si-label">Where We Win</span></div>
-        <div class="sb-item" onclick="nav('objtracker',this)" data-p="objtracker"><span class="si-icon">🔁</span><span class="si-label">Obj. Tracker</span></div>
       </div>
       <div class="sb-foot">
         <div class="sb-ver" id="sb-ver">v6.0</div>
@@ -420,6 +417,67 @@ select.field option{background:var(--bg3)}
               <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:var(--green);margin-bottom:8px">▶ Next Action</div>
               <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px" id="dash-next-action">—</div>
               <button class="gen-btn" style="width:100%;padding:11px;font-size:13px;margin-bottom:0" id="dash-cta-btn" onclick="continueDealFromDashboard()">Continue Deal →</button>
+            </div>
+
+          </div>
+        </div>
+
+
+        <!-- ══ DISCOVERY ══ -->
+        <div class="panel" id="panel-discovery">
+
+          <!-- Header -->
+          <div style="margin-bottom:20px">
+            <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;color:var(--text);margin-bottom:4px">Discovery</div>
+            <div style="font-size:13px;color:var(--muted)">Understand the operation before positioning anything.</div>
+          </div>
+
+          <!-- Empty state -->
+          <div id="disc-empty" style="text-align:center;padding:40px 20px">
+            <div style="font-size:32px;margin-bottom:12px;opacity:.3">🔍</div>
+            <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--muted);margin-bottom:6px">Set up the deal first</div>
+            <div style="font-size:12px;color:var(--subtle);margin-bottom:20px">Enter deal context in Setup before running discovery.</div>
+            <button class="gen-btn" style="width:auto;padding:10px 24px" onclick="nav('prep',document.querySelector('[data-p=prep]'))">Set up deal →</button>
+          </div>
+
+          <!-- Active state -->
+          <div id="disc-active" style="display:none">
+
+            <!-- Progress bar -->
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Discovery Progress</div>
+                <div style="font-size:12px;font-weight:800;color:var(--green)" id="disc-progress-label">0 / 11</div>
+              </div>
+              <div style="background:var(--bg3);border-radius:4px;height:5px;overflow:hidden">
+                <div id="disc-progress-bar" style="background:var(--green);height:100%;width:0%;border-radius:4px;transition:width .4s ease"></div>
+              </div>
+              <div style="font-size:11px;color:var(--subtle);margin-top:8px" id="disc-current-level">Level 1: Execution</div>
+            </div>
+
+            <!-- Current question — DOMINANT -->
+            <div id="disc-question-block" style="background:linear-gradient(135deg,rgba(61,220,132,.12) 0%,rgba(61,220,132,.04) 100%);border:2px solid var(--green);border-radius:var(--radius-lg);padding:20px 22px;margin-bottom:14px">
+              <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.16em;color:var(--green);margin-bottom:10px" id="disc-q-level">L1 · Execution</div>
+              <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:14px" id="disc-q-text">—</div>
+              <div style="font-size:11px;color:var(--subtle);margin-bottom:14px" id="disc-q-hint">—</div>
+              <div style="display:flex;gap:8px">
+                <button id="disc-answered-btn" onclick="discMarkAnswered()" style="flex:1;background:var(--green);border:none;border-radius:8px;padding:11px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer">Answered → Next</button>
+                <button id="disc-skip-btn" onclick="discSkip()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:11px 16px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer">Skip</button>
+              </div>
+            </div>
+
+            <!-- Question list -->
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">
+              <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px">All questions</div>
+              <div id="disc-q-list"></div>
+            </div>
+
+            <!-- Complete button — shows when enough answered -->
+            <div id="disc-complete-area" style="display:none">
+              <div style="background:var(--g2);border:1px solid var(--g3);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;font-size:12px;color:var(--text)">
+                <strong style="color:var(--green)">Discovery complete.</strong> You have enough context to qualify and position.
+              </div>
+              <button class="gen-btn" onclick="discComplete()" style="width:100%;padding:14px;font-size:14px;font-family:'Syne',sans-serif;font-weight:800">Complete Discovery → Move to Command</button>
             </div>
 
           </div>
@@ -606,7 +664,7 @@ select.field option{background:var(--bg3)}
             <input class="field" id="p-lastobj" type="text" placeholder='e.g. "We already use FreightCOM and it works fine"' oninput="debouncedSync()">
           </div>
 
-          <button class="gen-btn" onclick="runPrep()">Generate Prep Brief →</button>
+          <button class="gen-btn" onclick="runPrep()">Generate Opening Brief →</button>
           <div id="prep-output"><div class="ph"><div class="ph-icon">🎯</div><div class="ph-t">Ready to prep</div><div class="ph-s">Fill in the deal context above and hit Generate.</div></div></div>
         </div>
 
@@ -1003,7 +1061,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v9.4 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v9.6 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1144,7 +1202,7 @@ var flowState = {
 };
 
 var DRAWER_PANELS = ['prep','handle','roi','next','close','advance','battlecard','wherewewin','objtracker'];
-var MAIN_PANELS = ['dashboard','command'];
+var MAIN_PANELS = ['dashboard','discovery','command'];
 
 function stageOrder(){ return ['prep','discover','position','roi','close','advance']; }
 function stageIndex(stage){ return stageOrder().indexOf(stage); }
@@ -1209,6 +1267,7 @@ function resetFlowState(){
 }
 
 function clearPrepFields(){
+  discoveryProgress = {answered:[], current:0};
   ['p-client','p-industry','p-tool','p-concern','p-lastobj','p-ships','p-carriers',
    'r-portals','r-ships','r-hrs','r-rate','r-locs',
    'h-custom','h-ctx','nx-signal','c-blocker','adv-call','adv-req','www-scenario','ot-input'
@@ -1293,31 +1352,37 @@ var STAGE_LOADING_TEXT = {
 };
 
 function continueDealFromDashboard(){
+  if(!deal.client){
+    nav('prep',document.querySelector('[data-p="prep"]'));
+    return;
+  }
   var stage=resolveStage(deal);
+  var loadMap={prep:'Opening setup…',discover:'Opening discovery…',position:'Opening command…',roi:'Opening ROI…',close:'Opening close…',advance:'Opening follow-up…'};
   var btn=document.getElementById('dash-flow-btn');
   var ctaBtn=document.getElementById('dash-cta-btn');
-  var loadText=STAGE_LOADING_TEXT[stage]||'Opening…';
+  var loadText=loadMap[stage]||'Opening…';
   if(btn){btn.textContent=loadText;btn.disabled=true;}
   if(ctaBtn){ctaBtn.textContent=loadText;ctaBtn.disabled=true;}
   setTimeout(function(){
-    nav('command',document.querySelector('[data-p="command"]'));
-    var drawerMap={roi:'roi',close:'close',advance:'advance'};
-    if(drawerMap[stage]){
-      openDrawer(drawerMap[stage],document.querySelector('[data-p="'+drawerMap[stage]+'"]'));
+    if(!deal.discoveryDone){
+      // Not yet discovered — go to Discovery panel
+      nav('discovery',document.querySelector('[data-p="discovery"]'));
     } else {
-      closeDrawer();
+      // Discovery done — go to Command and open correct drawer
+      nav('command',document.querySelector('[data-p="command"]'));
+      var drawerMap={roi:'roi',close:'close',advance:'advance'};
+      if(drawerMap[stage]) openDrawer(drawerMap[stage],document.querySelector('[data-p="'+drawerMap[stage]+'"]'));
+      else closeDrawer();
     }
-    // Reset buttons
-    setTimeout(function(){
-      updateDashboard();
-    },200);
+    setTimeout(function(){updateDashboard();},200);
   },300);
 }
 
 function autoRouteStage(stage){
-  // Only auto-route when Command panel is the active main panel
   var cmdPanel = document.getElementById('panel-command');
   if(!cmdPanel || !cmdPanel.classList.contains('on')) return;
+  // If discovery not done, don't auto-route in Command
+  if(!deal.discoveryDone) return;
   var map={roi:'roi',close:'close',advance:'advance'};
   if(map[stage]){
     openDrawer(map[stage], document.querySelector('[data-p="'+map[stage]+'"]'));
@@ -1330,7 +1395,7 @@ function autoRouteStage(stage){
 // ══ NEXT ACTION BLOCK ══
 var STAGE_NEXT_QUESTIONS = {
   prep:     {q:'Walk me through how you manage shipping today — start to finish.',                                    cta:'Set up deal →',    action:function(){openDrawer('prep',document.querySelector('[data-p="prep"]'));}},
-  discover: {q:'How are you currently deciding which carrier to use per shipment?',                                   cta:'Run discovery →',  action:function(){openDrawer('prep',document.querySelector('[data-p="prep"]'));}},
+  discover: {q:'How are you currently deciding which carrier to use per shipment?',                                   cta:'Run discovery →',  action:function(){openDrawer('prep',document.querySelector('[data-p="prep"]'));runDiscovery(Math.max(1,discoveryProgress.current+1));}},
   position: {q:'If you had everything in one platform — booking, tracking, billing — what would change for your team?',cta:'Position value →', action:function(){closeDrawer();}},
   roi:      {q:'How many systems or portals is your team using today to manage shipping?',                            cta:'Show ROI →',       action:function(){openDrawer('roi',document.querySelector('[data-p="roi"]'));}},
   next:     {q:'What would need to happen on your end to move forward this week?',          cta:'Lock Next Step →', action:function(){openDrawer('next',document.querySelector('[data-p="next"]'));}},
@@ -1351,15 +1416,23 @@ function updateNextActionBlock(stage){
   var entry=STAGE_NEXT_QUESTIONS[stage];
   if(!entry){block.style.display='none';return;}
 
-  if(qEl)qEl.textContent='"'+entry.q+'"';
+  // For discover stage: show the current live discovery question
+  var displayQ = entry.q;
+  if(stage==='discover' && DISCOVERY_QUESTIONS && discoveryProgress.current>=0){
+    var curQ = DISCOVERY_QUESTIONS[Math.min(discoveryProgress.current, DISCOVERY_QUESTIONS.length-1)];
+    if(curQ) displayQ = curQ.q;
+  }
+  if(qEl)qEl.textContent='"'+displayQ+'"';
   if(btn){btn.textContent=entry.cta;btn.onclick=entry.action;}
 
   // Discovery progress
   if(progEl){
-    if(stage==='discover'||stage==='qualify'){
+    if(stage==='discover'){
       var answered=discoveryProgress.answered.length;
       var total=DISCOVERY_QUESTIONS.length;
-      progEl.textContent='Discovery: '+answered+' / '+total+' questions answered · Next focus: '+(answered<2?'Tools':answered<4?'Process':answered<7?'Control':'Scale');
+      var curIdx=discoveryProgress.current;
+      var focusLabels=['Execution','Tools','People','Process','Control','Services','Carriers','Volume','Automation','Costs','Scale'];
+      progEl.textContent='Discovery: '+answered+' / '+total+' answered · Current: '+(focusLabels[curIdx]||'Execution');
     } else {
       progEl.textContent='';
     }
@@ -1414,7 +1487,7 @@ function updateCommandSurface(){
 
 function nav(id, el){
   // Main panels — full surface switch
-  if(id==='dashboard'||id==='command'){
+  if(id==='dashboard'||id==='discovery'||id==='command'){
     document.querySelectorAll('.panel:not(.drawer)').forEach(function(p){p.classList.remove('on');});
     document.querySelectorAll('.sb-item').forEach(function(s){s.classList.remove('on');});
     closeDrawer();
@@ -1613,18 +1686,18 @@ ADVANCE: Generate follow-up message, data request, next step, and status.
 
 OUTPUT FORMAT — ONLY these markers. No preamble. No alternatives.
 
-Standard: [SAY] [ASK] [MEANS] [RISK] [NEXT] [STATUS]
-PREP: [OPEN] [Q1] [Q2] [Q3] [GAP] [ANGLE]
-DISCOVER: [SAY] [Q] [TRACK] [MISSING] [NEXT]
-QUALIFY: [FIT] [SIGNAL] [DECISION] [NEXT]
-HANDLE: [ACK] [REFRAME] [ASK] [NEXT]
-ROI: [IMPACT] [EXPLAIN] [SAY] [NEXT]
-NEXT: [INSIGHT] [ACTION] [LINE] [NEXT]
-CLOSE: [INSIGHT] [CLOSE] [STEP] [NEXT]
-ADVANCE: [FOLLOWUP] [REQUEST] [NEXTSTEP] [STATUS]
+Standard:   [SAY] [ASK] [MEANS] [RISK] [STATUS]
+PREP:       [OPEN] [GAP] [ANGLE]
+            — OPEN: one opening sentence. GAP: the likely gap. ANGLE: best positioning angle. NO questions.
+DISCOVER:   [Q1] [Q2] [Q3] [Q4] [Q5] [Q6] [Q7] [Q8] [Q9] [Q10] [Q11]
+            — Return all 11 official discovery questions in order. Each as one clean sentence.
+HANDLE:     [ACK] [REFRAME] [ASK] [NEXT]
+ROI:        [IMPACT] [EXPLAIN] [SAY] [NEXT]
+CLOSE:      [INSIGHT] [CLOSE] [STEP] [NEXT]
+ADVANCE:    [FOLLOWUP] [REQUEST] [NEXTSTEP] [STATUS]
 BATTLECARD: [HEADLINE] [D1] [D2] [D3] [ANGLE] [DONTSAY]
 
-Rules: max 2 sentences per field. No bullets inside fields. Always use deal context. Tone: confident, human, decisive. [NEXT] must always be a single immediately actionable instruction.`
+Rules: max 2 sentences per field. No bullets. Always use deal context. Tone: confident, decisive. [NEXT] = one immediately actionable instruction.`
 
 
 
@@ -1679,30 +1752,24 @@ async function callAI(prompt, outputEl, mode, renderFn){
 
 // ── PREP ──
 async function runPrep(){
-  var prompt='MODE: PREP — generate opening brief and ONE strong opening question only. Do not generate discovery questions (those run separately). Focus on: best opening angle, one opening question, key gap to probe.'+buildDealContext();
+  var prompt='MODE: PREP'+buildDealContext();
   var out=document.getElementById('prep-output');
   await callAI(prompt,out,'prep',function(text,o){
-    var open=extr(text,'OPEN'),q1=extr(text,'Q1'),q2=extr(text,'Q2'),q3=extr(text,'Q3'),gap=extr(text,'GAP'),angle=extr(text,'ANGLE');
-    if(open){var d=makeSayBlock(open);o.appendChild(d);}
-    if(q1||q2||q3){
-      var d=document.createElement('div');d.className='out-block green';
-      var qs=[q1,q2,q3].filter(Boolean);
-      var c=document.createElement('button');c.className='copy-btn';c.textContent='Copy all';c.onclick=function(){copyText(qs.join('\n'),c);};
-      d.innerHTML='<span class="ob-eye">Opening discovery questions</span><div class="ob-body">'
-        +qs.map(function(q,i){return '<div style="margin-bottom:8px;padding:8px 12px;background:rgba(61,220,132,.07);border-radius:6px;border-left:3px solid var(--green)"><span style="font-size:10px;font-weight:800;color:var(--green);margin-right:7px">'+(i+1)+'</span>'+q+'</div>';}).join('')
-        +'</div>';
-      d.appendChild(c);o.appendChild(d);
-    }
-    if(gap)o.appendChild(makeBlock('Likely gap to expose',gap,'amber',gap));
-    if(angle)o.appendChild(makeBlock('Best initial angle',angle,'blue',angle));
-    // Add discovery launch button
-    var launchDisc=document.createElement('button');
-    launchDisc.className='gen-btn';
-    launchDisc.style.marginTop='14px';
-    launchDisc.textContent='Start discovery (11 questions) →';
-    launchDisc.onclick=function(){closeDrawer();openDrawer('prep',document.querySelector('[data-p="prep"]'));runDiscovery(1);};
-    o.appendChild(launchDisc);
-    addEvent('prep','Prep complete');saveDeals();updateDashboard();showToast('Prep ready');
+    var open=extr(text,'OPEN'),gap=extr(text,'GAP'),angle=extr(text,'ANGLE');
+    if(open)o.appendChild(makeSayBlock(open));
+    if(gap)o.appendChild(makeBlock('Gap to expose',gap,'amber',gap));
+    if(angle)o.appendChild(makeBlock('Best angle',angle,'blue',angle));
+    // Forward to discovery
+    var fwd=document.createElement('div');
+    fwd.style.cssText='margin-top:14px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px';
+    fwd.innerHTML='<div style="font-size:12px;color:var(--muted)">Next: run discovery to map the operation.</div>';
+    var discBtn=document.createElement('button');
+    discBtn.textContent='Start discovery →';
+    discBtn.style.cssText='background:var(--green);border:none;border-radius:7px;padding:9px 16px;font-family:Syne,sans-serif;font-size:12px;font-weight:800;color:#050f0b;cursor:pointer;flex-shrink:0';
+    discBtn.onclick=function(){runDiscovery(1);};
+    fwd.appendChild(discBtn);
+    o.appendChild(fwd);
+    addEvent('prep','Prep complete');saveDeals();updateDashboard();showToast('Prep ready — start discovery');
   });
 }
 
@@ -1794,7 +1861,7 @@ function completeDiscovery(){
   closeDrawer();
   updateCommandSurface();
   updateDashboard();
-  showToast('Discovery complete — moving to qualify');
+  showToast('Discovery complete — moving to position');
 }
 
 // ── HANDLE ──
@@ -1910,7 +1977,7 @@ function updateDashboard(){
   var nextStageMap={prep:'Next: Run discovery',discover:'Next: Position value',position:'Next: Show ROI',roi:'Next: Close',close:'Next: Follow up',advance:'Next: Return to dashboard'};
   var fnEl=document.getElementById('dash-flow-now');if(fnEl)fnEl.textContent=nowMap[stage]||'Continue the deal';
   var fxEl=document.getElementById('dash-flow-next');if(fxEl)fxEl.textContent=nextStageMap[stage]||'';
-  var fbEl=document.getElementById('dash-flow-btn');if(fbEl)fbEl.textContent=(nowMap[stage]||'Continue deal')+' →';
+  var fbEl=document.getElementById('dash-flow-btn');if(fbEl){if(!deal.discoveryDone&&deal.client)fbEl.textContent='Start discovery →';else fbEl.textContent=(nowMap[stage]||'Continue deal')+' →';}
 
   // Health score
   var health=calculateHealth(deal);
@@ -1974,6 +2041,118 @@ function updateDashboard(){
         +'</div>';
     }).join('');
   }
+}
+
+
+// ══ DISCOVERY PANEL ══
+var DISC_HINTS = [
+  'Listen for: manual steps, multiple portals, no single source of truth.',
+  'More portals = more fragmentation. 3+ is a strong fit signal.',
+  'Multiple people = coordination overhead. Ask who makes the final call.',
+  'Time lost = where Lazr creates the most visible value.',
+  'Service mix tells you complexity level and carrier diversity.',
+  'Carrier count shows how much management overhead exists.',
+  'Volume anchors the ROI calculation. Get a real number.',
+  'Manual carrier management = clear inefficiency to quantify.',
+  'Manual process + growth = the exact problem Lazr solves.',
+  'No cost tracking = invoices errors going undetected.',
+  'Scale anxiety = the strongest long-term closing argument.',
+];
+
+function updateDiscoveryPanel(){
+  var empty=document.getElementById('disc-empty');
+  var active=document.getElementById('disc-active');
+  if(!deal.client){
+    if(empty)empty.style.display='block';
+    if(active)active.style.display='none';
+    return;
+  }
+  if(empty)empty.style.display='none';
+  if(active)active.style.display='block';
+
+  var answered=discoveryProgress.answered.length;
+  var total=DISCOVERY_QUESTIONS.length;
+  var cur=Math.min(discoveryProgress.current, total-1);
+  var q=DISCOVERY_QUESTIONS[cur];
+
+  // Progress
+  var pct=Math.round(answered/total*100);
+  var progBar=document.getElementById('disc-progress-bar');
+  var progLabel=document.getElementById('disc-progress-label');
+  var levelLabel=document.getElementById('disc-current-level');
+  if(progBar)progBar.style.width=pct+'%';
+  if(progLabel)progLabel.textContent=answered+' / '+total;
+  if(levelLabel)levelLabel.textContent=q?q.level:'Complete';
+
+  // Current question
+  var qLevel=document.getElementById('disc-q-level');
+  var qText=document.getElementById('disc-q-text');
+  var qHint=document.getElementById('disc-q-hint');
+  if(qLevel)qLevel.textContent=q?(q.level+' · '+(cur+1)+' of '+total):'Done';
+  if(qText)qText.textContent=q?q.q:'All questions covered.';
+  if(qHint)qHint.textContent=DISC_HINTS[cur]||'';
+
+  // Question list
+  var list=document.getElementById('disc-q-list');
+  if(list){
+    var rows='';
+    DISCOVERY_QUESTIONS.forEach(function(dq,i){
+      var done=discoveryProgress.answered.indexOf(i)>=0;
+      var isCur=i===cur;
+      var skipped=discoveryProgress.skipped&&discoveryProgress.skipped.indexOf(i)>=0;
+      rows+='<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;'+(isCur?'':'')+'font-size:12px;color:'+(isCur?'var(--green)':done?'var(--muted)':'var(--subtle)')+';">'
+        +'<span style="flex-shrink:0;font-size:11px">'+(done?'✅':skipped?'⏭':isCur?'▶':'○')+'</span>'
+        +'<span style="'+(isCur?'font-weight:700;color:var(--text)':'')+'">'+dq.q+'</span>'
+        +'</div>';
+    });
+    list.innerHTML=rows;
+  }
+
+  // Complete button
+  var completeArea=document.getElementById('disc-complete-area');
+  var answBtn=document.getElementById('disc-answered-btn');
+  var skipBtn=document.getElementById('disc-skip-btn');
+  var qBlock=document.getElementById('disc-question-block');
+  if(answered>=6||(cur>=total-1&&answered>0)){
+    if(completeArea)completeArea.style.display='block';
+  }
+  if(cur>=total){
+    if(qBlock)qBlock.style.display='none';
+  }
+}
+
+function discMarkAnswered(){
+  var cur=discoveryProgress.current;
+  if(discoveryProgress.answered.indexOf(cur)<0) discoveryProgress.answered.push(cur);
+  discoveryProgress.current=Math.min(cur+1, DISCOVERY_QUESTIONS.length);
+  updateDiscoveryPanel();
+  // Update command surface live question
+  updateNextActionBlock(resolveStage(deal));
+}
+
+function discSkip(){
+  if(!discoveryProgress.skipped) discoveryProgress.skipped=[];
+  var cur=discoveryProgress.current;
+  if(discoveryProgress.skipped.indexOf(cur)<0) discoveryProgress.skipped.push(cur);
+  discoveryProgress.current=Math.min(cur+1, DISCOVERY_QUESTIONS.length);
+  updateDiscoveryPanel();
+}
+
+function discComplete(){
+  deal.discoveryDone=true;
+  deal.flowState=Object.assign({},flowState);
+  addEvent('discover','Discovery complete — '+discoveryProgress.answered.length+'/'+DISCOVERY_QUESTIONS.length+' answered');
+  saveDeals();
+  // Quiet qualification
+  var answered=discoveryProgress.answered.length;
+  var fit = answered >= 6 ? 'good' : answered >= 3 ? 'weak' : 'low';
+  deal.qualFit = fit;
+  if(fit==='good') showToast('Good fit signals — moving to Command');
+  else if(fit==='weak') showToast('Weak fit — go light in Command');
+  else showToast('Low fit — tighten and move fast');
+  nav('command',document.querySelector('[data-p="command"]'));
+  updateCommandSurface();
+  updateDashboard();
 }
 
 function calcROI(){
@@ -2186,6 +2365,7 @@ function resetFlowState(){
 }
 
 function clearPrepFields(){
+  discoveryProgress = {answered:[], current:0};
   ['p-client','p-industry','p-tool','p-concern','p-lastobj','p-ships','p-carriers',
    'r-portals','r-ships','r-hrs','r-rate','r-locs',
    'h-custom','h-ctx','nx-signal','c-blocker','adv-call','adv-req','www-scenario','ot-input'].forEach(function(id){
