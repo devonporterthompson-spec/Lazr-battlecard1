@@ -995,17 +995,15 @@ function createDeal(){
   var d = newDealObj();
   deals.push(d);
   setActiveDeal(d.id);
-  // Don't saveDeals yet — only save once user enters a client name
   clearPrepFields();
   resetFlowState();
   updateDealBar();
-  updateCommandSurface();
-  updateDashboard();
-  // Show main panel and route to discovery layer
+  // Activate main panel and show nodeal layer briefly, then open prep
   var mainPanel=document.getElementById('panel-main');
   if(mainPanel)mainPanel.classList.add('on');
+  showLayer('nodeal');
   openDrawer('prep', document.querySelector('[data-p="prep"]'));
-  showToast('New deal — fill in deal setup to begin');
+  showToast('Fill in deal setup to begin');
 }
 
 function handleDealClick(el){switchToDealt(el.getAttribute("data-id"));}
@@ -1122,7 +1120,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v10.5 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v10.6 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1229,8 +1227,6 @@ function restorePrepFields(d){
   setVal('p-ships',d.ships||'');setVal('p-carriers',d.carriers||'');
   setVal('p-lastobj',d.lastObj||'');
 }
-function val(id){var el=document.getElementById(id);return el?el.value.trim():'';}
-function setVal(id,v){var el=document.getElementById(id);if(el)el.value=v||'';}
 
 function updateDealBar(){
   dm('dm-client','Client',deal.client||'—');
@@ -1626,7 +1622,7 @@ function openDrawer(id, el){
   var p=document.getElementById('panel-'+id);
   if(p){p.classList.add('on');document.getElementById('drawer-overlay').classList.add('on');}
   if(el)el.classList.add('on');
-  if(id==='battlecard')runBattlecard();
+  if(id==='battlecard'){if(typeof bcRender==='function')bcRender();}
   var dm=document.getElementById('dm-mode');
   if(dm)dm.innerHTML=id==='prep'?'✏️ Edit':'⚡ Live';
 }
@@ -1637,13 +1633,12 @@ function closeDrawer(){
   document.querySelectorAll('.sb-item').forEach(function(s){
     if(DRAWER_PANELS.indexOf(s.getAttribute('data-p'))>=0)s.classList.remove('on');
   });
-  // Restore whatever main panel is active
+  // Restore main panel
   var activeMain=document.querySelector('.panel:not(.drawer).on');
   if(!activeMain){
-    var dashPanel=document.getElementById('panel-dashboard');
-    if(dashPanel)dashPanel.classList.add('on');
-    var dashNav=document.querySelector('[data-p="dashboard"]');
-    if(dashNav)dashNav.classList.add('on');
+    var mainPanel=document.getElementById('panel-main');
+    if(mainPanel)mainPanel.classList.add('on');
+    autoRoute();
   }
   var dm=document.getElementById('dm-mode');
   if(dm)dm.innerHTML='⚡ Live';
@@ -2583,6 +2578,8 @@ function bcRender(key){
   document.getElementById('bc-hook').innerHTML='<b style="color:var(--amber)">Bottom line:</b> '+comp.hook;
   bcDrawRows(comp);
 }
+
+function runBattlecard(){ if(document.getElementById('bc-input'))bcRender(); }
 
 // ── WHERE WE WIN ──
 async function runWWW(){
