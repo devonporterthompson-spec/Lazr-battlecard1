@@ -339,7 +339,7 @@ body.light select.field option{background:var(--bg3)}
         <div class="sb-item" onclick="nav('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v12.6</div>
+        <div class="sb-ver" id="sb-ver">v12.7</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
@@ -1275,7 +1275,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v12.6 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v12.7 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1559,8 +1559,7 @@ function clearPrepFields(){
   ['prep-output','handle-output','next-output','close-output','advance-output','www-output'].forEach(function(id){
     var el=document.getElementById(id);if(el)el.innerHTML='';
   });
-  var ro=document.getElementById('roi-out');if(ro)ro.style.display='none';
-  var rp=document.getElementById('roi-placeholder');if(rp)rp.style.display='block';
+  if(typeof roiShowState==='function')roiShowState('manual');
   var rc=document.getElementById('roi-compound');if(rc)rc.style.display='none';
   // Reset post-positioning block
   var pp=document.getElementById('cmd-post-pos');if(pp)pp.style.display='none';
@@ -1818,6 +1817,26 @@ function openDrawer(id, el){
   if(p){p.classList.add('on');document.getElementById('drawer-overlay').classList.add('on');}
   if(el)el.classList.add('on');
   if(id==='battlecard'){if(typeof bcRender==='function')bcRender();}
+  // ROI panel — auto-determine state
+  if(id==='roi'){
+    setTimeout(function(){
+      var hasShips=deal.ships&&deal.ships>0;
+      var hasPortals=deal.carriers&&deal.carriers>0;
+      if(hasShips||hasPortals){
+        var preShips=document.getElementById('roi-pre-ships');
+        var prePorts=document.getElementById('roi-pre-portals');
+        var preManual=document.getElementById('roi-pre-manual');
+        if(preShips)preShips.textContent=(deal.ships||'—')+' / month';
+        if(prePorts)prePorts.textContent=(deal.carriers||'—')+' portals';
+        var autoAns=(deal.discoveryAnswers&&deal.discoveryAnswers.automation)||'';
+        var manLabel=/manual|mostly manual/i.test(autoAns)?'High':/partial|some/i.test(autoAns)?'Medium':'High';
+        if(preManual)preManual.textContent=manLabel;
+        roiShowState('prefilled');
+      } else {
+        roiShowState('manual');
+      }
+    },50);
+  }
 }
 
 function closeDrawer(){
@@ -2245,11 +2264,6 @@ function roiShowState(state){
     var el=document.getElementById(id);
     if(el) el.style.display=(id==='roi-'+state)?'block':'none';
   });
-  // Always keep old ids compatible for calcROI
-  var oldOut=document.getElementById('roi-out');
-  if(oldOut) oldOut.style.display='none';
-  var oldPH=document.getElementById('roi-placeholder');
-  if(oldPH) oldPH.style.display='none';
 }
 
 function roiShowManual(){
@@ -2283,31 +2297,6 @@ function roiMoveToClose(){
     openDrawer('close',document.querySelector('[data-p=close]'));
   }
   showToast('Moving to close →');
-}
-
-// Override openDrawer for ROI — auto-determine state when panel opens
-var _origOpenDrawer = window.openDrawer;
-function openDrawer(id, el){
-  _origOpenDrawer(id, el);
-  if(id==='roi'){
-    var hasShips = deal.ships && deal.ships > 0;
-    var hasPortals = deal.carriers && deal.carriers > 0;
-    if(hasShips || hasPortals){
-      // Pre-fill and show prefilled state
-      var preShips=document.getElementById('roi-pre-ships');
-      var prePorts=document.getElementById('roi-pre-portals');
-      var preManual=document.getElementById('roi-pre-manual');
-      if(preShips) preShips.textContent=(deal.ships||'—')+' / month';
-      if(prePorts) prePorts.textContent=(deal.carriers||'—')+' portals';
-      // Infer manual level
-      var autoAns=(deal.discoveryAnswers&&deal.discoveryAnswers.automation)||'';
-      var manLevel=/manual|mostly manual/i.test(autoAns)?'High':/partial|some/i.test(autoAns)?'Medium':'High';
-      if(preManual) preManual.textContent=manLevel;
-      roiShowState('prefilled');
-    } else {
-      roiShowState('manual');
-    }
-  }
 }
 
 // ── ROI ──
@@ -2987,10 +2976,9 @@ function clearPrepFields(){
   // Clear output areas
   ['prep-output','handle-output','next-output','close-output','advance-output','www-output','roi-out','bc-output'].forEach(function(id){
     var el=document.getElementById(id);
-    if(el&&id==='roi-out')el.style.display='none';
-    else if(el)el.innerHTML='';
+    if(el)el.innerHTML='';
   });
-  document.getElementById('roi-placeholder').style.display='block';
+  // Clear ROI state on drawer close
   // Clear ROI metric displays
   ['roi-m1','roi-m2','roi-m3'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent='--';});
   document.getElementById('roi-compound').style.display='none';
