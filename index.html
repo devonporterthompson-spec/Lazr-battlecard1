@@ -339,7 +339,7 @@ body.light select.field option{background:var(--bg3)}
         <div class="sb-item" onclick="nav('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v12.0</div>
+        <div class="sb-ver" id="sb-ver">v12.1</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
@@ -446,13 +446,13 @@ body.light select.field option{background:var(--bg3)}
                 <div style="font-size:12px;color:var(--muted);margin-bottom:2px" id="disc-insight-text">—</div>
                 <div style="font-size:12px;color:var(--green);font-weight:700;margin-top:5px" id="disc-insight-next">—</div>
               </div>
-              <!-- ⚡ NEXT STEP block -->
-              <div id="disc-next-step" style="background:linear-gradient(135deg,rgba(61,220,132,.13),rgba(61,220,132,.04));border:2px solid var(--green);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <!-- Next Step direction -->
+              <div id="disc-next-step" style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;gap:8px">
+                <span style="font-size:11px;color:var(--green)">⚡</span>
                 <div>
-                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:2px">⚡ Next Step</div>
-                  <div style="font-size:13px;font-weight:700;color:var(--text)" id="disc-next-step-label">Move to: Tools</div>
+                  <span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Next Step · </span>
+                  <span style="font-size:13px;font-weight:700;color:var(--text)" id="disc-next-step-label">Move to: Tools</span>
                 </div>
-                <button id="disc-next-step-btn" onclick="if(_discAdvanceTimer){clearTimeout(_discAdvanceTimer);_discAdvanceTimer=null;}discAdvance();" style="background:var(--green);border:none;border-radius:8px;padding:10px 20px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap;flex-shrink:0">Continue →</button>
               </div>
             </div>
 
@@ -483,7 +483,8 @@ body.light select.field option{background:var(--bg3)}
                 <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:900;color:var(--green);margin-bottom:6px">Discovery Complete</div>
                 <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:4px">You have enough signal to position value and run execution guidance.</div>
                 <div style="font-size:11px;color:var(--subtle);margin-bottom:16px" id="disc-complete-count">— questions answered</div>
-                <button class="gen-btn" style="margin-bottom:0;font-size:15px;padding:14px" onclick="discComplete()">Go to Command →</button>
+                <button class="gen-btn" style="margin-bottom:0;font-size:15px;padding:14px" onclick="discComplete();showLayer('command')">Go to Command →</button>
+                <div style="font-size:11px;color:var(--subtle);margin-top:10px;line-height:1.6">Next step: Move into Command to position Lazr around the operational gaps uncovered.</div>
               </div>
             </div>
           </div>
@@ -1134,7 +1135,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v12.0 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v12.1 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1506,21 +1507,18 @@ function continueDealFromDashboard(){
   var loadMap={prep:'Opening setup…',discover:'Opening discovery…',position:'Opening command…',roi:'Opening ROI…',close:'Opening close…',advance:'Opening follow-up…'};
   var btn=document.getElementById('dash-flow-btn');
   var ctaBtn=null; // removed
-  var loadText=loadMap[stage]||'Opening…';
-  if(btn){btn.textContent=loadText;btn.disabled=true;}
-
-  setTimeout(function(){
-    if(!deal.discoveryDone){
-      showLayer('discovery');
-    } else {
-      // Discovery done -- go to Command and open correct drawer
-      showLayer('command');
-      var drawerMap={roi:'roi',close:'close',advance:'advance'};
-      if(drawerMap[stage]) openDrawer(drawerMap[stage],document.querySelector('[data-p="'+drawerMap[stage]+'"]'));
-      else closeDrawer();
-    }
-    setTimeout(function(){updateDashboard();},200);
-  },300);
+  // Immediate — no delay, user clicked
+  if(!deal.discoveryDone){
+    showLayer('discovery');
+    if(btn){btn.textContent='Continue →';btn.disabled=false;}
+  } else {
+    showLayer('command');
+    var drawerMap={roi:'roi',close:'close',advance:'advance'};
+    if(drawerMap[stage]) openDrawer(drawerMap[stage],document.querySelector('[data-p="'+drawerMap[stage]+'"]'));
+    else closeDrawer();
+    if(btn){btn.textContent='Go to Command →';btn.disabled=false;}
+  }
+  updateDashboard();
 }
 
 function autoRouteStage(stage){
@@ -1538,8 +1536,8 @@ function autoRouteStage(stage){
 
 // ══ NEXT ACTION BLOCK ══
 var STAGE_NEXT_QUESTIONS = {
-  prep:     {q:'Walk me through how you manage shipping today -- start to finish.',                                    cta:'Set up deal →',    action:function(){nav('discovery',document.querySelector('[data-p="discovery"]'));setTimeout(function(){updateDiscoveryPanel();},100);}},
-  discover: {q:'How are you currently deciding which carrier to use per shipment?',                                   cta:'Run discovery →',  action:function(){nav('discovery',document.querySelector('[data-p="discovery"]'));setTimeout(function(){updateDiscoveryPanel();},100);}},
+  prep:     {q:'Walk me through how you manage shipping today -- start to finish.',                                    cta:'Set up deal →',    action:function(){nav('discovery',document.querySelector('[data-p="discovery"]'));updateDiscoveryPanel();}},
+  discover: {q:'How are you currently deciding which carrier to use per shipment?',                                   cta:'Run discovery →',  action:function(){nav('discovery',document.querySelector('[data-p="discovery"]'));updateDiscoveryPanel();}},
   position: {q:'If you had everything in one platform -- booking, tracking, billing -- what would change for your team?',cta:'Position value →', action:function(){closeDrawer();}},
   roi:      {q:'How many systems or portals is your team using today to manage shipping?',                            cta:'Show ROI →',       action:function(){openDrawer('roi',document.querySelector('[data-p="roi"]'));}},
   next:     {q:'What would need to happen on your end to move forward this week?',          cta:'Lock Next Step →', action:function(){openDrawer('next',document.querySelector('[data-p="next"]'));}},
@@ -1936,7 +1934,7 @@ async function runPrep(){
     var discBtn=document.createElement('button');
     discBtn.textContent='Start discovery →';
     discBtn.style.cssText='background:var(--green);border:none;border-radius:7px;padding:9px 16px;font-family:Syne,sans-serif;font-size:12px;font-weight:800;color:#050f0b;cursor:pointer;flex-shrink:0';
-    discBtn.onclick=function(){closeDrawer();nav('discovery',document.querySelector('[data-p="discovery"]'));setTimeout(function(){updateDiscoveryPanel();},50);};
+    discBtn.onclick=function(){closeDrawer();showLayer('discovery');updateDiscoveryPanel();};
     fwd.appendChild(discBtn);
     o.appendChild(fwd);
     addEvent('prep','Prep complete');saveDeals();updateDashboard();showToast('Prep ready -- start discovery');
@@ -2106,8 +2104,9 @@ function updateDiscoveryPanel(){
         +'<span style="flex-shrink:0;font-size:11px">'+(done?'✅':skipped?'⏭':isCur?'▶':'○')+'</span>'
         +'<span style="'+(isCur?'font-weight:700':'')+'">'+dq.q+'</span>'
         +'</div>'
-        +(savedAnswer?'<div style="margin-left:19px;margin-top:3px;font-size:11px;color:var(--green);font-style:italic">"'+savedAnswer.slice(0,80)+(savedAnswer.length>80?'…':'')+'"</div>':'')
-        +'</div>';
+        +(savedAnswer?'<div style="margin-left:19px;margin-top:3px;font-size:11px;color:var(--green);font-style:italic">\"'+savedAnswer.slice(0,80)+(savedAnswer.length>80?'…':'')+'\"</div>'
+        +(DISC_INSIGHTS[dq.area]?'<div style="margin-left:19px;margin-top:2px;font-size:10px;color:var(--muted)">'+DISC_INSIGHTS[dq.area].text+'</div>':'')
+        :'');
     });
     list.innerHTML=rows;
   }
@@ -2149,8 +2148,6 @@ var DISC_INSIGHTS={
 var DISC_INSIGHT_ICONS={1:"✔",2:"⚠",3:"🚨"};
 var DISC_INSIGHT_COLORS={1:"var(--green)",2:"var(--amber)",3:"var(--red)"};
 var DISC_FOCUS_LABELS=["Tools","People","Process","Cost Control","Services","Carrier Control","Volume","Automation","Scale Pressure","Fit / Vision","Complete"];
-
-var _discAdvanceTimer=null;
 
 function discSaveAnswer(){
   // Guard: don't fire if already in the "next question" phase
@@ -2200,27 +2197,19 @@ function discSaveAnswer(){
   // Update efficiency score
   updateEfficiencyScore();
 
-  // Phase 2: change button to "Next Question →"
+  // Phase 2: single dominant CTA — Next Question →
   if(btn){
     btn.textContent='Next Question →';
     btn.onclick=discAdvance;
-    btn.style.background='var(--bg3)';
-    btn.style.color='var(--green)';
-    btn.style.border='2px solid var(--green)';
+    btn.style.cssText='width:100%;background:var(--green);border:none;border-radius:8px;padding:13px;font-family:Syne,sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer;margin-top:8px';
   }
   if(answerEl) answerEl.value='';
   if(answerEl) answerEl.disabled=true;
   saveDeals();
-
-  // Auto-advance after 2.2s — cancel if user clicks Next Question manually
-  if(_discAdvanceTimer) clearTimeout(_discAdvanceTimer);
-  _discAdvanceTimer = setTimeout(function(){ discAdvance(); }, 2200);
+  // No auto-advance — user clicks Next Question → to continue
 }
 
 function discAdvance(){
-  // Cancel any pending auto-advance timer
-  if(_discAdvanceTimer){ clearTimeout(_discAdvanceTimer); _discAdvanceTimer=null; }
-
   var cur=discoveryProgress.current;
   // Guard: don't advance past end
   if(cur >= DISCOVERY_QUESTIONS.length) return;
@@ -2277,10 +2266,8 @@ function discComplete(){
   var fit = answered >= 6 ? 'good' : answered >= 3 ? 'weak' : 'low';
   deal.qualFit = fit;
   saveDeals();
-  var msgs={good:'Good fit -- moving to Command.',weak:'Weak fit signals -- keep it light.',low:'Low fit -- tighten and move fast.'};
-  showToast(msgs[fit]||'Discovery complete');
-  autoRoute();
-  updateDashboard();
+  // No auto-transition — user clicks "Go to Command →"
+  showToast('Discovery complete');
 }
 
 function calcROI(){
