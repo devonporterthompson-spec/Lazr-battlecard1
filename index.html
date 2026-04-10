@@ -339,7 +339,7 @@ body.light select.field option{background:var(--bg3)}
         <div class="sb-item" onclick="nav('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v12.4</div>
+        <div class="sb-ver" id="sb-ver">v12.5</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
@@ -541,6 +541,59 @@ body.light select.field option{background:var(--bg3)}
                 </div>
                 <button class="copy-btn" onclick="copyDirective()">Copy</button>
               </div>
+
+              <!-- Post-positioning sequence (hidden until positioning done) -->
+              <div id="cmd-post-pos" style="display:none">
+
+                <!-- Alignment check -->
+                <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px">
+                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:8px">Alignment Check</div>
+                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Say this</div>
+                  <div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:rgba(61,220,132,.07);border-left:3px solid var(--green);border-radius:6px;margin-bottom:0" id="pp-align-say">Does that align with how things are working on your end today?</div>
+                </div>
+
+                <!-- Micro-commitment -->
+                <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px">
+                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--blue);margin-bottom:8px">Micro-Commitment</div>
+                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Then ask</div>
+                  <div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:var(--b2);border-left:3px solid var(--blue);border-radius:6px" id="pp-commit-ask">If that was streamlined into one system, would that make things easier for your team?</div>
+                </div>
+
+                <!-- ROI trigger (shown when numbers not yet shown) -->
+                <div id="pp-roi-block" style="display:none;background:rgba(255,95,87,.06);border:2px solid var(--r3);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px">
+                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--red);margin-bottom:8px">⛔ Stop — Show This</div>
+                  <div style="font-size:13px;color:var(--muted);margin-bottom:10px" id="pp-roi-insight">You are likely losing meaningful time and cost every month from fragmentation alone — before rate optimization even begins.</div>
+                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Say this</div>
+                  <div style="font-size:13px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:rgba(61,220,132,.07);border-left:3px solid var(--green);border-radius:6px;margin-bottom:10px">If nothing changes, this continues every month before rate optimization even begins.</div>
+                  <button onclick="openDrawer('roi',document.querySelector('[data-p=roi]'));flowState.numbersShown=true;deal.flowState=Object.assign({},flowState);saveDeals();document.getElementById('pp-roi-block').style.display='none';document.getElementById('pp-close-block').style.display='block';" style="width:100%;background:var(--red);border:none;border-radius:8px;padding:11px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#fff;cursor:pointer">Use ROI →</button>
+                </div>
+
+                <!-- Close-ready block -->
+                <div id="pp-close-block" style="display:none;background:linear-gradient(135deg,rgba(61,220,132,.13),rgba(61,220,132,.04));border:2px solid var(--green);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px">
+                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:10px">⚡ Close Ready</div>
+                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Say this</div>
+                  <div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:rgba(61,220,132,.07);border-left:3px solid var(--green);border-radius:6px;margin-bottom:8px">The next step would just be to validate this using your actual shipment data.</div>
+                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Then ask</div>
+                  <div style="font-size:13px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:var(--b2);border-left:3px solid var(--blue);border-radius:6px;margin-bottom:8px">Would you be open to sending over a few recent shipments?</div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+                    <div style="padding:10px 12px;background:var(--bg3);border-radius:8px">
+                      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:3px">What this means</div>
+                      <div style="font-size:12px;color:var(--text);line-height:1.6">They understand the problem. Now convert interest into action.</div>
+                    </div>
+                    <div style="padding:10px 12px;background:var(--am2);border-radius:8px;border:1px solid var(--am3)">
+                      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--amber);margin-bottom:3px">Risk if unchanged</div>
+                      <div style="font-size:12px;color:var(--text);line-height:1.6">Without a concrete next step, momentum fades and the problem stays theoretical.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Required next step CTA -->
+                <div id="pp-nextstep-block" style="display:none;margin-bottom:14px">
+                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px">Required Next Step</div>
+                  <div style="display:flex;flex-direction:column;gap:7px" id="pp-nextstep-btns"></div>
+                </div>
+
+              </div><!-- end cmd-post-pos -->
 
               <!-- Close-ready CTA (hidden until triggered) -->
               <div id="cmd-close-ready" style="display:none;margin-bottom:14px">
@@ -1160,7 +1213,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v12.4 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v12.5 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1301,7 +1354,8 @@ var flowState = {
   numbersShown: false,
   objectionActive: false,
   objectionHandled: false,
-  closeReady: false
+  closeReady: false,
+  positioningDone: false
 };
 
 var DRAWER_PANELS = ['prep','handle','roi','next','close','advance','battlecard','wherewewin','objtracker'];
@@ -1446,6 +1500,8 @@ function clearPrepFields(){
   var ro=document.getElementById('roi-out');if(ro)ro.style.display='none';
   var rp=document.getElementById('roi-placeholder');if(rp)rp.style.display='block';
   var rc=document.getElementById('roi-compound');if(rc)rc.style.display='none';
+  // Reset post-positioning block
+  var pp=document.getElementById('cmd-post-pos');if(pp)pp.style.display='none';
 }
 
 function showDeleteModal(){
@@ -1633,8 +1689,18 @@ function updateCommandSurface(){
   }
 
   if(stage==='position'){
+    if(flowState.positioningDone){
+      // Already positioned — show post-positioning sequence
+      triggerPostPositioning();
+      return;
+    }
     setDirective({say:'Most teams in your position are not trying to replace what is working -- they are trying to get control and visibility without adding more tools.',ask:'If you had one place to manage all of this, what would that change for your team?',means:'You have enough context to frame Lazr around their specific gap. Use what they told you.',risk:'Generic positioning feels like a pitch. Use their words back at them.',status:'🟢 Position'});
-    setNextBar('Position value →','Position value →',function(){closeDrawer();});
+    setNextBar('Positioning done →','Positioning done →',function(){
+      flowState.positioningDone=true;
+      deal.flowState=Object.assign({},flowState);
+      saveDeals();
+      triggerPostPositioning();
+    });
     return;
   }
 
@@ -1721,6 +1787,70 @@ function quickTrigger(type){
   openDrawer('handle',document.querySelector('[data-p="handle"]'));
 }
 
+
+
+// ══ POST-POSITIONING SEQUENCE ══
+function triggerPostPositioning(){
+  var block=document.getElementById('cmd-post-pos');
+  if(!block||block.style.display!=='none') return; // already showing
+  block.style.display='block';
+  // Show ROI block if numbers not yet shown, else go straight to close
+  var roiBlock=document.getElementById('pp-roi-block');
+  var closeBlock=document.getElementById('pp-close-block');
+  var nsBlock=document.getElementById('pp-nextstep-block');
+  if(!flowState.numbersShown){
+    if(roiBlock) roiBlock.style.display='block';
+    if(closeBlock) closeBlock.style.display='none';
+    if(nsBlock) nsBlock.style.display='none';
+  } else {
+    if(roiBlock) roiBlock.style.display='none';
+    if(closeBlock) closeBlock.style.display='block';
+    renderNextStepCTAs();
+    if(nsBlock) nsBlock.style.display='block';
+  }
+  // Update flow banner
+  var nowEl=document.getElementById('command-stage-now');
+  var badgeEl=document.getElementById('command-stage-badge');
+  if(nowEl) nowEl.textContent='CLOSE';
+  if(badgeEl) badgeEl.textContent='CLOSE READY';
+  // Mark positioning done
+  flowState.positioningDone=true;
+  flowState.closeReady=true;
+  deal.flowState=Object.assign({},flowState);
+  saveDeals();
+  // Show the cmd-close-ready strip too
+  var cr=document.getElementById('cmd-close-ready');
+  if(cr) cr.style.display='none'; // pp-close-block handles it now
+}
+
+function renderNextStepCTAs(){
+  var btns=document.getElementById('pp-nextstep-btns');
+  if(!btns) return;
+  btns.innerHTML='';
+  // Determine best CTA based on deal context
+  var ctaDefs=[
+    {label:'Request Shipment Data →', condition: deal.ships>=100||deal.carriers>=2, primary:true,
+     action:"openDrawer('advance',document.querySelector('[data-p=advance]'));showToast('Request shipment data');"},
+    {label:'Book Follow-Up →', condition: !deal.ships||deal.ships<100, primary:!deal.ships||deal.ships<100,
+     action:"openDrawer('advance',document.querySelector('[data-p=advance]'));showToast('Book follow-up');"},
+    {label:'Loop In Stakeholder →', condition: deal.role==='operations'||deal.role==='logistics', primary:false,
+     action:"openDrawer('advance',document.querySelector('[data-p=advance]'));showToast('Loop in stakeholder');"},
+  ];
+  var primaryShown=false;
+  ctaDefs.forEach(function(cta){
+    if(cta.condition||!primaryShown){
+      var btn=document.createElement('button');
+      var isPrimary=cta.primary&&!primaryShown;
+      btn.style.cssText=isPrimary
+        ?'width:100%;background:var(--green);border:none;border-radius:9px;padding:13px;font-family:Syne,sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer'
+        :'width:100%;background:none;border:1px solid var(--border2);border-radius:9px;padding:11px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer';
+      btn.textContent=cta.label;
+      btn.setAttribute('onclick',cta.action);
+      btns.appendChild(btn);
+      if(isPrimary) primaryShown=true;
+    }
+  });
+}
 
 // ══ SIDEBAR + THEME + LANG ══
 function toggleSB(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sb-overlay').classList.toggle('open');}
@@ -2320,6 +2450,17 @@ function calcROI(){
   saveDeals();
   updateCommandSurface();
   updateDashboard();
+  // If post-positioning is active, advance to close block
+  var ppBlock=document.getElementById('cmd-post-pos');
+  if(ppBlock&&ppBlock.style.display!=='none'){
+    var roiBlock=document.getElementById('pp-roi-block');
+    var closeBlock=document.getElementById('pp-close-block');
+    var nsBlock=document.getElementById('pp-nextstep-block');
+    if(roiBlock)roiBlock.style.display='none';
+    if(closeBlock)closeBlock.style.display='block';
+    renderNextStepCTAs();
+    if(nsBlock)nsBlock.style.display='block';
+  }
   var fmult=portals>=7?2.8:portals>=5?2.2:portals>=4?1.8:portals>=3?1.4:portals>=2?1.15:1.0;
   var lmult=locs>=5?1.5:locs>=3?1.25:locs>=2?1.1:1.0;
   var monthlyHrs=(hrs||ships*0.04)*fmult;
