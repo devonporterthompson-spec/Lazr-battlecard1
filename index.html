@@ -209,6 +209,29 @@ select.field option{background:var(--bg3)}
 .ptitle{font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px;color:var(--text)}
 .psub{font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.55}
 
+
+/* ══ LIGHT THEME ══ */
+body.light{
+  --bg:#f4f6f4;--bg2:#ffffff;--bg3:#eef1ee;--bg4:#e4e9e4;
+  --border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.13);--border3:rgba(0,0,0,.22);
+  --text:#0d1f18;--muted:#4a6b5a;--subtle:#8aaa98;
+  --green:#1a9e58;--g2:rgba(26,158,88,.08);--g3:rgba(26,158,88,.18);--g4:rgba(26,158,88,.3);
+  --amber:#c47d00;--am2:rgba(196,125,0,.08);--am3:rgba(196,125,0,.22);
+  --red:#c0392b;--r2:rgba(192,57,43,.08);--r3:rgba(192,57,43,.22);
+  --blue:#2563a8;--b2:rgba(37,99,168,.08);--b3:rgba(37,99,168,.22);
+}
+body.light .topbar{background:var(--bg2);border-bottom-color:var(--border2)}
+body.light .sidebar{background:var(--bg2)}
+body.light #login-screen{background:var(--bg)}
+body.light .panel.drawer{background:var(--bg2)}
+body.light .drawer-close{background:var(--bg2)}
+body.light .out-block{background:var(--bg2)}
+body.light .lf{background:var(--bg3)}
+body.light .field{background:var(--bg3)}
+body.light .chip{background:var(--bg3)}
+body.light .metric{background:var(--bg3)}
+body.light select.field option{background:var(--bg3)}
+
 /* ── BATTLECARD ──*/
 
 /* ══ DISCOVERY ══ */
@@ -316,7 +339,7 @@ select.field option{background:var(--bg3)}
         <div class="sb-item" onclick="nav('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v11.7</div>
+        <div class="sb-ver" id="sb-ver">v11.8</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
@@ -1032,6 +1055,10 @@ function doLogin(user){
   document.getElementById('l-err').textContent='';
   loadDealFromSession();
   checkApiKeyStatus();
+  // Restore saved theme
+  var savedTheme=localStorage.getItem('cos_theme');
+  if(savedTheme==='light'){isDark=false;document.body.classList.add('light');document.getElementById('theme-btn').textContent='🌙';}
+  else{isDark=true;document.body.classList.remove('light');document.getElementById('theme-btn').textContent='☀️';}
   // Show the main panel and route to correct layer
   var mainPanel=document.getElementById('panel-main');
   if(mainPanel)mainPanel.classList.add('on');
@@ -1071,6 +1098,9 @@ document.addEventListener('keydown',function(e){
 
 // ── SESSION ──
 document.addEventListener('DOMContentLoaded',function(){
+  // Apply saved theme immediately
+  var t=localStorage.getItem('cos_theme');
+  if(t==='light'){document.body.classList.add('light');}
   // Ensure main panel is the default visible panel
   document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on');});
   var mainPanel=document.getElementById('panel-main');
@@ -1079,7 +1109,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v11.7 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v11.8 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1640,7 +1670,12 @@ function quickTrigger(type){
 // ══ SIDEBAR + THEME + LANG ══
 function toggleSB(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sb-overlay').classList.toggle('open');}
 function closeSB(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sb-overlay').classList.remove('open');}
-function toggleTheme(){isDark=!isDark;document.getElementById('theme-btn').textContent=isDark?'☀️':'🌙';}
+function toggleTheme(){
+  isDark=!isDark;
+  document.body.classList.toggle('light', !isDark);
+  document.getElementById('theme-btn').textContent=isDark?'☀️':'🌙';
+  localStorage.setItem('cos_theme', isDark?'dark':'light');
+}
 function toggleLang(){currentLang=currentLang==='en'?'fr':'en';document.getElementById('lang-btn').textContent=currentLang==='fr'?'🇨🇦':'🇫🇷';showToast(currentLang==='fr'?'Français activé':'English mode');}
 
 // ══ AI UTILITIES ══
