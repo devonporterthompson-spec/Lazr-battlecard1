@@ -339,7 +339,7 @@ body.light select.field option{background:var(--bg3)}
         <div class="sb-item" onclick="nav('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v12.7</div>
+        <div class="sb-ver" id="sb-ver">v12.8</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
@@ -594,6 +594,18 @@ body.light select.field option{background:var(--bg3)}
                 </div>
 
               </div><!-- end cmd-post-pos -->
+
+              <!-- Advance Deal button (shown at close stage) -->
+              <div id="cmd-advance-deal" style="display:none;margin-bottom:14px">
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <button onclick="openDrawer('advance',document.querySelector('[data-p=advance]'))" style="width:100%;background:var(--green);border:none;border-radius:9px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer">Advance Deal →</button>
+                  <div style="display:flex;gap:8px">
+                    <button onclick="openDrawer('advance',document.querySelector('[data-p=advance]'));showToast('Request shipment data')" style="flex:1;background:none;border:1px solid var(--border2);border-radius:8px;padding:9px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer">📋 Request Data</button>
+                    <button onclick="openDrawer('advance',document.querySelector('[data-p=advance]'));showToast('Book follow-up')" style="flex:1;background:none;border:1px solid var(--border2);border-radius:8px;padding:9px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer">📅 Book Follow-Up</button>
+                    <button onclick="openDrawer('advance',document.querySelector('[data-p=advance]'));showToast('Loop in stakeholder')" style="flex:1;background:none;border:1px solid var(--border2);border-radius:8px;padding:9px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer">👥 Loop In</button>
+                  </div>
+                </div>
+              </div>
 
               <!-- Close-ready CTA (hidden until triggered) -->
               <div id="cmd-close-ready" style="display:none;margin-bottom:14px">
@@ -961,35 +973,10 @@ body.light select.field option{background:var(--bg3)}
       <button class="bc-view-btn" onclick="bcSetView('tied',this)">🤝 Where They Match</button>
     </div>
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:13px">
-      <div style="display:grid;grid-template-columns:1fr 100px 100px;background:var(--bg3);border-bottom:1px solid var(--border);padding:9px 14px;gap:8px">
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">Feature</div>
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--green);text-align:center">Lazr</div>
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);text-align:center" id="bc-col-hdr">Competitor</div>
-      </div>
-      <div id="bc-rows"></div>
-    </div>
-    <div style="padding:12px 15px;background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:10px;font-size:13px;color:var(--text);line-height:1.75;margin-bottom:12px" id="bc-hook"></div>
-  <div style="display:flex;gap:9px;flex-wrap:wrap">
-    <button class="btn btn-ghost btn-sm" onclick="showPanel('followup')">✉️ Write follow-up</button>
-    <button class="btn btn-ghost btn-sm" onclick="showPanel('closingflow')">🎯 Closing Flow</button>
-    <button class="btn btn-ghost btn-sm" onclick="showPanel('nextmove')">🧭 Next Move</button>
-  </div>
-  </div>
-</div>
-
-
-      </div><!-- panel-wrap -->
-
-      <!-- NEXT BAR -->
-      <div class="next-bar" id="next-bar">
-        <button class="nb-btn" id="nb-btn" style="width:100%;padding:13px 20px;font-size:14px;font-family:'Syne',sans-serif;font-weight:800;letter-spacing:.02em">→</button>
-      </div>
-
-    </div><!-- main -->
-  </div><!-- app-body -->
-</div><!-- app -->
+      <div style="display:grid;gr
 
 <script>
+
 
 // ══ DEAL MEMORY ══
 // ══ MULTI-DEAL ENGINE ══
@@ -1275,7 +1262,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v12.7 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v12.8 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1730,9 +1717,12 @@ function updateCommandSurface(){
   // Show close-ready block when deal has ROI shown or is at close/advance stage
   var crEl=document.getElementById('cmd-close-ready');
   if(crEl){
-    var showClose=flowState.numbersShown||stage==='close'||stage==='advance';
+    var showClose=flowState.numbersShown&&stage!=='close'&&stage!=='advance';
     crEl.style.display=showClose?'block':'none';
   }
+  // Reset advance deal btn — close stage shows it
+  var advBtnReset=document.getElementById('cmd-advance-deal');
+  if(advBtnReset)advBtnReset.style.display='none';
 
   updateCommandFlowBanner(stage);
   updateNextActionBlock(stage);
@@ -1773,8 +1763,10 @@ function updateCommandSurface(){
   }
 
   if(stage==='close'){
-    setDirective({say:'Based on everything we have covered, the next step is simple -- let me put together a cost analysis using your actual shipments.',ask:'Can you send over a few recent shipments so I can show you exactly where this applies?',means:'The deal is ready to advance. You are not closing a contract -- you are closing the next step.',risk:'Leaving without a defined next action is how deals die quietly.',status:'🟢 Close'});
-    setNextBar('Close the loop →','Close the loop →',function(){openDrawer('close',document.querySelector('[data-p="close"]'));});
+    setDirective({say:'Based on everything we have covered, the next step is simple — let me put together a cost analysis using your actual shipments.',ask:'Can you send over a few recent shipments so I can show you exactly where this applies?',means:'The deal is ready to advance. You are not closing a contract — you are closing the next step.',risk:'Leaving without a defined next action is how deals die quietly.',status:'🟢 Close'});
+    var nb=document.getElementById('next-bar');if(nb)nb.style.display='none';
+    var cr2=document.getElementById('cmd-close-ready');if(cr2)cr2.style.display='none';
+    var advBtn=document.getElementById('cmd-advance-deal');if(advBtn)advBtn.style.display='block';
     autoRouteStage(stage);
     return;
   }
@@ -3165,6 +3157,7 @@ function showPanel(id){
   if(DRAWER_PANELS.indexOf(target)>=0) openDrawer(target,document.querySelector('[data-p="'+target+'"]'));
   else showToast('Opening '+id+'...');
 }
+
 </script>
 </body>
 </html>
