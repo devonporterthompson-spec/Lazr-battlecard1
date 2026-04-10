@@ -339,7 +339,7 @@ body.light select.field option{background:var(--bg3)}
         <div class="sb-item" onclick="nav('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v12.5</div>
+        <div class="sb-ver" id="sb-ver">v12.6</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
@@ -744,46 +744,108 @@ body.light select.field option{background:var(--bg3)}
           <div id="handle-output"><div class="ph"><div class="ph-icon">🛡️</div><div class="ph-t">Ready to handle</div><div class="ph-s">Select the objection and hit Handle It.</div></div></div>
         </div>
 
-<div class="panel drawer" id="panel-roi"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">ROI</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
-          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">ROI</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Make the cost of inaction visible. Their numbers, not yours.</div>
-          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">
-            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:8px">Anchor question -- ask this first</div>
-            <div style="font-size:13px;color:var(--text);font-style:italic">"How many different systems or carrier portals does your team use to manage shipping?"</div>
-          </div>
-          <div class="field-row">
-            <div><label class="field-label">Carrier portals</label><input class="field" id="r-portals" type="number" placeholder="e.g. 4" oninput="calcROI()"></div>
-            <div><label class="field-label">Shipments / month</label><input class="field" id="r-ships" type="number" placeholder="e.g. 200" oninput="calcROI()"></div>
-          </div>
-          <div class="field-row">
-            <div><label class="field-label">Admin hrs / week</label><input class="field" id="r-hrs" type="number" placeholder="e.g. 10" oninput="calcROI()"></div>
-            <div><label class="field-label">Hourly rate ($/hr)</label><input class="field" id="r-rate" type="number" placeholder="e.g. 25" oninput="calcROI()"></div>
-          </div>
-          <div style="margin-bottom:16px"><label class="field-label">Locations</label><input class="field" id="r-locs" type="number" placeholder="e.g. 3" oninput="calcROI()"></div>
-          <div id="roi-out" style="display:none">
-            <div class="metric-grid">
-              <div class="metric"><div class="met-num" id="roi-m1">--</div><div class="met-label">Monthly admin hours wasted</div></div>
-              <div class="metric"><div class="met-num" id="roi-m2">--</div><div class="met-label">Monthly labor cost of fragmentation</div></div>
-              <div class="metric closer">
-                <div class="met-eyebrow">Annual Cost of Staying Fragmented</div>
-                <div class="met-num big" id="roi-m3">--</div>
-                <div style="width:40px;height:2px;background:var(--green);margin:12px auto;opacity:.4"></div>
-                <div style="font-size:13px;color:var(--muted)">Before rate optimization. This is fragmentation cost alone.</div>
-                <button style="margin-top:14px;background:var(--green);border:none;border-radius:8px;padding:10px 22px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer" onclick="nav('close',document.querySelector('[data-p=close]'))">→ Show how we fix this</button>
-              </div>
-            </div>
-            <div id="roi-compound" style="display:none;background:var(--r2);border:1px solid var(--r3);border-left:4px solid var(--red);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px"></div>
-            <div id="roi-script" style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px">
-              <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:7px">📞 Say this right now</div>
-              <div style="font-size:13.5px;color:var(--text);line-height:1.72;font-style:italic" id="roi-say">--</div>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-              <button class="gen-btn" style="margin-bottom:0" onclick="nav('close',document.querySelector('[data-p=close]'))">🔐 Close Mode</button>
-              <button class="gen-btn" style="margin-bottom:0;background:var(--bg3);color:var(--text);border:1px solid var(--border2)" onclick="nav('next',document.querySelector('[data-p=next]'))">🧭 Next Move</button>
-            </div>
-          </div>
-          <div id="roi-placeholder" style="background:var(--bg3);border:1.5px dashed var(--border2);border-radius:var(--radius);padding:36px;text-align:center;font-size:13px;color:var(--subtle)">Enter portal count and shipments to begin</div>
+<div class="panel drawer" id="panel-roi">
+  <div class="drawer-close">
+    <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">ROI</div>
+    <button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button>
+  </div>
+
+  <!-- State 1: Prefilled (shown when deal has data) -->
+  <div id="roi-prefilled" style="display:none">
+    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:900;margin-bottom:4px">ROI Ready</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.55">Pre-filled from discovery. Review and recalculate.</div>
+    <div style="background:var(--g2);border:1px solid var(--g3);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:10px">From discovery</div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="display:flex;justify-content:space-between;font-size:13px">
+          <span style="color:var(--muted)">Shipments / month</span>
+          <span style="font-weight:700;color:var(--text)" id="roi-pre-ships">—</span>
         </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px">
+          <span style="color:var(--muted)">Carrier portals</span>
+          <span style="font-weight:700;color:var(--text)" id="roi-pre-portals">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px">
+          <span style="color:var(--muted)">Manual involvement</span>
+          <span style="font-weight:700;color:var(--text)" id="roi-pre-manual">—</span>
+        </div>
+      </div>
+    </div>
+    <button class="gen-btn" style="margin-bottom:10px" onclick="roiCalculateFromDeal()">Calculate Impact →</button>
+    <button style="width:100%;background:none;border:none;font-size:12px;color:var(--subtle);cursor:pointer;padding:4px" onclick="roiShowManual()">Enter different numbers</button>
+  </div>
+
+  <!-- State 2: Manual input (shown when no deal data) -->
+  <div id="roi-manual" style="display:none">
+    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:900;margin-bottom:4px">ROI Setup</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Let's quantify this quickly.</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:6px">Anchor question — ask this first</div>
+      <div style="font-size:13px;color:var(--text);font-style:italic">"How many different systems or portals does your team use to manage shipping?"</div>
+    </div>
+    <div class="field-row">
+      <div><label class="field-label">Monthly shipments</label><input class="field" id="r-ships" type="number" placeholder="e.g. 200" oninput="calcROI()"></div>
+      <div><label class="field-label">Carrier portals</label><input class="field" id="r-portals" type="number" placeholder="e.g. 4" oninput="calcROI()"></div>
+    </div>
+    <div class="field-row">
+      <div><label class="field-label">Admin hrs / week</label><input class="field" id="r-hrs" type="number" placeholder="e.g. 10" oninput="calcROI()"></div>
+      <div><label class="field-label">Hourly rate ($/hr)</label><input class="field" id="r-rate" type="number" placeholder="e.g. 25" oninput="calcROI()"></div>
+    </div>
+    <div style="margin-bottom:14px"><label class="field-label">Locations</label><input class="field" id="r-locs" type="number" placeholder="e.g. 3" oninput="calcROI()"></div>
+    <div style="margin-bottom:6px">
+      <label class="field-label">Manual involvement</label>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="chip" onclick="roiSetManual('low',this)">Low</button>
+        <button class="chip" onclick="roiSetManual('medium',this)">Medium</button>
+        <button class="chip on" onclick="roiSetManual('high',this)" id="roi-manual-high">High</button>
+      </div>
+    </div>
+    <button class="gen-btn" style="margin-top:12px" onclick="calcROI()">Calculate Impact →</button>
+  </div>
+
+  <!-- State 3: Results (shown after calculation) -->
+  <div id="roi-results" style="display:none">
+    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:900;margin-bottom:4px">Estimated Impact</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Based on your operation.</div>
+
+    <!-- Numbers -->
+    <div class="metric-grid">
+      <div class="metric"><div class="met-num" id="roi-m1">—</div><div class="met-label">Monthly admin hours wasted</div></div>
+      <div class="metric"><div class="met-num" id="roi-m2">—</div><div class="met-label">Monthly labor cost</div></div>
+      <div class="metric closer">
+        <div class="met-eyebrow">Annual Cost of Staying Fragmented</div>
+        <div class="met-num big" id="roi-m3">—</div>
+        <div style="width:40px;height:2px;background:var(--green);margin:12px auto;opacity:.4"></div>
+        <div style="font-size:13px;color:var(--muted)">Before rate optimization. Fragmentation cost alone.</div>
+      </div>
+    </div>
+
+    <!-- Compound warning -->
+    <div id="roi-compound" style="display:none;background:var(--r2);border:1px solid var(--r3);border-left:4px solid var(--red);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px"></div>
+
+    <!-- Drivers -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px">Cost drivers</div>
+      <div id="roi-drivers" style="font-size:13px;color:var(--muted);line-height:1.8"></div>
+    </div>
+
+    <!-- Say this -->
+    <div style="background:linear-gradient(135deg,rgba(61,220,132,.12),rgba(61,220,132,.04));border:2px solid var(--green);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">
+      <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:8px">▶ Say this now</div>
+      <div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.72" id="roi-say">—</div>
+    </div>
+
+    <!-- Force next step -->
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">
+      <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:6px">Next Step</div>
+      <div style="font-size:13px;color:var(--text);margin-bottom:12px">Make the cost visible, then move to close.</div>
+      <button class="gen-btn" style="margin-bottom:0" onclick="roiMoveToClose()">Move to Close →</button>
+    </div>
+
+    <button style="width:100%;background:none;border:none;font-size:12px;color:var(--subtle);cursor:pointer;padding:4px;margin-bottom:8px" onclick="roiShowManual()">Adjust numbers</button>
+  </div>
+
+</div>
 
 <div class="panel drawer" id="panel-next"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">NEXT</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
           <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Next</div>
@@ -1213,7 +1275,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v12.5 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v12.6 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -2167,6 +2229,87 @@ async function runHandle(){
   });
 }
 
+
+// ── ROI HELPERS ──
+window._roiManualLevel = 'high';
+
+function roiSetManual(level, el){
+  window._roiManualLevel = level;
+  document.querySelectorAll('#roi-manual .chip').forEach(function(c){c.classList.remove('on');});
+  if(el) el.classList.add('on');
+  calcROI();
+}
+
+function roiShowState(state){
+  ['roi-prefilled','roi-manual','roi-results'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.style.display=(id==='roi-'+state)?'block':'none';
+  });
+  // Always keep old ids compatible for calcROI
+  var oldOut=document.getElementById('roi-out');
+  if(oldOut) oldOut.style.display='none';
+  var oldPH=document.getElementById('roi-placeholder');
+  if(oldPH) oldPH.style.display='none';
+}
+
+function roiShowManual(){
+  roiShowState('manual');
+}
+
+function roiCalculateFromDeal(){
+  // Pre-fill fields from deal data then calculate
+  var rs=document.getElementById('r-ships');
+  var rp=document.getElementById('r-portals');
+  if(rs&&deal.ships) rs.value=deal.ships;
+  if(rp&&deal.carriers) rp.value=deal.carriers;
+  // Infer manual level from discovery
+  var autoAns=(deal.discoveryAnswers&&deal.discoveryAnswers.automation)||'';
+  window._roiManualLevel=/manual|mostly manual|not automated/i.test(autoAns)?'high':/partial|some/i.test(autoAns)?'medium':'high';
+  calcROI();
+}
+
+function roiMoveToClose(){
+  closeDrawer();
+  // If post-positioning is active, advance it
+  var ppBlock=document.getElementById('cmd-post-pos');
+  if(ppBlock&&ppBlock.style.display!=='none'){
+    var closeBlock=document.getElementById('pp-close-block');
+    var nsBlock=document.getElementById('pp-nextstep-block');
+    if(closeBlock)closeBlock.style.display='block';
+    renderNextStepCTAs();
+    if(nsBlock)nsBlock.style.display='block';
+  } else {
+    // Open close drawer directly
+    openDrawer('close',document.querySelector('[data-p=close]'));
+  }
+  showToast('Moving to close →');
+}
+
+// Override openDrawer for ROI — auto-determine state when panel opens
+var _origOpenDrawer = window.openDrawer;
+function openDrawer(id, el){
+  _origOpenDrawer(id, el);
+  if(id==='roi'){
+    var hasShips = deal.ships && deal.ships > 0;
+    var hasPortals = deal.carriers && deal.carriers > 0;
+    if(hasShips || hasPortals){
+      // Pre-fill and show prefilled state
+      var preShips=document.getElementById('roi-pre-ships');
+      var prePorts=document.getElementById('roi-pre-portals');
+      var preManual=document.getElementById('roi-pre-manual');
+      if(preShips) preShips.textContent=(deal.ships||'—')+' / month';
+      if(prePorts) prePorts.textContent=(deal.carriers||'—')+' portals';
+      // Infer manual level
+      var autoAns=(deal.discoveryAnswers&&deal.discoveryAnswers.automation)||'';
+      var manLevel=/manual|mostly manual/i.test(autoAns)?'High':/partial|some/i.test(autoAns)?'Medium':'High';
+      if(preManual) preManual.textContent=manLevel;
+      roiShowState('prefilled');
+    } else {
+      roiShowState('manual');
+    }
+  }
+}
+
 // ── ROI ──
 
 // ── DEAL LIST ──
@@ -2436,21 +2579,54 @@ function discComplete(){
 }
 
 function calcROI(){
-  var portals=parseInt(val('r-portals'))||0;
-  var ships=parseInt(val('r-ships'))||0;
-  var hrs=parseFloat(val('r-hrs'))||0;
-  var rate=parseFloat(val('r-rate'))||0;
-  var locs=parseInt(val('r-locs'))||1;
-  if(!portals&&!ships){document.getElementById('roi-out').style.display='none';document.getElementById('roi-placeholder').style.display='block';return;}
-  document.getElementById('roi-placeholder').style.display='none';
-  document.getElementById('roi-out').style.display='block';
-  flowState.numbersShown = true;
-  deal.flowState = Object.assign({},flowState);
-  addEvent('roi','ROI calculated: $'+(document.getElementById('roi-m3')?document.getElementById('roi-m3').textContent:''));
+  var portals=parseInt(document.getElementById('r-portals')&&document.getElementById('r-portals').value)||0;
+  var ships=parseInt(document.getElementById('r-ships')&&document.getElementById('r-ships').value)||0;
+  var hrs=parseFloat(document.getElementById('r-hrs')&&document.getElementById('r-hrs').value)||0;
+  var rate=parseFloat(document.getElementById('r-rate')&&document.getElementById('r-rate').value)||0;
+  var locs=parseInt(document.getElementById('r-locs')&&document.getElementById('r-locs').value)||1;
+  if(!portals&&!ships) return; // need at least one
+  // Compute
+  var fmult=portals>=7?2.8:portals>=5?2.2:portals>=4?1.8:portals>=3?1.4:portals>=2?1.15:1.0;
+  var lmult=locs>=5?1.5:locs>=3?1.25:locs>=2?1.1:1.0;
+  var manualLevel=window._roiManualLevel||'high';
+  var manMult=manualLevel==='high'?1.3:manualLevel==='medium'?1.0:0.7;
+  var monthlyHrs=((hrs||ships*0.04)*fmult)*manMult;
+  var monthlyCost=Math.round(monthlyHrs*(rate||22)*4.33*lmult);
+  var annual=monthlyCost*12;
+  // Populate numbers
+  var m1=document.getElementById('roi-m1');if(m1)m1.textContent=Math.round(monthlyHrs)+' hrs/mo';
+  var m2=document.getElementById('roi-m2');if(m2)m2.textContent='$'+monthlyCost.toLocaleString()+'/mo';
+  var m3=document.getElementById('roi-m3');if(m3)m3.textContent='$'+annual.toLocaleString();
+  // Compound warning
+  var cEl=document.getElementById('roi-compound');
+  if(ships>=200&&cEl){
+    cEl.style.display='block';
+    cEl.innerHTML='<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--red);margin-bottom:6px">⚠️ At your volume this compounds</div>'
+      +'<div style="font-size:13px;color:var(--text);line-height:1.68">At '+ships+' shipments/month, a 20% growth quarter takes this to <strong style="color:var(--red)">$'+Math.round(annual*1.2).toLocaleString()+'</strong>/yr.</div>';
+  } else if(cEl){ cEl.style.display='none'; }
+  // Cost drivers
+  var drivers=[];
+  if(portals>=3) drivers.push('Switching between '+portals+' carrier portals');
+  if(manualLevel==='high'||manualLevel==='medium') drivers.push('Manual processing and booking steps');
+  drivers.push('Lack of centralized visibility and cost tracking');
+  if(locs>=2) drivers.push('Multi-location coordination overhead');
+  var drEl=document.getElementById('roi-drivers');
+  if(drEl) drEl.innerHTML=drivers.map(function(d){return '<div>· '+d+'</div>';}).join('');
+  // Say this
+  var say=portals>=4
+    ?'You are running '+portals+' separate systems to manage one freight operation. Based on what you have shared, that is costing roughly $'+annual.toLocaleString()+' a year just in management overhead — before we even look at rates.'
+    :'Based on your numbers, the fragmentation overhead is approximately $'+annual.toLocaleString()+' a year. That is not the cost of shipping — that is the cost of managing shipping the hard way.';
+  var sayEl=document.getElementById('roi-say');if(sayEl)sayEl.textContent=say;
+  // Show results, hide others
+  roiShowState('results');
+  // Update deal state
+  flowState.numbersShown=true;
+  deal.flowState=Object.assign({},flowState);
+  addEvent('roi','ROI: $'+annual.toLocaleString());
   saveDeals();
   updateCommandSurface();
   updateDashboard();
-  // If post-positioning is active, advance to close block
+  // Advance post-positioning if active
   var ppBlock=document.getElementById('cmd-post-pos');
   if(ppBlock&&ppBlock.style.display!=='none'){
     var roiBlock=document.getElementById('pp-roi-block');
@@ -2461,21 +2637,6 @@ function calcROI(){
     renderNextStepCTAs();
     if(nsBlock)nsBlock.style.display='block';
   }
-  var fmult=portals>=7?2.8:portals>=5?2.2:portals>=4?1.8:portals>=3?1.4:portals>=2?1.15:1.0;
-  var lmult=locs>=5?1.5:locs>=3?1.25:locs>=2?1.1:1.0;
-  var monthlyHrs=(hrs||ships*0.04)*fmult;
-  var monthlyCost=Math.round(monthlyHrs*(rate||22)*4.33*lmult);
-  var annual=monthlyCost*12;
-  document.getElementById('roi-m1').textContent=Math.round(monthlyHrs)+' hrs/mo';
-  document.getElementById('roi-m2').textContent='$'+monthlyCost.toLocaleString()+'/mo';
-  document.getElementById('roi-m3').textContent='$'+annual.toLocaleString();
-  // Compound
-  var cEl=document.getElementById('roi-compound');
-  if(ships>=200){cEl.style.display='block';cEl.innerHTML='<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--red);margin-bottom:6px">⚠️ At your volume this compounds</div><div style="font-size:13px;color:var(--text);line-height:1.68">At '+ships+' shipments/month, a 20% growth quarter takes this to <strong style="color:var(--red)">$'+Math.round(annual*1.2).toLocaleString()+'</strong>/yr -- same process, more volume, more waste.</div>';}
-  else cEl.style.display='none';
-  // Script
-  var say=portals>=4?'You are running '+portals+' separate systems to manage one freight operation. Based on what you have shared, that is costing roughly $'+annual.toLocaleString()+' a year just in management overhead -- before we even look at rates.':'Based on your numbers, the fragmentation overhead is approximately $'+annual.toLocaleString()+' a year. That is not the cost of shipping -- that is the cost of managing shipping the hard way.';
-  document.getElementById('roi-say').textContent=say;
 }
 
 // ── NEXT ──
