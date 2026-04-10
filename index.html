@@ -2077,7 +2077,7 @@ function updateDiscoveryPanel(){
   var nfEl=document.getElementById('disc-next-focus');
   if(nfEl){
     var nextIdx=cur+1;
-    nfEl.textContent=nextIdx<DISCOVERY_QUESTIONS.length?('Next focus: '+(DISC_FOCUS_LABELS[nextIdx]||DISCOVERY_QUESTIONS[nextIdx].level)):(answered>=DISCOVERY_QUESTIONS.length?'Complete':'Final question');
+    nfEl.textContent=cur<DISC_FOCUS_LABELS.length?('Next focus: '+DISC_FOCUS_LABELS[cur]):'Complete';
   }
 
   // Current question
@@ -2144,7 +2144,7 @@ var DISC_INSIGHTS={
 };
 var DISC_INSIGHT_ICONS={1:"✔",2:"⚠",3:"🚨"};
 var DISC_INSIGHT_COLORS={1:"var(--green)",2:"var(--amber)",3:"var(--red)"};
-var DISC_FOCUS_LABELS=["Tools","People","Process","Control","Services","Carriers","Volume","Automation","Costs","Scale","Done"];
+var DISC_FOCUS_LABELS=["Tools","People","Process","Cost Control","Services","Carrier Control","Volume","Automation","Scale Pressure","Fit / Vision","Complete"];
 
 var _discAdvanceTimer=null;
 
@@ -2172,7 +2172,7 @@ function discSaveAnswer(){
   var insText=document.getElementById('disc-insight-text');
   var insNext=document.getElementById('disc-insight-next');
   var nextQ=DISCOVERY_QUESTIONS[Math.min(cur+1, DISCOVERY_QUESTIONS.length-1)];
-  var nextFocus=DISC_FOCUS_LABELS[cur+1]||'Complete';
+  var nextFocus=DISC_FOCUS_LABELS[cur]||'Complete';
   var insight=DISC_INSIGHTS[q?q.area:'']||{text:'Noted.',level:1};
   var insLevel=insight.level||1;
   var insIcon=DISC_INSIGHT_ICONS[insLevel]||'✔';
