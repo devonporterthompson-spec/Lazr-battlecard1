@@ -339,7 +339,7 @@ body.light select.field option{background:var(--bg3)}
         <div class="sb-item" onclick="nav('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v12.2</div>
+        <div class="sb-ver" id="sb-ver">v12.3</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
@@ -1128,7 +1128,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v12.2 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v12.3 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -2099,7 +2099,8 @@ function updateDiscoveryPanel(){
         +'</div>'
         +(savedAnswer?'<div style="margin-left:19px;margin-top:3px;font-size:11px;color:var(--green);font-style:italic">\"'+savedAnswer.slice(0,80)+(savedAnswer.length>80?'…':'')+'\"</div>'
         +(DISC_INSIGHTS[dq.area]?'<div style="margin-left:19px;margin-top:2px;font-size:10px;color:var(--muted)">'+DISC_INSIGHTS[dq.area].text+'</div>':'')
-        :'');
+        :'')
+        +'</div>';
     });
     list.innerHTML=rows;
   }
@@ -2122,6 +2123,9 @@ function updateDiscoveryPanel(){
     if(qBlock)qBlock.style.display='none';
   } else {
     if(qBlock)qBlock.style.display='block';
+    // Always ensure textarea is enabled when question is visible
+    var answerInput=document.getElementById('disc-answer-input');
+    if(answerInput)answerInput.disabled=false;
   }
 }
 
