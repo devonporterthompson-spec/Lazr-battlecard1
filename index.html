@@ -339,7 +339,7 @@ body.light select.field option{background:var(--bg3)}
         <div class="sb-item" onclick="nav('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v12.1</div>
+        <div class="sb-ver" id="sb-ver">v12.2</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
@@ -446,14 +446,7 @@ body.light select.field option{background:var(--bg3)}
                 <div style="font-size:12px;color:var(--muted);margin-bottom:2px" id="disc-insight-text">—</div>
                 <div style="font-size:12px;color:var(--green);font-weight:700;margin-top:5px" id="disc-insight-next">—</div>
               </div>
-              <!-- Next Step direction -->
-              <div id="disc-next-step" style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;gap:8px">
-                <span style="font-size:11px;color:var(--green)">⚡</span>
-                <div>
-                  <span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Next Step · </span>
-                  <span style="font-size:13px;font-weight:700;color:var(--text)" id="disc-next-step-label">Move to: Tools</span>
-                </div>
-              </div>
+
             </div>
 
             <!-- Question block -->
@@ -1135,7 +1128,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v12.1 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v12.2 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -2191,8 +2184,7 @@ function discSaveAnswer(){
   if(insAnswer) insAnswer.textContent=answerText?'"'+answerText.slice(0,60)+(answerText.length>60?'…':'')+'"':'(no answer -- skipping)';
   if(insText){insText.textContent=insight.text;insText.style.color=insColor;}
   if(insNext) insNext.textContent='→ Moving to: '+nextFocus;
-  var nsLabel=document.getElementById('disc-next-step-label');
-  if(nsLabel)nsLabel.textContent='Move to: '+nextFocus;
+
   if(flash) flash.style.display='block';
   // Update efficiency score
   updateEfficiencyScore();
