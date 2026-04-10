@@ -339,7 +339,7 @@ body.light select.field option{background:var(--bg3)}
         <div class="sb-item" onclick="nav('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v11.8</div>
+        <div class="sb-ver" id="sb-ver">v11.9</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
@@ -435,14 +435,25 @@ body.light select.field option{background:var(--bg3)}
             </div>
 
             <!-- Insight flash -->
-            <div id="disc-insight-flash" style="display:none;background:var(--bg2);border-left:4px solid var(--green);border:1px solid var(--g3);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;animation:fup .25s ease">
-              <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-                <span style="font-size:13px" id="disc-flash-icon">✔</span>
-                <span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green)" id="disc-flash-label">Insight captured</span>
+            <div id="disc-insight-flash" style="display:none;margin-bottom:14px;animation:fup .25s ease">
+              <!-- Insight card -->
+              <div style="background:var(--bg2);border-left:4px solid var(--green);border:1px solid var(--g3);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+                  <span style="font-size:13px" id="disc-flash-icon">✔</span>
+                  <span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green)" id="disc-flash-label">Insight captured</span>
+                </div>
+                <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px" id="disc-insight-answer">—</div>
+                <div style="font-size:12px;color:var(--muted);margin-bottom:2px" id="disc-insight-text">—</div>
+                <div style="font-size:12px;color:var(--green);font-weight:700;margin-top:5px" id="disc-insight-next">—</div>
               </div>
-              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px" id="disc-insight-answer">—</div>
-              <div style="font-size:12px;color:var(--muted);margin-bottom:2px" id="disc-insight-text">—</div>
-              <div style="font-size:12px;color:var(--green);font-weight:700;margin-top:5px" id="disc-insight-next">—</div>
+              <!-- ⚡ NEXT STEP block -->
+              <div id="disc-next-step" style="background:linear-gradient(135deg,rgba(61,220,132,.13),rgba(61,220,132,.04));border:2px solid var(--green);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <div>
+                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:2px">⚡ Next Step</div>
+                  <div style="font-size:13px;font-weight:700;color:var(--text)" id="disc-next-step-label">Move to: Tools</div>
+                </div>
+                <button onclick="discAdvance()" style="background:var(--green);border:none;border-radius:8px;padding:10px 20px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap;flex-shrink:0">Continue →</button>
+              </div>
             </div>
 
             <!-- Question block -->
@@ -465,12 +476,15 @@ body.light select.field option{background:var(--bg3)}
               <div id="disc-q-list" style="margin-top:8px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px"></div>
             </details>
 
-            <!-- Complete -->
+            <!-- Discovery Complete transition -->
             <div id="disc-complete-area" style="display:none">
-              <div style="background:var(--g2);border:1px solid var(--g3);border-radius:var(--radius);padding:10px 14px;margin-bottom:10px;font-size:12px;color:var(--text)">
-                <strong style="color:var(--green)">Discovery complete.</strong> You have enough context to position and execute.
+              <div style="background:linear-gradient(135deg,rgba(61,220,132,.15),rgba(61,220,132,.05));border:2px solid var(--green);border-radius:var(--radius-lg);padding:20px;margin-bottom:12px;text-align:center">
+                <div style="font-size:28px;margin-bottom:8px">✅</div>
+                <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:900;color:var(--green);margin-bottom:6px">Discovery Complete</div>
+                <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:4px">You have enough signal to position value and run execution guidance.</div>
+                <div style="font-size:11px;color:var(--subtle);margin-bottom:16px" id="disc-complete-count">— questions answered</div>
+                <button class="gen-btn" style="margin-bottom:0;font-size:15px;padding:14px" onclick="discComplete()">Go to Command →</button>
               </div>
-              <button class="gen-btn" onclick="discComplete()">Complete Discovery → Unlock Command</button>
             </div>
           </div>
 
@@ -532,6 +546,17 @@ body.light select.field option{background:var(--bg3)}
                   <div class="dir-status" id="d-status">🟡</div>
                 </div>
                 <button class="copy-btn" onclick="copyDirective()">Copy</button>
+              </div>
+
+              <!-- Close-ready CTA (hidden until triggered) -->
+              <div id="cmd-close-ready" style="display:none;margin-bottom:14px">
+                <div style="background:linear-gradient(135deg,rgba(61,220,132,.15),rgba(61,220,132,.05));border:2px solid var(--green);border-radius:var(--radius-lg);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                  <div>
+                    <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:3px">⚡ Close Ready</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text)">You have enough to ask for the next step.</div>
+                  </div>
+                  <button onclick="openDrawer('close',document.querySelector('[data-p=close]'))" style="background:var(--green);border:none;border-radius:8px;padding:10px 20px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap;flex-shrink:0">Move to Close →</button>
+                </div>
               </div>
 
               <!-- Live signals -->
@@ -1109,7 +1134,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v11.8 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v11.9 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1561,6 +1586,13 @@ function updateNextActionBlock(stage){
 function updateCommandSurface(){
   updateStageBar();
   var stage=resolveStage(deal);
+
+  // Show close-ready block when deal has ROI shown or is at close/advance stage
+  var crEl=document.getElementById('cmd-close-ready');
+  if(crEl){
+    var showClose=flowState.numbersShown||stage==='close'||stage==='advance';
+    crEl.style.display=showClose?'block':'none';
+  }
 
   updateCommandFlowBanner(stage);
   updateNextActionBlock(stage);
@@ -2085,6 +2117,8 @@ function updateDiscoveryPanel(){
   var allVisited=(discoveryProgress.current>=total);
   if(answered>=8||(allVisited&&answered>=6)){
     if(completeArea)completeArea.style.display='block';
+    var countEl=document.getElementById('disc-complete-count');
+    if(countEl)countEl.textContent=answered+' / '+total+' questions answered';
   } else {
     if(completeArea)completeArea.style.display='none';
   }
@@ -2156,6 +2190,8 @@ function discSaveAnswer(){
   if(insAnswer) insAnswer.textContent=answerText?'"'+answerText.slice(0,60)+(answerText.length>60?'…':'')+'"':'(no answer -- skipping)';
   if(insText){insText.textContent=insight.text;insText.style.color=insColor;}
   if(insNext) insNext.textContent='→ Moving to: '+nextFocus;
+  var nsLabel=document.getElementById('disc-next-step-label');
+  if(nsLabel)nsLabel.textContent='Move to: '+nextFocus;
   if(flash) flash.style.display='block';
   // Update efficiency score
   updateEfficiencyScore();
@@ -2225,6 +2261,9 @@ function discSkip(){
 }
 
 function discComplete(){
+  // Update count display
+  var countEl=document.getElementById('disc-complete-count');
+  if(countEl)countEl.textContent=discoveryProgress.answered.length+' / '+DISCOVERY_QUESTIONS.length+' questions answered';
   deal.discoveryDone=true;
   deal.flowState=Object.assign({},flowState);
   // Build discovery summary from captured answers
