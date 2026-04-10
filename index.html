@@ -205,6 +205,10 @@ select.field option{background:var(--bg3)}
   .field-row{grid-template-columns:1fr}
 }
 
+
+.ptitle{font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px;color:var(--text)}
+.psub{font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.55}
+
 /* ── BATTLECARD ──*/
 
 /* ══ DISCOVERY ══ */
@@ -748,8 +752,9 @@ select.field option{background:var(--bg3)}
         </div>
 
 <div class="panel drawer" id="panel-battlecard">
-<div class="ptitle">Battlecard</div>
-  <div class="psub">Type a competitor to get the full breakdown -- win probability, top angles, what not to say.</div>
+<div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">BATTLECARD</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
+  <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Battlecard</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Type a competitor to get the full breakdown — win probability, top angles, what not to say.</div>
   <div id="bc-deal-hint" style="display:none;margin-bottom:14px"></div>
 
   <div class="bc-search-wrap">
