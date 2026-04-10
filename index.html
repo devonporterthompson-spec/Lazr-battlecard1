@@ -262,7 +262,7 @@ body.light select.field option{background:var(--bg3)}
 <!-- ══ LOGIN ══ -->
 <div id="login-screen">
   <div class="lbox">
-    <div class="l-logo" onclick="bypass()">LAZR<span>.</span></div>
+    <div class="l-logo" onclick="bypass()" style="cursor:pointer">LAZR<span style="pointer-events:none">.</span></div>
     <div class="l-tag">Command OS</div>
     <div class="l-tabs">
       <button class="l-tab on" id="tab-si" onclick="switchTab('si')">Sign In</button>
@@ -297,7 +297,7 @@ body.light select.field option{background:var(--bg3)}
   <!-- TOPBAR -->
   <div class="topbar">
     <button id="menu-btn" style="display:none;background:none;border:none;color:var(--muted);font-size:18px;padding:0 6px 0 0" onclick="toggleSB()">☰</button>
-    <div class="tb-logo" onclick="bypass()">LAZR<span>.</span></div>
+    <div class="tb-logo" onclick="bypass()" style="cursor:pointer">LAZR<span style="pointer-events:none">.</span></div>
     <div class="tb-stage-bar" id="stage-bar">
       <div class="stage-pip">Prep</div>
       <span class="stage-sep">›</span>
@@ -331,15 +331,15 @@ body.light select.field option{background:var(--bg3)}
           <span class="si-label" style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--green)">LAZR</span>
         </div>
         <div class="sb-sec">Tools</div>
-        <div class="sb-item" onclick="nav('prep',this)" data-p="prep"><span class="si-icon">🎯</span><span class="si-label">Deal Setup</span></div>
-        <div class="sb-item" onclick="nav('handle',this)" data-p="handle"><span class="si-icon">🛡️</span><span class="si-label">Handle</span></div>
-        <div class="sb-item" onclick="nav('roi',this)" data-p="roi"><span class="si-icon">📊</span><span class="si-label">ROI</span></div>
-        <div class="sb-item" onclick="nav('close',this)" data-p="close"><span class="si-icon">🔐</span><span class="si-label">Close</span></div>
-        <div class="sb-item" onclick="nav('advance',this)" data-p="advance"><span class="si-icon">🚀</span><span class="si-label">Advance</span></div>
-        <div class="sb-item" onclick="nav('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
+        <div class="sb-item" onclick="openDrawer('prep',this)" data-p="prep"><span class="si-icon">🎯</span><span class="si-label">Deal Setup</span></div>
+        <div class="sb-item" onclick="openDrawer('handle',this)" data-p="handle"><span class="si-icon">🛡️</span><span class="si-label">Handle</span></div>
+        <div class="sb-item" onclick="openDrawer('roi',this)" data-p="roi"><span class="si-icon">📊</span><span class="si-label">ROI</span></div>
+        <div class="sb-item" onclick="openDrawer('close',this)" data-p="close"><span class="si-icon">🔐</span><span class="si-label">Close</span></div>
+        <div class="sb-item" onclick="openDrawer('advance',this)" data-p="advance"><span class="si-icon">🚀</span><span class="si-label">Advance</span></div>
+        <div class="sb-item" onclick="openDrawer('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v12.8</div>
+        <div class="sb-ver" id="sb-ver">v12.9</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
@@ -1240,7 +1240,7 @@ function switchTab(t){
 // ── BYPASS ──
 function bypass(){
   bypassClicks++;clearTimeout(bypassTimer);
-  bypassTimer=setTimeout(function(){bypassClicks=0;},800);
+  bypassTimer=setTimeout(function(){bypassClicks=0;},1500);
   if(bypassClicks>=3){bypassClicks=0;doLogin({username:'devon',password:'lazr2026',name:'Devon'});showToast('Admin bypass ⚡');}
 }
 document.addEventListener('keydown',function(e){
@@ -1250,6 +1250,9 @@ document.addEventListener('keydown',function(e){
 });
 
 // ── SESSION ──
+document.addEventListener('keydown',function(e){
+  if(e.ctrlKey&&e.shiftKey&&e.key==='D'){e.preventDefault();doLogin({username:'devon',password:'lazr2026',name:'Devon'});showToast('Admin bypass ⚡');}
+});
 document.addEventListener('DOMContentLoaded',function(){
   // Apply saved theme immediately
   var t=localStorage.getItem('cos_theme');
@@ -1262,7 +1265,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v12.8 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v12.9 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
