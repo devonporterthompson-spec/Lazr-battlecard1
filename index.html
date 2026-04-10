@@ -96,8 +96,6 @@ button{cursor:pointer}
 .panel{display:none}
 .panel.on{display:block;animation:fup .2s ease}
 @keyframes fup{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-
-/* Tool panels slide in as overlay drawer */
 .panel.drawer{display:none;position:fixed;top:0;right:0;bottom:0;width:min(460px,100vw);background:var(--bg);border-left:1px solid var(--border2);z-index:200;overflow-y:auto;padding:22px 24px;box-shadow:-12px 0 40px rgba(0,0,0,.5)}
 .panel.drawer.on{display:block;animation:slideIn .22s ease}
 @keyframes slideIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
@@ -109,12 +107,10 @@ button{cursor:pointer}
 
 /* ── NEXT BAR ── */
 .next-bar{flex-shrink:0;border-top:1px solid var(--border);padding:10px 20px;display:none;align-items:center;justify-content:space-between;gap:12px;background:var(--bg)}
-.nb-label{display:none}
-.nb-text{display:none}
 .nb-btn{flex-shrink:0;background:var(--green);border:none;border-radius:7px;padding:7px 14px;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:#050f0b;transition:opacity .15s;white-space:nowrap}
 .nb-btn:hover{opacity:.88}
 
-/* ── DEAL MEMORY BAR ── */
+/* ── DEAL BAR ── */
 .deal-bar{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .dm-chip{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:4px}
 .dm-chip span{color:var(--text)}
@@ -125,7 +121,7 @@ button{cursor:pointer}
 .dm-chip.red{background:var(--r2);border-color:var(--r3)}
 .dm-chip.red span{color:var(--red)}
 
-/* ── OUTPUT BLOCK ── */
+/* ── OUTPUT BLOCKS ── */
 .directive{background:linear-gradient(135deg,rgba(61,220,132,.12) 0%,rgba(61,220,132,.04) 100%);border:2px solid var(--green);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:14px;position:relative;animation:fup .2s ease}
 .dir-eye{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:var(--green);margin-bottom:10px;display:block}
 .dir-field{margin-bottom:10px}
@@ -135,7 +131,6 @@ button{cursor:pointer}
 .insight-text{font-size:13px;color:var(--text);line-height:1.68}
 .risk-text{font-size:13px;color:var(--amber);line-height:1.68}
 .dir-status{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;margin-top:4px}
-
 .out-block{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;position:relative;animation:fup .2s ease}
 .ob-eye{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:7px;display:block}
 .out-block.amber{background:var(--am2);border-color:var(--am3)}
@@ -145,8 +140,6 @@ button{cursor:pointer}
 .out-block.green{background:var(--g2);border-color:var(--g3)}
 .out-block.green .ob-eye{color:var(--green)}
 .ob-body{font-size:13.5px;color:var(--text);line-height:1.72}
-
-/* Copy button */
 .copy-btn{position:absolute;top:10px;right:12px;background:none;border:1px solid var(--border2);border-radius:5px;padding:3px 8px;font-size:10px;font-weight:700;color:var(--subtle);transition:all .15s}
 .copy-btn:hover{color:var(--text);border-color:var(--border3)}
 .copy-btn.done{color:var(--green);border-color:var(--g3)}
@@ -161,22 +154,19 @@ select.field{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmln
 select.field option{background:var(--bg3)}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 .field-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px;display:block}
-
 .chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .chip{background:var(--bg3);border:1.5px solid var(--border2);border-radius:7px;padding:7px 12px;font-size:12.5px;font-weight:500;color:var(--muted);transition:all .15s}
 .chip:hover{border-color:var(--border3);color:var(--text)}
 .chip.on{background:var(--g2);border-color:var(--green);color:var(--green);font-weight:700}
-
 .gen-btn{width:100%;background:var(--green);border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#050f0b;transition:all .18s;letter-spacing:.02em;margin-bottom:18px}
 .gen-btn:hover{opacity:.9;transform:translateY(-1px)}
 .gen-btn:active{transform:none}
 .gen-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-
 .trigger-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:16px}
 .trigger-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;font-size:12px;font-weight:600;color:var(--muted);text-align:left;transition:all .15s}
 .trigger-btn:hover{border-color:var(--border3);color:var(--text)}
 
-/* ROI metrics */
+/* ROI */
 .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 .metric{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
 .metric.closer{background:linear-gradient(135deg,rgba(61,220,132,.13) 0%,rgba(61,220,132,.04) 100%);border:2px solid var(--green);grid-column:1/-1;text-align:center}
@@ -185,26 +175,25 @@ select.field option{background:var(--bg3)}
 .met-label{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4}
 .met-eyebrow{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:8px}
 
-/* Quick triggers */
-.flow-bar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
-.flow-btn{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:8px 13px;font-size:12px;font-weight:600;color:var(--muted);transition:all .15s}
-.flow-btn:hover{border-color:var(--border3);color:var(--text)}
-
-/* Spinner */
+/* Misc */
 .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(5,15,11,.25);border-top-color:#050f0b;border-radius:50%;animation:rot .6s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes rot{to{transform:rotate(360deg)}}
-
-/* Placeholder */
 .ph{text-align:center;padding:40px 20px;color:var(--subtle)}
 .ph-icon{font-size:32px;margin-bottom:10px;opacity:.35}
 .ph-t{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--muted);margin-bottom:5px}
 .ph-s{font-size:12px;line-height:1.6;max-width:260px;margin:0 auto}
-
-/* Toast */
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--green);color:#050f0b;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;padding:9px 20px;border-radius:99px;z-index:9998;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* Mobile */
+/* Prospect menu */
+.drop-menu{display:none;position:absolute;background:var(--bg2);border:1.5px solid var(--border2);border-radius:10px;z-index:500;box-shadow:0 10px 40px rgba(0,0,0,.5);overflow:hidden;min-width:180px}
+.drop-menu.open{display:block;animation:fup .12s ease}
+.drop-item{padding:10px 14px;cursor:pointer;font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px}
+.drop-item:hover{background:var(--bg3)}
+.drop-item.danger{color:var(--red)}
+.drop-item.warn{color:var(--amber)}
+.drop-divider{height:1px;background:var(--border);margin:2px 0}
+
 @media(max-width:700px){
   .sidebar{position:fixed;top:0;bottom:0;left:0;width:0!important;transform:translateX(-100%);z-index:50}
   .sidebar.open{transform:translateX(0);width:178px!important}
@@ -214,60 +203,12 @@ select.field option{background:var(--bg3)}
   .tb-stage-bar{display:none}
   .metric-grid{grid-template-columns:1fr}
   .field-row{grid-template-columns:1fr}
-  
 }
+
 /* ── BATTLECARD ──*/
-.bc-search-wrap{position:relative;margin-bottom:7px}
-.bc-search{width:100%;background:var(--bg3);border:2px solid var(--border2);border-radius:11px;padding:12px 44px 12px 44px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s}
-.bc-search:focus{border-color:var(--green)}
-.bc-search-ico{position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;color:var(--muted)}
-.bc-clear{display:none;position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:4px}
-.bc-drop{display:none;position:absolute;top:calc(100% + 5px);left:0;right:0;background:var(--bg2);border:1.5px solid var(--border2);border-radius:11px;z-index:300;box-shadow:0 12px 40px rgba(0,0,0,.45);overflow:hidden;max-height:280px;overflow-y:auto}
-.bc-di{display:flex;align-items:center;gap:12px;padding:11px 15px;cursor:pointer;transition:background .1s;border-bottom:1px solid var(--border)}
-.bc-di:last-child{border-bottom:none}
-.bc-di:hover,.bc-di.focus{background:var(--bg3)}
-.bc-di-name{font-size:13px;font-weight:600;color:var(--text);flex:1}
-.bc-di-sub{font-size:10px;color:var(--muted);margin-top:1px}
-.bc-di-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:99px;background:var(--bg4);color:var(--muted);border:1px solid var(--border2);white-space:nowrap}
-.bc-score{display:grid;grid-template-columns:1fr 50px 1fr;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px}
-.bc-score-lazr{padding:18px;text-align:center;background:var(--g2);border-right:1px solid var(--g3)}
-.bc-score-mid{display:flex;align-items:center;justify-content:center;background:var(--bg3);font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:var(--subtle)}
-.bc-score-comp{padding:18px;text-align:center;border-left:1px solid var(--border)}
-.bc-score-num{font-family:'Syne',sans-serif;font-size:44px;font-weight:800;line-height:1}
-.bc-score-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
-.bc-score-sub{font-size:10px;margin-top:4px;opacity:.75}
-.win-prob{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--g2);border:1px solid var(--g3);border-radius:9px;margin-bottom:14px}
-.win-prob-bar{flex:1;height:8px;background:var(--bg4);border-radius:99px;overflow:hidden}
-.win-prob-fill{height:100%;border-radius:99px;background:var(--green);transition:width .6s ease}
-.win-prob-num{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--green);white-space:nowrap}
-.bc-top3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:14px}
-.bc-top3-card{background:var(--bg3);border:1px solid var(--g3);border-radius:9px;padding:11px;text-align:center}
-.bc-top3-num{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--green);margin-bottom:4px}
-.bc-top3-label{font-size:11px;color:var(--muted);line-height:1.4}
-.bc-angle{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:9px}
-.bc-angle-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--green);margin-bottom:7px}
-.bc-dont{background:var(--r2);border:1px solid var(--r3);border-radius:10px;padding:13px 14px;margin-bottom:9px}
-.bc-dont-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--red);margin-bottom:6px}
-.bc-view-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:6px 13px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s}
-.bc-view-btn:hover{color:var(--text);border-color:var(--border3)}
-.bc-view-btn.on{color:var(--green);border-color:var(--green);background:var(--g2)}
-.bc-row{display:grid;grid-template-columns:1fr 100px 100px;align-items:start;padding:11px 14px;border-bottom:1px solid var(--border);gap:8px;cursor:pointer;transition:background .1s}
-.bc-row:last-child{border-bottom:none}
-.bc-row:hover{background:var(--bg3)}
-.bc-row.win{background:rgba(61,220,132,.05)}
-.bc-row.win:hover{background:rgba(61,220,132,.09)}
-.bc-feat-name{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;flex-wrap:wrap;gap:5px;line-height:1.35}
-.bc-feat-detail{display:none;margin-top:7px;padding:8px 10px;background:var(--g2);border-radius:7px;font-size:12px;color:var(--green);line-height:1.55}
-.bc-row.open .bc-feat-detail{display:block}
-.bc-cell{text-align:center;padding-top:2px}
-.bc-yes{color:var(--green);font-size:16px;font-weight:700;display:block;text-align:center}
-.bc-no{color:var(--red);font-size:16px;display:block;text-align:center}
-.bc-part{font-size:10px;font-weight:700;color:var(--amber);display:block;text-align:center}
-.bc-road{font-size:9px;font-weight:700;color:var(--amber);text-transform:uppercase;display:block;text-align:center;line-height:1.4}
-.bc-win-pill{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:99px;background:var(--g2);color:var(--green);border:1px solid var(--g3)}
-.bc-both-pill{font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 7px;border-radius:99px;background:var(--bg4);color:var(--muted);border:1px solid var(--border2)}
 
 /* ══ DISCOVERY ══ */
+/* (styles inline on elements) */
 </style>
 </head>
 <body>
@@ -281,9 +222,8 @@ select.field option{background:var(--bg3)}
   <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:28px;max-width:400px;width:100%">
     <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:10px">⚙️ API Key</div>
     <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:900;color:var(--text);margin-bottom:8px">Connect Anthropic</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6">Paste your Anthropic API key to enable AI features. Your key is stored locally in this browser only and never sent anywhere except Anthropic's API.</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6">Your key is stored locally and never sent anywhere except Anthropic's API.</div>
     <input id="api-key-input" type="password" placeholder="sk-ant-..." style="width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:9px;padding:11px 14px;color:var(--text);font-size:13px;outline:none;margin-bottom:10px;font-family:'DM Sans',sans-serif">
-    <div style="font-size:11px;color:var(--subtle);margin-bottom:16px">Get your key at <span style="color:var(--green)">console.anthropic.com</span></div>
     <div style="display:flex;gap:8px">
       <button onclick="saveApiKey()" style="flex:1;background:var(--green);border:none;border-radius:9px;padding:11px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer">Save Key</button>
       <button onclick="closeApiModal()" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:9px;padding:11px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer">Cancel</button>
@@ -318,7 +258,7 @@ select.field option{background:var(--bg3)}
         <button class="lbtn" type="submit">Create Account →</button>
       </form>
       <div class="lerr" id="su-err"></div>
-      <div class="lsuccess" id="su-ok" style="display:none">✅ Created -- signing you in…</div>
+      <div class="lsuccess" id="su-ok" style="display:none">✅ Created — signing you in…</div>
     </div>
     <div class="l-hint">Triple-click LAZR. or Ctrl+Shift+D to bypass</div>
   </div>
@@ -359,7 +299,10 @@ select.field option{background:var(--bg3)}
     <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
       <div class="sb-nav">
-        <div class="sb-item on" onclick="nav('main',this)" data-p="main" style="margin-bottom:4px"><span class="si-icon" style="font-size:18px">⚡</span><span class="si-label" style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--green)">LAZR</span></div>
+        <div class="sb-item on" onclick="nav('main',this)" data-p="main" style="margin-bottom:4px">
+          <span class="si-icon" style="font-size:18px">⚡</span>
+          <span class="si-label" style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--green)">LAZR</span>
+        </div>
         <div class="sb-sec">Tools</div>
         <div class="sb-item" onclick="nav('prep',this)" data-p="prep"><span class="si-icon">🎯</span><span class="si-label">Deal Setup</span></div>
         <div class="sb-item" onclick="nav('handle',this)" data-p="handle"><span class="si-icon">🛡️</span><span class="si-label">Handle</span></div>
@@ -369,7 +312,7 @@ select.field option{background:var(--bg3)}
         <div class="sb-item" onclick="nav('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v6.0</div>
+        <div class="sb-ver" id="sb-ver">v11.6</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
@@ -378,11 +321,10 @@ select.field option{background:var(--bg3)}
     <div class="main">
       <div class="panel-wrap">
 
-
-        <!-- ══ MAIN (unified: status + discovery + command) ══ -->
+        <!-- ══ MAIN PANEL ══ -->
         <div class="panel on" id="panel-main">
 
-          <!-- LAYER 0: No deal state -->
+          <!-- LAYER 0: No deal -->
           <div id="main-nodeal" style="text-align:center;padding:60px 20px;display:none">
             <div style="font-size:36px;margin-bottom:14px;opacity:.25">⚡</div>
             <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:900;color:var(--muted);margin-bottom:6px">No active deal</div>
@@ -390,26 +332,30 @@ select.field option{background:var(--bg3)}
             <button class="gen-btn" style="width:auto;padding:11px 28px" onclick="createDeal()">+ New Deal</button>
           </div>
 
-          <!-- LAYER 1: Status strip -- always visible when deal exists -->
+          <!-- LAYER 1: Status strip -->
           <div id="main-status" style="display:none">
             <div id="status-strip" style="display:flex;align-items:center;gap:8px;padding:8px 0;margin-bottom:14px;border-bottom:1px solid var(--border);flex-wrap:wrap">
+              <!-- Prospect selector -->
               <div style="position:relative">
-                <button onclick="toggleProspectMenu()" style="background:none;border:none;padding:0;font-family:'Syne',sans-serif;font-size:13px;font-weight:900;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:4px">
-                  <span id="dash-client">--</span>
-                  <span style="font-size:10px;color:var(--muted)">▾</span>
+                <button class="prospect-btn" onclick="toggleProspectMenu()" style="background:none;border:1px solid var(--border2);border-radius:7px;padding:4px 10px;font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:5px;max-width:160px;overflow:hidden">
+                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="dash-client">—</span>
+                  <span style="font-size:9px;color:var(--muted);flex-shrink:0">▾</span>
                 </button>
-                <div id="prospect-menu" style="display:none;position:absolute;top:calc(100%+6px);left:0;background:var(--bg2);border:1.5px solid var(--border2);border-radius:10px;min-width:200px;z-index:500;box-shadow:0 8px 30px rgba(0,0,0,.4);overflow:hidden">
+                <div class="drop-menu" id="prospect-menu" style="top:calc(100% + 5px);left:0;min-width:200px">
                   <div id="prospect-menu-list"></div>
-                  <div style="border-top:1px solid var(--border);padding:8px;display:flex;flex-direction:column;gap:5px">
-                    <button onclick="createDeal();toggleProspectMenu()" style="width:100%;background:var(--green);border:none;border-radius:7px;padding:8px;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:#050f0b;cursor:pointer">+ New Prospect</button>
-                    <button onclick="viewArchivedDeals();toggleProspectMenu()" style="width:100%;background:none;border:1px solid var(--border2);border-radius:7px;padding:6px;font-size:11px;color:var(--subtle);cursor:pointer">📁 View archived</button>
+                  <div class="drop-divider"></div>
+                  <div class="drop-item" onclick="createDeal();document.getElementById('prospect-menu').classList.remove('open')">
+                    <span style="color:var(--green)">＋</span> New prospect
+                  </div>
+                  <div class="drop-item" onclick="viewArchivedDeals();document.getElementById('prospect-menu').classList.remove('open')">
+                    <span>📁</span> View archived
                   </div>
                 </div>
               </div>
               <span style="color:var(--border2);font-size:11px">·</span>
-              <span id="dash-stage-chip" style="font-size:9px;font-weight:800;text-transform:uppercase;color:var(--green)">--</span>
+              <span id="dash-stage-chip" style="font-size:9px;font-weight:800;text-transform:uppercase;color:var(--green)">—</span>
               <span style="color:var(--border2);font-size:11px">·</span>
-              <span id="dash-progress-text" style="font-size:11px;color:var(--muted)">--</span>
+              <span id="dash-progress-text" style="font-size:11px;color:var(--muted)">—</span>
               <span style="color:var(--border2);font-size:11px">·</span>
               <span id="dash-momentum-chip" style="font-size:11px;color:var(--subtle)">🟡</span>
               <div style="margin-left:auto;display:flex;align-items:center;gap:4px">
@@ -418,20 +364,18 @@ select.field option{background:var(--bg3)}
                 <!-- More options -->
                 <div style="position:relative">
                   <button onclick="toggleMoreMenu()" style="background:none;border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-size:13px;color:var(--muted);cursor:pointer;line-height:1" title="More options">⋯</button>
-                  <div id="more-menu" style="display:none;position:absolute;top:calc(100%+5px);right:0;background:var(--bg2);border:1.5px solid var(--border2);border-radius:10px;min-width:170px;z-index:500;box-shadow:0 8px 30px rgba(0,0,0,.4);overflow:hidden">
-                    <div onclick="openDrawer('prep',document.querySelector('[data-p=prep]'));toggleMoreMenu()" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">✏️ Edit prospect</div>
-                    <div onclick="archiveProspect();toggleMoreMenu()" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--amber);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">📁 Archive prospect</div>
-                    <div id="status-del-btn" onclick="showDeleteModal();toggleMoreMenu()" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--red);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">🗑 Delete prospect</div>
+                  <div class="drop-menu" id="more-menu" style="top:calc(100%+5px);right:0">
+                    <div class="drop-item" onclick="openDrawer('prep',document.querySelector('[data-p=prep]'));document.getElementById('more-menu').classList.remove('open')">✏️ Edit prospect</div>
+                    <div class="drop-item warn" onclick="archiveProspect();document.getElementById('more-menu').classList.remove('open')">📁 Archive</div>
+                    <div class="drop-item danger" id="status-del-btn" onclick="showDeleteModal();document.getElementById('more-menu').classList.remove('open')">🗑 Delete</div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- LAYER 2: Discovery workspace -- dominant until discoveryDone -->
+          <!-- LAYER 2: Discovery -->
           <div id="main-discovery" style="display:none">
-
-            <!-- Discovery header -->
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap">
               <div>
                 <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px">Building your</div>
@@ -444,12 +388,11 @@ select.field option{background:var(--bg3)}
                 <div style="font-size:9px;color:var(--muted);margin-top:1px" id="disc-eff-label">Efficient</div>
               </div>
             </div>
-            <!-- Score bar -->
             <div style="background:var(--bg3);border-radius:3px;height:3px;margin-bottom:16px;overflow:hidden">
               <div id="disc-eff-bar" style="background:var(--green);height:100%;width:100%;border-radius:3px;transition:width .6s ease,background .4s ease"></div>
             </div>
 
-            <!-- Progress bar -->
+            <!-- Progress -->
             <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
                 <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Progress</div>
@@ -470,80 +413,74 @@ select.field option{background:var(--bg3)}
                 <span style="font-size:13px" id="disc-flash-icon">✔</span>
                 <span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green)" id="disc-flash-label">Insight captured</span>
               </div>
-              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px" id="disc-insight-answer">--</div>
-              <div style="font-size:12px;color:var(--muted);margin-bottom:2px" id="disc-insight-text">--</div>
-              <div style="font-size:12px;color:var(--green);font-weight:700;margin-top:5px" id="disc-insight-next">--</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px" id="disc-insight-answer">—</div>
+              <div style="font-size:12px;color:var(--muted);margin-bottom:2px" id="disc-insight-text">—</div>
+              <div style="font-size:12px;color:var(--green);font-weight:700;margin-top:5px" id="disc-insight-next">—</div>
             </div>
 
-            <!-- Current question -- DOMINANT -->
+            <!-- Question block -->
             <div id="disc-question-block" style="background:linear-gradient(135deg,rgba(61,220,132,.12) 0%,rgba(61,220,132,.04) 100%);border:2px solid var(--green);border-radius:var(--radius-lg);padding:20px 22px;margin-bottom:14px">
               <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:5px">Current Step</div>
               <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:12px" id="disc-q-level">L1 · Execution</div>
-              <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:12px" id="disc-q-text">--</div>
-              <div style="font-size:11px;color:var(--subtle);margin-bottom:14px;font-style:italic" id="disc-q-hint">--</div>
+              <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:12px" id="disc-q-text">—</div>
+              <div style="font-size:11px;color:var(--subtle);margin-bottom:14px;font-style:italic" id="disc-q-hint">—</div>
               <div style="margin-bottom:10px">
                 <label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px;display:block">What they said</label>
                 <textarea id="disc-answer-input" rows="2" placeholder="Type their answer here…" style="width:100%;background:rgba(0,0,0,.25);border:1.5px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;resize:none;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='var(--border2)'"></textarea>
               </div>
-              <!-- ONE primary action -->
               <button id="disc-answered-btn" onclick="discSaveAnswer()" style="width:100%;background:var(--green);border:none;border-radius:8px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer">Save Answer →</button>
               <button id="disc-skip-btn" onclick="discSkip()" style="width:100%;background:none;border:none;padding:8px;font-size:11px;color:var(--subtle);cursor:pointer;margin-top:4px">Skip this question</button>
             </div>
 
-            <!-- Question checklist (collapsed by default, expandable) -->
+            <!-- All questions (collapsed) -->
             <details style="margin-bottom:14px">
               <summary style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);cursor:pointer;padding:8px 0">All questions ▾</summary>
               <div id="disc-q-list" style="margin-top:8px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px"></div>
             </details>
 
-            <!-- Complete button -->
+            <!-- Complete -->
             <div id="disc-complete-area" style="display:none">
               <div style="background:var(--g2);border:1px solid var(--g3);border-radius:var(--radius);padding:10px 14px;margin-bottom:10px;font-size:12px;color:var(--text)">
                 <strong style="color:var(--green)">Discovery complete.</strong> You have enough context to position and execute.
               </div>
-              <button class="gen-btn" onclick="discComplete()" style="width:100%;padding:14px;font-size:14px">Complete Discovery → Unlock Command</button>
+              <button class="gen-btn" onclick="discComplete()">Complete Discovery → Unlock Command</button>
             </div>
-
           </div>
 
-          <!-- LAYER 3: Command workspace -- locked until discoveryDone -->
+          <!-- LAYER 3: Command -->
           <div id="main-command" style="display:none">
-
-            <!-- Command locked state -->
+            <!-- Locked state -->
             <div id="cmd-lock" style="display:none;text-align:center;padding:48px 20px">
               <div style="font-size:28px;margin-bottom:12px;opacity:.3">🔒</div>
               <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:900;color:var(--text);margin-bottom:8px">⚡ Command Locked</div>
               <div style="font-size:13px;color:var(--muted);margin-bottom:6px;max-width:260px;margin-left:auto;margin-right:auto">Complete discovery to unlock live execution guidance.</div>
               <div style="font-size:11px;color:var(--subtle);opacity:.7;margin-bottom:20px;font-style:italic">Every answer you capture sharpens the directive.</div>
-              <button style="background:var(--green);border:none;border-radius:8px;padding:11px 24px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer" onclick="showLayer('discovery');nav('main',document.querySelector('[data-p=main]'))">Go to Discovery →</button>
+              <button style="background:var(--green);border:none;border-radius:8px;padding:11px 24px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer" onclick="showLayer('discovery')">Go to Discovery →</button>
             </div>
 
             <!-- Command surface -->
             <div id="cmd-surface">
-
-              <!-- Flow banner -->
               <div id="command-flow-banner" style="margin-bottom:12px">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
-                  <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text)" id="command-stage-now">--</div>
-                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);background:var(--g2);border:1px solid var(--g3);border-radius:4px;padding:2px 7px" id="command-stage-badge">--</div>
+                  <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text)" id="command-stage-now">—</div>
+                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);background:var(--g2);border:1px solid var(--g3);border-radius:4px;padding:2px 7px" id="command-stage-badge">—</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:10px">
-                  <div style="font-size:11px;color:var(--subtle)" id="command-stage-next">--</div>
-                  <div style="font-size:11px;color:var(--green);font-weight:700" id="command-stage-action">--</div>
+                  <div style="font-size:11px;color:var(--subtle)" id="command-stage-next">—</div>
+                  <div style="font-size:11px;color:var(--green);font-weight:700" id="command-stage-action">—</div>
                 </div>
               </div>
 
               <!-- Next action block -->
               <div id="command-next-action" style="background:linear-gradient(135deg,rgba(61,220,132,.13) 0%,rgba(61,220,132,.04) 100%);border:2px solid var(--green);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:14px;display:none">
-
-                <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:10px;font-style:italic" id="cna-question">--</div>
+                <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:10px;font-style:italic" id="cna-question">—</div>
                 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-                  <div style="font-size:11px;color:var(--muted)" id="cna-progress">--</div>
+                  <div style="font-size:11px;color:var(--muted)" id="cna-progress">—</div>
                   <button id="cna-btn" style="background:var(--green);border:none;border-radius:8px;padding:9px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer">Continue →</button>
                 </div>
               </div>
 
-              <!-- Directive block -->
+              <!-- Directive -->
               <div class="directive" id="deal-directive">
                 <span class="dir-eye">▶ Do This Now</span>
                 <div class="dir-field">
@@ -552,16 +489,16 @@ select.field option{background:var(--bg3)}
                 </div>
                 <div class="dir-field">
                   <span class="dir-field-label">Then ask</span>
-                  <div class="ask-text" id="d-ask">--</div>
+                  <div class="ask-text" id="d-ask">—</div>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
                   <div class="dir-field" style="margin-bottom:0">
                     <span class="dir-field-label">What this means</span>
-                    <div class="insight-text" id="d-means">--</div>
+                    <div class="insight-text" id="d-means">—</div>
                   </div>
                   <div class="dir-field" style="margin-bottom:0">
                     <span class="dir-field-label">Risk if unchanged</span>
-                    <div class="risk-text" id="d-risk">--</div>
+                    <div class="risk-text" id="d-risk">—</div>
                   </div>
                 </div>
                 <div style="display:flex;align-items:center;justify-content:flex-end">
@@ -570,7 +507,7 @@ select.field option{background:var(--bg3)}
                 <button class="copy-btn" onclick="copyDirective()">Copy</button>
               </div>
 
-              <!-- Live signals -- lowest priority -->
+              <!-- Live signals -->
               <div style="margin-top:12px">
                 <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:6px">Live signals</div>
                 <div class="trigger-row">
@@ -580,16 +517,13 @@ select.field option{background:var(--bg3)}
                   <button class="trigger-btn" onclick="quickTrigger('quiet')">🔇 Gone quiet</button>
                 </div>
               </div>
-
-            </div><!-- end cmd-surface -->
-          </div><!-- end main-command -->
+            </div>
+          </div>
 
         </div><!-- end panel-main -->
 
 
-
-        <!-- ══ PREP ══ -->
-        <div class="panel drawer" id="panel-prep"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">PREP</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
+<div class="panel drawer" id="panel-prep"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">PREP</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
           <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Prep</div>
           <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Set the deal. The system adapts everything else.</div>
 
@@ -692,8 +626,7 @@ select.field option{background:var(--bg3)}
           <div id="prep-output"><div class="ph"><div class="ph-icon">🎯</div><div class="ph-t">Ready to prep</div><div class="ph-s">Fill in the deal context above and hit Generate.</div></div></div>
         </div>
 
-        <!-- ══ HANDLE ══ -->
-        <div class="panel drawer" id="panel-handle"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">HANDLE</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
+<div class="panel drawer" id="panel-handle"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">HANDLE</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
           <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Handle</div>
           <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Select or type the objection. Get a word-for-word response.</div>
           <div class="chip-row" id="handle-chips">
@@ -712,8 +645,7 @@ select.field option{background:var(--bg3)}
           <div id="handle-output"><div class="ph"><div class="ph-icon">🛡️</div><div class="ph-t">Ready to handle</div><div class="ph-s">Select the objection and hit Handle It.</div></div></div>
         </div>
 
-        <!-- ══ ROI ══ -->
-        <div class="panel drawer" id="panel-roi"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">ROI</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
+<div class="panel drawer" id="panel-roi"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">ROI</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
           <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">ROI</div>
           <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Make the cost of inaction visible. Their numbers, not yours.</div>
           <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">
@@ -754,8 +686,7 @@ select.field option{background:var(--bg3)}
           <div id="roi-placeholder" style="background:var(--bg3);border:1.5px dashed var(--border2);border-radius:var(--radius);padding:36px;text-align:center;font-size:13px;color:var(--subtle)">Enter portal count and shipments to begin</div>
         </div>
 
-        <!-- ══ NEXT ══ -->
-        <div class="panel drawer" id="panel-next"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">NEXT</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
+<div class="panel drawer" id="panel-next"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">NEXT</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
           <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Next</div>
           <div style="font-size:13px;color:var(--muted);margin-bottom:18px">What is happening and what to do right now.</div>
           <div style="margin-bottom:12px"><label class="field-label">Live signal -- what just happened?</label><input class="field" id="nx-signal" type="text" placeholder='e.g. "They said they like it but need to loop in their boss"'></div>
@@ -773,8 +704,7 @@ select.field option{background:var(--bg3)}
           <div id="next-output"><div class="ph"><div class="ph-icon">🧭</div><div class="ph-t">Describe what just happened</div><div class="ph-s">Enter the live signal and hit Generate.</div></div></div>
         </div>
 
-        <!-- ══ CLOSE ══ -->
-        <div class="panel drawer" id="panel-close"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">CLOSE</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
+<div class="panel drawer" id="panel-close"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">CLOSE</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
           <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Close</div>
           <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Convert momentum. Get the next concrete step.</div>
           <div class="chip-row" id="close-chips">
@@ -790,8 +720,7 @@ select.field option{background:var(--bg3)}
           <div id="close-output"><div class="ph"><div class="ph-icon">🔐</div><div class="ph-t">Select their situation</div><div class="ph-s">Pick where they are and hit Close It.</div></div></div>
         </div>
 
-        <!-- ══ ADVANCE ══ -->
-        <div class="panel drawer" id="panel-advance"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">ADVANCE</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
+<div class="panel drawer" id="panel-advance"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">ADVANCE</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
           <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Advance</div>
           <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Post-call. Move the deal forward.</div>
           <div style="margin-bottom:12px"><label class="field-label">What happened on the call?</label><textarea class="field" id="adv-call" rows="3" placeholder="e.g. Good call, they liked the ROI demo. CFO wants a written summary before next meeting."></textarea></div>
@@ -800,8 +729,25 @@ select.field option{background:var(--bg3)}
           <div id="advance-output"><div class="ph"><div class="ph-icon">🚀</div><div class="ph-t">What happened?</div><div class="ph-s">Summarize the call and hit Generate.</div></div></div>
         </div>
 
-        <!-- ══ BATTLECARD ══ -->
-        <div class="panel drawer" id="panel-battlecard">
+<div class="panel drawer" id="panel-wherewewin"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">WHERE WE WIN</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
+          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Where We Win</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Scenario-specific strength framing.</div>
+          <div style="margin-bottom:12px"><label class="field-label">Scenario / lane / use case</label><input class="field" id="www-scenario" type="text" placeholder="e.g. Multi-location LTL, cross-border parcel, 5+ carriers…"></div>
+          <button class="gen-btn" onclick="runWWW()">Get Framing →</button>
+          <div id="www-output"><div class="ph"><div class="ph-icon">🏆</div><div class="ph-t">Describe the scenario</div><div class="ph-s">Enter the lane or use case and hit Generate.</div></div></div>
+        </div>
+
+<div class="panel drawer" id="panel-objtracker"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">OBJTRACKER </div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
+          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Objection Tracker</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Track patterns. Spot recurring friction.</div>
+          <div style="display:flex;gap:8px;margin-bottom:16px">
+            <input class="field" id="ot-input" type="text" placeholder="Log an objection…" style="flex:1">
+            <button class="gen-btn" style="width:auto;padding:10px 16px;margin-bottom:0;flex-shrink:0" onclick="logObj()">Log</button>
+          </div>
+          <div id="ot-list"><div class="ph" style="padding:24px"><div class="ph-icon">🔁</div><div class="ph-t">No objections logged yet</div></div></div>
+        </div>
+
+<div class="panel drawer" id="panel-battlecard">
 <div class="ptitle">Battlecard</div>
   <div class="psub">Type a competitor to get the full breakdown -- win probability, top angles, what not to say.</div>
   <div id="bc-deal-hint" style="display:none;margin-bottom:14px"></div>
@@ -869,41 +815,20 @@ select.field option{background:var(--bg3)}
   </div>
 </div>
 
-<!-- ══ ROI CALCULATOR ══ -->
-      
 
-        <!-- ══ WHERE WE WIN ══ -->
-        <div class="panel drawer" id="panel-wherewewin"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">WHERE WE WIN</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
-          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Where We Win</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Scenario-specific strength framing.</div>
-          <div style="margin-bottom:12px"><label class="field-label">Scenario / lane / use case</label><input class="field" id="www-scenario" type="text" placeholder="e.g. Multi-location LTL, cross-border parcel, 5+ carriers…"></div>
-          <button class="gen-btn" onclick="runWWW()">Get Framing →</button>
-          <div id="www-output"><div class="ph"><div class="ph-icon">🏆</div><div class="ph-t">Describe the scenario</div><div class="ph-s">Enter the lane or use case and hit Generate.</div></div></div>
-        </div>
-
-        <!-- ══ OBJECTION TRACKER ══ -->
-        <div class="panel drawer" id="panel-objtracker"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">OBJTRACKER </div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
-          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Objection Tracker</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Track patterns. Spot recurring friction.</div>
-          <div style="display:flex;gap:8px;margin-bottom:16px">
-            <input class="field" id="ot-input" type="text" placeholder="Log an objection…" style="flex:1">
-            <button class="gen-btn" style="width:auto;padding:10px 16px;margin-bottom:0;flex-shrink:0" onclick="logObj()">Log</button>
-          </div>
-          <div id="ot-list"><div class="ph" style="padding:24px"><div class="ph-icon">🔁</div><div class="ph-t">No objections logged yet</div></div></div>
-        </div>
-
-      </div><!-- end panel-wrap -->
+      </div><!-- panel-wrap -->
 
       <!-- NEXT BAR -->
       <div class="next-bar" id="next-bar">
         <button class="nb-btn" id="nb-btn" style="width:100%;padding:13px 20px;font-size:14px;font-family:'Syne',sans-serif;font-weight:800;letter-spacing:.02em">→</button>
       </div>
 
-    </div><!-- end main -->
-  </div><!-- end app-body -->
-</div><!-- end app -->
+    </div><!-- main -->
+  </div><!-- app-body -->
+</div><!-- app -->
 
 <script>
+
 // ══ DEAL MEMORY ══
 // ══ MULTI-DEAL ENGINE ══
 var deals = [];
@@ -1149,7 +1074,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v11.5 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v11.6 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1239,8 +1164,12 @@ function syncDeal(){
   deal.updatedAt = Date.now();
   if(deal.client && deal.client.trim().length > 1) saveDeals();
   updateDealBar();
-  updateCommandSurface();
-  updateDashboard();
+  // Only update surface/dashboard if no drawer is open
+  var drawerOpen=document.querySelector('.panel.drawer.on');
+  if(!drawerOpen){
+    updateCommandSurface();
+    updateDashboard();
+  }
   var rs=document.getElementById('r-ships');if(rs&&deal.ships&&!rs.value)rs.value=deal.ships;
   var rp=document.getElementById('r-portals');if(rp&&deal.carriers&&!rp.value)rp.value=deal.carriers;
 }
@@ -2051,12 +1980,12 @@ var DISC_HINTS = [
 ];
 
 function updateDiscoveryPanel(){
-  // Fade distractions during discovery
-  var editBtn=document.getElementById('status-edit-btn');
-  var delBtn=document.getElementById('status-del-btn');
-  if(editBtn)editBtn.style.display='none';
-  if(delBtn)delBtn.style.display='none';
-
+  // Only hide edit/delete if discovery layer is the active layer
+  var discLayer=document.getElementById('main-discovery');
+  if(discLayer&&discLayer.style.display!=='none'){
+    var editBtn=document.getElementById('status-edit-btn');
+    if(editBtn)editBtn.style.display='none';
+  }
   if(!deal.client) return;
 
   var answered=discoveryProgress.answered.length;
@@ -2112,11 +2041,17 @@ function updateDiscoveryPanel(){
   var answBtn=document.getElementById('disc-answered-btn');
   var skipBtn=document.getElementById('disc-skip-btn');
   var qBlock=document.getElementById('disc-question-block');
-  if(answered>=8||(cur>=total-1&&answered>0)){
+  // Show Complete button when: 8+ answered OR all questions visited with 6+ answered
+  var allVisited=(discoveryProgress.current>=total);
+  if(answered>=8||(allVisited&&answered>=6)){
     if(completeArea)completeArea.style.display='block';
+  } else {
+    if(completeArea)completeArea.style.display='none';
   }
-  if(cur>=total){
+  if(allVisited){
     if(qBlock)qBlock.style.display='none';
+  } else {
+    if(qBlock)qBlock.style.display='block';
   }
 }
 
@@ -2137,10 +2072,15 @@ var DISC_INSIGHT_ICONS={1:"✔",2:"⚠",3:"🚨"};
 var DISC_INSIGHT_COLORS={1:"var(--green)",2:"var(--amber)",3:"var(--red)"};
 var DISC_FOCUS_LABELS=["Tools","People","Process","Control","Services","Carriers","Volume","Automation","Costs","Scale","Done"];
 
+var _discAdvanceTimer=null;
+
 function discSaveAnswer(){
+  // Guard: don't fire if already in the "next question" phase
+  var btn=document.getElementById('disc-answered-btn');
+  if(btn&&btn.textContent==='Next Question →') return;
+
   var answerEl=document.getElementById('disc-answer-input');
   var answerText=answerEl?answerEl.value.trim():'';
-  var btn=document.getElementById('disc-answered-btn');
 
   // Phase 1: save and show insight
   var cur=discoveryProgress.current;
@@ -2192,12 +2132,18 @@ function discSaveAnswer(){
   if(answerEl) answerEl.disabled=true;
   saveDeals();
 
-  // Auto-advance after 2.2s -- system pulls user forward
-  setTimeout(function(){ discAdvance(); }, 2200);
+  // Auto-advance after 2.2s — cancel if user clicks Next Question manually
+  if(_discAdvanceTimer) clearTimeout(_discAdvanceTimer);
+  _discAdvanceTimer = setTimeout(function(){ discAdvance(); }, 2200);
 }
 
 function discAdvance(){
+  // Cancel any pending auto-advance timer
+  if(_discAdvanceTimer){ clearTimeout(_discAdvanceTimer); _discAdvanceTimer=null; }
+
   var cur=discoveryProgress.current;
+  // Guard: don't advance past end
+  if(cur >= DISCOVERY_QUESTIONS.length) return;
   discoveryProgress.current=Math.min(cur+1, DISCOVERY_QUESTIONS.length);
 
   // Reset button
@@ -2647,6 +2593,185 @@ function clearPrepFields(){
 
 
 
+
+
+
+function archiveProspect(){
+  if(!deal.client){showToast('No active prospect to archive.');return;}
+  var clientName=deal.client;
+  var existing=document.getElementById('archive-modal');if(existing)existing.remove();
+  var inDiscovery=!deal.discoveryDone&&deal.client&&discoveryProgress.answered.length>0;
+  var modal=document.createElement('div');
+  modal.id='archive-modal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;display:flex;align-items:center;justify-content:center;padding:20px';
+  var box=document.createElement('div');
+  box.style.cssText='background:var(--bg2);border:1px solid var(--am3);border-radius:var(--radius-lg);padding:28px;max-width:360px;width:100%';
+  var lbl=document.createElement('div');lbl.style.cssText='font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--amber);margin-bottom:10px';lbl.textContent='Archive Prospect';
+  var nm=document.createElement('div');nm.style.cssText='font-family:Syne,sans-serif;font-size:20px;font-weight:900;color:var(--text);margin-bottom:12px';nm.textContent=clientName;
+  box.appendChild(lbl);box.appendChild(nm);
+  if(inDiscovery){
+    var w=document.createElement('div');w.style.cssText='background:var(--am2);border:1px solid var(--am3);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--amber)';
+    w.textContent='You are mid-discovery. Archiving preserves all progress.';box.appendChild(w);
+  } else {
+    var i=document.createElement('div');i.style.cssText='font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6';
+    i.textContent='All discovery data will be preserved. Restore at any time.';box.appendChild(i);
+  }
+  var btns=document.createElement('div');btns.style.cssText='display:flex;gap:8px';
+  var ab=document.createElement('button');ab.style.cssText='flex:1;background:var(--amber);border:none;border-radius:8px;padding:11px;font-family:Syne,sans-serif;font-size:13px;font-weight:800;color:#fff;cursor:pointer';ab.textContent='Archive';
+  ab.onclick=function(){confirmArchiveProspect();modal.remove();};
+  var cb=document.createElement('button');cb.style.cssText='flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:11px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer';cb.textContent='Cancel';
+  cb.onclick=function(){modal.remove();};
+  btns.appendChild(ab);btns.appendChild(cb);box.appendChild(btns);
+  modal.appendChild(box);document.body.appendChild(modal);
+}
+
+function confirmArchiveProspect(){
+  var clientName=deal.client;
+  try{var arch=JSON.parse(localStorage.getItem('cos_archived')||'[]');arch.unshift(Object.assign({},deal,{archivedAt:Date.now()}));localStorage.setItem('cos_archived',JSON.stringify(arch.slice(0,50)));}catch(e){}
+  deals=deals.filter(function(d){return d.id!==activeDealId;});
+  activeDealId=deals.length>0?deals[0].id:null;
+  if(activeDealId){setActiveDeal(activeDealId);}
+  else{deal=newDealObj();flowState={liveSignal:'',explicitNeed:'',callEnded:false,numbersShown:false,objectionActive:false,objectionHandled:false,closeReady:false};}
+  saveDeals();clearPrepFields();closeDrawer();_updateTopBar();
+  if(deal.client) goTo('snapshot'); else goTo('overview');
+  showToast(clientName+' archived.');
+}
+
+function viewArchivedDeals(){
+  try{
+    var arch=JSON.parse(localStorage.getItem('cos_archived')||'[]');
+    if(!arch.length){showToast('No archived prospects yet.');return;}
+    var existing=document.getElementById('archived-modal');if(existing)existing.remove();
+    var modal=document.createElement('div');modal.id='archived-modal';
+    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;display:flex;align-items:center;justify-content:center;padding:20px';
+    var shell=document.createElement('div');shell.style.cssText='background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);max-width:420px;width:100%;max-height:80vh;display:flex;flex-direction:column';
+    var hdr=document.createElement('div');hdr.style.cssText='padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between';
+    var t=document.createElement('div');t.style.cssText='font-family:Syne,sans-serif;font-size:16px;font-weight:900;color:var(--text)';t.textContent='Archived Prospects';
+    var xb=document.createElement('button');xb.style.cssText='background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer';xb.textContent='×';xb.onclick=function(){modal.remove();};
+    hdr.appendChild(t);hdr.appendChild(xb);
+    var list=document.createElement('div');list.style.cssText='overflow-y:auto;flex:1';
+    arch.slice(0,20).forEach(function(d){
+      var row=document.createElement('div');row.style.cssText='padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px';
+      var info=document.createElement('div');
+      var n=document.createElement('div');n.style.cssText='font-size:13px;font-weight:600;color:var(--text)';n.textContent=d.client;
+      var m=document.createElement('div');m.style.cssText='font-size:11px;color:var(--subtle)';m.textContent=cap(d.stage||'prep')+' · '+(d.archivedAt?new Date(d.archivedAt).toLocaleDateString('en-CA',{month:'short',day:'numeric'}):'');
+      info.appendChild(n);info.appendChild(m);
+      var btn=document.createElement('button');btn.style.cssText='background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer';btn.textContent='Restore';
+      btn.onclick=(function(id){return function(){restoreArchivedDeal(id);modal.remove();};})(d.id);
+      row.appendChild(info);row.appendChild(btn);list.appendChild(row);
+    });
+    shell.appendChild(hdr);shell.appendChild(list);modal.appendChild(shell);document.body.appendChild(modal);
+  }catch(e){showToast('No archived prospects.');}
+}
+
+function restoreArchivedDeal(id){
+  try{
+    var arch=JSON.parse(localStorage.getItem('cos_archived')||'[]');
+    var found=arch.find(function(d){return d.id===id;});
+    if(!found){showToast('Could not restore.');return;}
+    arch=arch.filter(function(d){return d.id!==id;});
+    localStorage.setItem('cos_archived',JSON.stringify(arch));
+    found.archivedAt=null;
+    deals.push(found);
+    setActiveDeal(found.id);
+    saveDeals();
+    _updateTopBar();
+    goTo('snapshot');
+    showToast(found.client+' restored.');
+  }catch(e){showToast('Restore failed.');}
+}
+
+function toggleMoreMenu(){
+  var m=document.getElementById('mm-drop');if(!m)return;
+  if(m.classList.contains('open')){m.classList.remove('open');return;}
+  m.classList.add('open');
+  setTimeout(function(){document.addEventListener('click',function cl(e){if(!m.contains(e.target)){m.classList.remove('open');}document.removeEventListener('click',cl);});},10);
+}
+
+function toggleProspectMenu(){
+  var m=document.getElementById('pm-drop');if(!m)return;
+  if(m.classList.contains('open')){m.classList.remove('open');return;}
+  var named=deals.filter(function(d){return d.client&&d.client.trim().length>1;});
+  m.innerHTML='';
+  named.forEach(function(d){
+    var isA=d.id===activeDealId;
+    var div=document.createElement('div');div.className='drop-item';
+    div.innerHTML=(isA?'<span style="color:var(--green)">●</span> ':'<span style="color:var(--subtle)">○</span> ')
+      +'<span style="font-weight:'+(isA?700:400)+';color:var(--text)">'+d.client+'</span>';
+    div.onclick=(function(id){return function(){m.classList.remove('open');_openDeal(id);};})(d.id);
+    m.appendChild(div);
+  });
+  var div2=document.createElement('div');div2.className='drop-divider';m.appendChild(div2);
+  var newBtn=document.createElement('div');newBtn.className='drop-item';
+  newBtn.innerHTML='<span style="color:var(--green)">＋</span> <span>New prospect</span>';
+  newBtn.onclick=function(){m.classList.remove('open');createDeal();};
+  m.appendChild(newBtn);
+  var arcBtn=document.createElement('div');arcBtn.className='drop-item';
+  arcBtn.innerHTML='<span>📁</span> <span>View archived</span>';
+  arcBtn.onclick=function(){m.classList.remove('open');viewArchivedDeals();};
+  m.appendChild(arcBtn);
+  m.classList.add('open');
+  setTimeout(function(){document.addEventListener('click',function cl(e){if(!m.contains(e.target)){m.classList.remove('open');}document.removeEventListener('click',cl);});},10);
+}
+
+
+// ── Stubs & compat ──
+function renderDealList(){}
+function updateDashboard(){
+  if(!deal.client) return;
+  var stage=resolveStage(deal);
+  var clientEl=document.getElementById('dash-client');if(clientEl)clientEl.textContent=deal.client;
+  var stageEl=document.getElementById('dash-stage-chip');if(stageEl)stageEl.textContent=cap(stage);
+  var answered=discoveryProgress.answered.length;
+  var progEl=document.getElementById('dash-progress-text');
+  if(progEl){if(deal.discoveryDone)progEl.textContent='Discovery complete';else progEl.textContent='Discovery: '+answered+' / '+DISCOVERY_QUESTIONS.length;}
+  var mom=deal.momentum||'neutral';
+  var momEl=document.getElementById('dash-momentum-chip');
+  if(momEl)momEl.textContent=(mom==='advancing'?'🟢':mom==='stalling'?'🔴':'🟡')+' '+cap(mom);
+  var fbEl=document.getElementById('dash-flow-btn');
+  if(fbEl&&fbEl.style.display!=='none'){fbEl.textContent=deal.discoveryDone?'Go to Command →':'Start discovery →';}
+}
+
+function calcEfficiencyScore(){
+  if(!deal.discoveryAnswers) return 100;
+  var a=deal.discoveryAnswers; var d=0;
+  var t=a.tools||''; var au=a.automation||''; var co=a.costs||''; var ti=a.time||''; var sc=a.scale||'';
+  if(t.match(/\d+/)){var n=parseInt(t.match(/\d+/)[0]);d+=Math.min(n*4,20);}
+  if(/manual|spreadsheet|email|phone|multiple/i.test(au))d+=15;
+  if(/don.t|no tracking|not sure|excel/i.test(co))d+=18;
+  if(/hours|days|manual|always|constantly/i.test(ti))d+=12;
+  if(/break|problem|struggle|difficult/i.test(sc))d+=10;
+  d+=Math.min(discoveryProgress.answered.length*2,12);
+  return Math.max(100-d,28);
+}
+
+function updateEfficiencyScore(){
+  var score=calcEfficiencyScore();
+  var numEl=document.getElementById('disc-eff-score');
+  var barEl=document.getElementById('disc-eff-bar');
+  var lblEl=document.getElementById('disc-eff-label');
+  var col=score>=75?'var(--green)':score>=50?'var(--amber)':'var(--red)';
+  if(numEl){numEl.textContent=score;numEl.style.color=col;}
+  if(barEl){barEl.style.width=score+'%';barEl.style.background=col;}
+  if(lblEl){lblEl.textContent=score>=75?'Efficient':score>=50?'At Risk':'Needs Work';lblEl.style.color=col;}
+}
+
+function copyDirective(){
+  var parts=[];
+  var say=document.getElementById('d-say');if(say&&say.textContent&&say.textContent!=='—')parts.push('Say this: '+say.textContent);
+  var ask=document.getElementById('d-ask');if(ask&&ask.textContent&&ask.textContent!=='—')parts.push('Then ask: '+ask.textContent);
+  var means=document.getElementById('d-means');if(means&&means.textContent&&means.textContent!=='—')parts.push('Means: '+means.textContent);
+  var risk=document.getElementById('d-risk');if(risk&&risk.textContent&&risk.textContent!=='—')parts.push('Risk: '+risk.textContent);
+  var text=parts.join('\n\n');
+  if(text)copyText(text,document.querySelector('.directive .copy-btn'));else showToast('Nothing to copy yet.');
+}
+
+function showPanel(id){
+  var map={followup:'advance',closingflow:'close',nextmove:'next'};
+  var target=map[id]||id;
+  if(DRAWER_PANELS.indexOf(target)>=0) openDrawer(target,document.querySelector('[data-p="'+target+'"]'));
+  else showToast('Opening '+id+'...');
+}
 </script>
 </body>
 </html>
