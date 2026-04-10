@@ -27,7 +27,7 @@ button{cursor:pointer}
 /* ══ LOGIN ══ */
 #login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px}
 .lbox{width:100%;max-width:340px}
-.l-logo{font-family:'Syne',sans-serif;font-size:40px;font-weight:900;letter-spacing:-2px;margin-bottom:2px;user-select:none}
+.l-logo{font-family:'Syne',sans-serif;font-size:40px;font-weight:900;letter-spacing:-2px;margin-bottom:2px;user-select:none;background:none;border:none;padding:0;cursor:pointer;color:var(--text);display:block;text-align:left}
 .l-logo span{color:var(--green)}
 .l-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--green);background:var(--g2);border:1px solid var(--g3);border-radius:4px;padding:2px 8px;display:inline-block;margin-bottom:28px}
 .l-tabs{display:flex;border-bottom:1px solid var(--border2);margin-bottom:20px}
@@ -47,7 +47,7 @@ button{cursor:pointer}
 
 /* ── TOPBAR ── */
 .topbar{height:48px;display:flex;align-items:center;padding:0 18px;border-bottom:1px solid var(--border);flex-shrink:0;gap:12px;background:var(--bg)}
-.tb-logo{font-family:'Syne',sans-serif;font-size:17px;font-weight:900;letter-spacing:-.5px;user-select:none}
+.tb-logo{font-family:'Syne',sans-serif;font-size:17px;font-weight:900;letter-spacing:-.5px;user-select:none;background:none;border:none;padding:0;cursor:pointer;color:var(--text);flex-shrink:0}
 .tb-logo span{color:var(--green)}
 .tb-stage-bar{flex:1;display:flex;align-items:center;gap:2px;overflow:hidden}
 .stage-pip{font-size:10px;font-weight:700;padding:4px 9px;border-radius:6px;color:var(--subtle);transition:all .2s;cursor:default;white-space:nowrap;border:1px solid transparent;user-select:none}
@@ -239,741 +239,6 @@ body.light select.field option{background:var(--bg3)}
 </style>
 </head>
 <body>
-
-<div class="sb-overlay" id="sb-overlay" onclick="closeSB()"></div>
-<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
-<div class="toast" id="toast"></div>
-
-<!-- API KEY MODAL -->
-<div id="api-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9995;align-items:center;justify-content:center;padding:20px">
-  <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:28px;max-width:400px;width:100%">
-    <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:10px">⚙️ API Key</div>
-    <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:900;color:var(--text);margin-bottom:8px">Connect Anthropic</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6">Your key is stored locally and never sent anywhere except Anthropic's API.</div>
-    <input id="api-key-input" type="password" placeholder="sk-ant-..." style="width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:9px;padding:11px 14px;color:var(--text);font-size:13px;outline:none;margin-bottom:10px;font-family:'DM Sans',sans-serif">
-    <div style="display:flex;gap:8px">
-      <button onclick="saveApiKey()" style="flex:1;background:var(--green);border:none;border-radius:9px;padding:11px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer">Save Key</button>
-      <button onclick="closeApiModal()" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:9px;padding:11px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer">Cancel</button>
-    </div>
-    <div id="api-key-status" style="font-size:12px;margin-top:10px;text-align:center"></div>
-  </div>
-</div>
-
-<!-- ══ LOGIN ══ -->
-<div id="login-screen">
-  <div class="lbox">
-    <div class="l-logo" onclick="bypass()" style="cursor:pointer">LAZR<span style="pointer-events:none">.</span></div>
-    <div class="l-tag">Command OS</div>
-    <div class="l-tabs">
-      <button class="l-tab on" id="tab-si" onclick="switchTab('si')">Sign In</button>
-      <button class="l-tab" id="tab-su" onclick="switchTab('su')">Sign Up</button>
-    </div>
-    <div id="form-si">
-      <form onsubmit="login(event)">
-        <input class="lf" id="l-u" type="text" placeholder="Username" autocapitalize="off" autocomplete="username">
-        <input class="lf" id="l-p" type="password" placeholder="Password" autocomplete="current-password">
-        <button class="lbtn" type="submit">Sign In →</button>
-      </form>
-      <div class="lerr" id="l-err"></div>
-    </div>
-    <div id="form-su" style="display:none">
-      <form onsubmit="signup(event)">
-        <input class="lf" id="su-n" type="text" placeholder="Full name" autocapitalize="words">
-        <input class="lf" id="su-u" type="text" placeholder="Username" autocapitalize="off">
-        <input class="lf" id="su-p" type="password" placeholder="Password (min 6)">
-        <input class="lf" id="su-p2" type="password" placeholder="Confirm password">
-        <button class="lbtn" type="submit">Create Account →</button>
-      </form>
-      <div class="lerr" id="su-err"></div>
-      <div class="lsuccess" id="su-ok" style="display:none">✅ Created — signing you in…</div>
-    </div>
-    <div class="l-hint">Triple-click LAZR. or Ctrl+Shift+D to bypass</div>
-  </div>
-</div>
-
-<!-- ══ APP ══ -->
-<div id="app">
-
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <button id="menu-btn" style="display:none;background:none;border:none;color:var(--muted);font-size:18px;padding:0 6px 0 0" onclick="toggleSB()">☰</button>
-    <div class="tb-logo" onclick="bypass()" style="cursor:pointer">LAZR<span style="pointer-events:none">.</span></div>
-    <div class="tb-stage-bar" id="stage-bar">
-      <div class="stage-pip">Prep</div>
-      <span class="stage-sep">›</span>
-      <div class="stage-pip">Discover</div>
-      <span class="stage-sep">›</span>
-      <div class="stage-pip">Position</div>
-      <span class="stage-sep">›</span>
-      <div class="stage-pip">ROI</div>
-      <span class="stage-sep">›</span>
-      <div class="stage-pip">Close</div>
-      <span class="stage-sep">›</span>
-      <div class="stage-pip">Advance</div>
-    </div>
-    <div class="tb-right">
-      <span class="tb-user" id="tb-user"></span>
-      <button class="tb-btn" onclick="toggleLang()" id="lang-btn">🇫🇷</button>
-      <button class="tb-btn" onclick="toggleTheme()" id="theme-btn">☀️</button>
-      <button class="tb-btn" onclick="showApiKeyModal()" id="api-btn" title="Set API key">⚙️</button>
-      <button class="tb-btn red" onclick="doLogout()">Logout</button>
-    </div>
-  </div>
-
-  <!-- BODY -->
-  <div class="app-body">
-
-    <!-- SIDEBAR -->
-    <div class="sidebar" id="sidebar">
-      <div class="sb-nav">
-        <div class="sb-item on" onclick="nav('main',this)" data-p="main" style="margin-bottom:4px">
-          <span class="si-icon" style="font-size:18px">⚡</span>
-          <span class="si-label" style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--green)">LAZR</span>
-        </div>
-        <div class="sb-sec">Tools</div>
-        <div class="sb-item" onclick="openDrawer('prep',this)" data-p="prep"><span class="si-icon">🎯</span><span class="si-label">Deal Setup</span></div>
-        <div class="sb-item" onclick="openDrawer('handle',this)" data-p="handle"><span class="si-icon">🛡️</span><span class="si-label">Handle</span></div>
-        <div class="sb-item" onclick="openDrawer('roi',this)" data-p="roi"><span class="si-icon">📊</span><span class="si-label">ROI</span></div>
-        <div class="sb-item" onclick="openDrawer('close',this)" data-p="close"><span class="si-icon">🔐</span><span class="si-label">Close</span></div>
-        <div class="sb-item" onclick="openDrawer('advance',this)" data-p="advance"><span class="si-icon">🚀</span><span class="si-label">Advance</span></div>
-        <div class="sb-item" onclick="openDrawer('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
-      </div>
-      <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v12.9</div>
-        <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
-      </div>
-    </div>
-
-    <!-- MAIN -->
-    <div class="main">
-      <div class="panel-wrap">
-
-        <!-- ══ MAIN PANEL ══ -->
-        <div class="panel on" id="panel-main">
-
-          <!-- LAYER 0: No deal -->
-          <div id="main-nodeal" style="text-align:center;padding:60px 20px;display:none">
-            <div style="font-size:36px;margin-bottom:14px;opacity:.25">⚡</div>
-            <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:900;color:var(--muted);margin-bottom:6px">No active deal</div>
-            <div style="font-size:12px;color:var(--subtle);margin-bottom:24px">Create a deal to begin the guided flow.</div>
-            <button class="gen-btn" style="width:auto;padding:11px 28px" onclick="createDeal()">+ New Deal</button>
-          </div>
-
-          <!-- LAYER 1: Status strip -->
-          <div id="main-status" style="display:none">
-            <div id="status-strip" style="display:flex;align-items:center;gap:8px;padding:8px 0;margin-bottom:14px;border-bottom:1px solid var(--border);flex-wrap:wrap">
-              <!-- Prospect selector -->
-              <div style="position:relative">
-                <button class="prospect-btn" onclick="toggleProspectMenu()" style="background:none;border:1px solid var(--border2);border-radius:7px;padding:4px 10px;font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:5px;max-width:160px;overflow:hidden">
-                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="dash-client">—</span>
-                  <span style="font-size:9px;color:var(--muted);flex-shrink:0">▾</span>
-                </button>
-                <div class="drop-menu" id="prospect-menu" style="top:calc(100% + 5px);left:0;min-width:200px">
-                  <div id="prospect-menu-list"></div>
-                  <div class="drop-divider"></div>
-                  <div class="drop-item" onclick="createDeal();document.getElementById('prospect-menu').classList.remove('open')">
-                    <span style="color:var(--green)">＋</span> New prospect
-                  </div>
-                  <div class="drop-item" onclick="viewArchivedDeals();document.getElementById('prospect-menu').classList.remove('open')">
-                    <span>📁</span> View archived
-                  </div>
-                </div>
-              </div>
-              <span style="color:var(--border2);font-size:11px">·</span>
-              <span id="dash-stage-chip" style="font-size:9px;font-weight:800;text-transform:uppercase;color:var(--green)">—</span>
-              <span style="color:var(--border2);font-size:11px">·</span>
-              <span id="dash-progress-text" style="font-size:11px;color:var(--muted)">—</span>
-              <span style="color:var(--border2);font-size:11px">·</span>
-              <span id="dash-momentum-chip" style="font-size:11px;color:var(--subtle)">🟡</span>
-              <div style="margin-left:auto;display:flex;align-items:center;gap:4px">
-                <button id="dash-flow-btn" onclick="continueDealFromDashboard()" style="display:none;background:var(--green);border:none;border-radius:7px;padding:6px 14px;font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap">Continue →</button>
-                <button id="status-edit-btn" onclick="openDrawer('prep',document.querySelector('[data-p=prep]'))" style="background:none;border:none;padding:4px 7px;font-size:12px;cursor:pointer" title="Edit deal">✏️</button>
-                <!-- More options -->
-                <div style="position:relative">
-                  <button onclick="toggleMoreMenu()" style="background:none;border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-size:13px;color:var(--muted);cursor:pointer;line-height:1" title="More options">⋯</button>
-                  <div class="drop-menu" id="more-menu" style="top:calc(100%+5px);right:0">
-                    <div class="drop-item" onclick="openDrawer('prep',document.querySelector('[data-p=prep]'));document.getElementById('more-menu').classList.remove('open')">✏️ Edit prospect</div>
-                    <div class="drop-item warn" onclick="archiveProspect();document.getElementById('more-menu').classList.remove('open')">📁 Archive</div>
-                    <div class="drop-item danger" id="status-del-btn" onclick="showDeleteModal();document.getElementById('more-menu').classList.remove('open')">🗑 Delete</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- LAYER 2: Discovery -->
-          <div id="main-discovery" style="display:none">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap">
-              <div>
-                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px">Building your</div>
-                <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:900;color:var(--text);margin-bottom:2px">Shipping Efficiency Score</div>
-                <div style="font-size:12px;color:var(--muted)">Each answer reveals where cost and time are being lost.</div>
-              </div>
-              <div style="text-align:right;flex-shrink:0">
-                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:2px">Score</div>
-                <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:900;color:var(--green);line-height:1" id="disc-eff-score">100</div>
-                <div style="font-size:9px;color:var(--muted);margin-top:1px" id="disc-eff-label">Efficient</div>
-              </div>
-            </div>
-            <div style="background:var(--bg3);border-radius:3px;height:3px;margin-bottom:16px;overflow:hidden">
-              <div id="disc-eff-bar" style="background:var(--green);height:100%;width:100%;border-radius:3px;transition:width .6s ease,background .4s ease"></div>
-            </div>
-
-            <!-- Progress -->
-            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Progress</div>
-                <div style="font-size:12px;font-weight:800;color:var(--green)" id="disc-progress-label">0 / 11</div>
-              </div>
-              <div style="background:var(--bg3);border-radius:4px;height:4px;overflow:hidden;margin-bottom:7px">
-                <div id="disc-progress-bar" style="background:var(--green);height:100%;width:0%;border-radius:4px;transition:width .4s ease"></div>
-              </div>
-              <div style="display:flex;align-items:center;justify-content:space-between">
-                <div style="font-size:11px;color:var(--subtle)" id="disc-current-level">L1 · Execution · Q1</div>
-                <div style="font-size:11px;color:var(--green);font-weight:700" id="disc-next-focus">Next focus: Tools</div>
-              </div>
-            </div>
-
-            <!-- Insight flash -->
-            <div id="disc-insight-flash" style="display:none;margin-bottom:14px;animation:fup .25s ease">
-              <!-- Insight card -->
-              <div style="background:var(--bg2);border-left:4px solid var(--green);border:1px solid var(--g3);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px">
-                <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-                  <span style="font-size:13px" id="disc-flash-icon">✔</span>
-                  <span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green)" id="disc-flash-label">Insight captured</span>
-                </div>
-                <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px" id="disc-insight-answer">—</div>
-                <div style="font-size:12px;color:var(--muted);margin-bottom:2px" id="disc-insight-text">—</div>
-                <div style="font-size:12px;color:var(--green);font-weight:700;margin-top:5px" id="disc-insight-next">—</div>
-              </div>
-
-            </div>
-
-            <!-- Question block -->
-            <div id="disc-question-block" style="background:linear-gradient(135deg,rgba(61,220,132,.12) 0%,rgba(61,220,132,.04) 100%);border:2px solid var(--green);border-radius:var(--radius-lg);padding:20px 22px;margin-bottom:14px">
-              <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:5px">Current Step</div>
-              <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:12px" id="disc-q-level">L1 · Execution</div>
-              <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:12px" id="disc-q-text">—</div>
-              <div style="font-size:11px;color:var(--subtle);margin-bottom:14px;font-style:italic" id="disc-q-hint">—</div>
-              <div style="margin-bottom:10px">
-                <label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px;display:block">What they said</label>
-                <textarea id="disc-answer-input" rows="2" placeholder="Type their answer here…" style="width:100%;background:rgba(0,0,0,.25);border:1.5px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;resize:none;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='var(--border2)'"></textarea>
-              </div>
-              <button id="disc-answered-btn" onclick="discSaveAnswer()" style="width:100%;background:var(--green);border:none;border-radius:8px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer">Save Answer →</button>
-              <button id="disc-skip-btn" onclick="discSkip()" style="width:100%;background:none;border:none;padding:8px;font-size:11px;color:var(--subtle);cursor:pointer;margin-top:4px">Skip this question</button>
-            </div>
-
-            <!-- All questions (collapsed) -->
-            <details style="margin-bottom:14px">
-              <summary style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);cursor:pointer;padding:8px 0">All questions ▾</summary>
-              <div id="disc-q-list" style="margin-top:8px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px"></div>
-            </details>
-
-            <!-- Discovery Complete transition -->
-            <div id="disc-complete-area" style="display:none">
-              <div style="background:linear-gradient(135deg,rgba(61,220,132,.15),rgba(61,220,132,.05));border:2px solid var(--green);border-radius:var(--radius-lg);padding:20px;margin-bottom:12px;text-align:center">
-                <div style="font-size:28px;margin-bottom:8px">✅</div>
-                <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:900;color:var(--green);margin-bottom:6px">Discovery Complete</div>
-                <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:4px">You have enough signal to position value and run execution guidance.</div>
-                <div style="font-size:11px;color:var(--subtle);margin-bottom:16px" id="disc-complete-count">— questions answered</div>
-                <button class="gen-btn" style="margin-bottom:0;font-size:15px;padding:14px" onclick="discComplete();showLayer('command')">Go to Command →</button>
-                <div style="font-size:11px;color:var(--subtle);margin-top:10px;line-height:1.6">Next step: Move into Command to position Lazr around the operational gaps uncovered.</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- LAYER 3: Command -->
-          <div id="main-command" style="display:none">
-            <!-- Locked state -->
-            <div id="cmd-lock" style="display:none;text-align:center;padding:48px 20px">
-              <div style="font-size:28px;margin-bottom:12px;opacity:.3">🔒</div>
-              <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:900;color:var(--text);margin-bottom:8px">⚡ Command Locked</div>
-              <div style="font-size:13px;color:var(--muted);margin-bottom:6px;max-width:260px;margin-left:auto;margin-right:auto">Complete discovery to unlock live execution guidance.</div>
-              <div style="font-size:11px;color:var(--subtle);opacity:.7;margin-bottom:20px;font-style:italic">Every answer you capture sharpens the directive.</div>
-              <button style="background:var(--green);border:none;border-radius:8px;padding:11px 24px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer" onclick="showLayer('discovery')">Go to Discovery →</button>
-            </div>
-
-            <!-- Command surface -->
-            <div id="cmd-surface">
-              <div id="command-flow-banner" style="margin-bottom:12px">
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
-                  <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text)" id="command-stage-now">—</div>
-                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);background:var(--g2);border:1px solid var(--g3);border-radius:4px;padding:2px 7px" id="command-stage-badge">—</div>
-                </div>
-                <div style="display:flex;align-items:center;gap:10px">
-                  <div style="font-size:11px;color:var(--subtle)" id="command-stage-next">—</div>
-                  <div style="font-size:11px;color:var(--green);font-weight:700" id="command-stage-action">—</div>
-                </div>
-              </div>
-
-              <!-- Next action block -->
-              <div id="command-next-action" style="background:linear-gradient(135deg,rgba(61,220,132,.13) 0%,rgba(61,220,132,.04) 100%);border:2px solid var(--green);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:14px;display:none">
-                <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:10px;font-style:italic" id="cna-question">—</div>
-                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-                  <div style="font-size:11px;color:var(--muted)" id="cna-progress">—</div>
-                  <button id="cna-btn" style="background:var(--green);border:none;border-radius:8px;padding:9px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer">Continue →</button>
-                </div>
-              </div>
-
-              <!-- Directive -->
-              <div class="directive" id="deal-directive">
-                <span class="dir-eye">▶ Do This Now</span>
-                <div class="dir-field">
-                  <span class="dir-field-label">Say this</span>
-                  <div class="say-text" id="d-say">Complete discovery to get your first directive.</div>
-                </div>
-                <div class="dir-field">
-                  <span class="dir-field-label">Then ask</span>
-                  <div class="ask-text" id="d-ask">—</div>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-                  <div class="dir-field" style="margin-bottom:0">
-                    <span class="dir-field-label">What this means</span>
-                    <div class="insight-text" id="d-means">—</div>
-                  </div>
-                  <div class="dir-field" style="margin-bottom:0">
-                    <span class="dir-field-label">Risk if unchanged</span>
-                    <div class="risk-text" id="d-risk">—</div>
-                  </div>
-                </div>
-                <div style="display:flex;align-items:center;justify-content:flex-end">
-                  <div class="dir-status" id="d-status">🟡</div>
-                </div>
-                <button class="copy-btn" onclick="copyDirective()">Copy</button>
-              </div>
-
-              <!-- Post-positioning sequence (hidden until positioning done) -->
-              <div id="cmd-post-pos" style="display:none">
-
-                <!-- Alignment check -->
-                <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px">
-                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:8px">Alignment Check</div>
-                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Say this</div>
-                  <div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:rgba(61,220,132,.07);border-left:3px solid var(--green);border-radius:6px;margin-bottom:0" id="pp-align-say">Does that align with how things are working on your end today?</div>
-                </div>
-
-                <!-- Micro-commitment -->
-                <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px">
-                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--blue);margin-bottom:8px">Micro-Commitment</div>
-                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Then ask</div>
-                  <div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:var(--b2);border-left:3px solid var(--blue);border-radius:6px" id="pp-commit-ask">If that was streamlined into one system, would that make things easier for your team?</div>
-                </div>
-
-                <!-- ROI trigger (shown when numbers not yet shown) -->
-                <div id="pp-roi-block" style="display:none;background:rgba(255,95,87,.06);border:2px solid var(--r3);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px">
-                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--red);margin-bottom:8px">⛔ Stop — Show This</div>
-                  <div style="font-size:13px;color:var(--muted);margin-bottom:10px" id="pp-roi-insight">You are likely losing meaningful time and cost every month from fragmentation alone — before rate optimization even begins.</div>
-                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Say this</div>
-                  <div style="font-size:13px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:rgba(61,220,132,.07);border-left:3px solid var(--green);border-radius:6px;margin-bottom:10px">If nothing changes, this continues every month before rate optimization even begins.</div>
-                  <button onclick="openDrawer('roi',document.querySelector('[data-p=roi]'));flowState.numbersShown=true;deal.flowState=Object.assign({},flowState);saveDeals();document.getElementById('pp-roi-block').style.display='none';document.getElementById('pp-close-block').style.display='block';" style="width:100%;background:var(--red);border:none;border-radius:8px;padding:11px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#fff;cursor:pointer">Use ROI →</button>
-                </div>
-
-                <!-- Close-ready block -->
-                <div id="pp-close-block" style="display:none;background:linear-gradient(135deg,rgba(61,220,132,.13),rgba(61,220,132,.04));border:2px solid var(--green);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px">
-                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:10px">⚡ Close Ready</div>
-                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Say this</div>
-                  <div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:rgba(61,220,132,.07);border-left:3px solid var(--green);border-radius:6px;margin-bottom:8px">The next step would just be to validate this using your actual shipment data.</div>
-                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Then ask</div>
-                  <div style="font-size:13px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:var(--b2);border-left:3px solid var(--blue);border-radius:6px;margin-bottom:8px">Would you be open to sending over a few recent shipments?</div>
-                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-                    <div style="padding:10px 12px;background:var(--bg3);border-radius:8px">
-                      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:3px">What this means</div>
-                      <div style="font-size:12px;color:var(--text);line-height:1.6">They understand the problem. Now convert interest into action.</div>
-                    </div>
-                    <div style="padding:10px 12px;background:var(--am2);border-radius:8px;border:1px solid var(--am3)">
-                      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--amber);margin-bottom:3px">Risk if unchanged</div>
-                      <div style="font-size:12px;color:var(--text);line-height:1.6">Without a concrete next step, momentum fades and the problem stays theoretical.</div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Required next step CTA -->
-                <div id="pp-nextstep-block" style="display:none;margin-bottom:14px">
-                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px">Required Next Step</div>
-                  <div style="display:flex;flex-direction:column;gap:7px" id="pp-nextstep-btns"></div>
-                </div>
-
-              </div><!-- end cmd-post-pos -->
-
-              <!-- Advance Deal button (shown at close stage) -->
-              <div id="cmd-advance-deal" style="display:none;margin-bottom:14px">
-                <div style="display:flex;flex-direction:column;gap:8px">
-                  <button onclick="openDrawer('advance',document.querySelector('[data-p=advance]'))" style="width:100%;background:var(--green);border:none;border-radius:9px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer">Advance Deal →</button>
-                  <div style="display:flex;gap:8px">
-                    <button onclick="openDrawer('advance',document.querySelector('[data-p=advance]'));showToast('Request shipment data')" style="flex:1;background:none;border:1px solid var(--border2);border-radius:8px;padding:9px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer">📋 Request Data</button>
-                    <button onclick="openDrawer('advance',document.querySelector('[data-p=advance]'));showToast('Book follow-up')" style="flex:1;background:none;border:1px solid var(--border2);border-radius:8px;padding:9px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer">📅 Book Follow-Up</button>
-                    <button onclick="openDrawer('advance',document.querySelector('[data-p=advance]'));showToast('Loop in stakeholder')" style="flex:1;background:none;border:1px solid var(--border2);border-radius:8px;padding:9px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer">👥 Loop In</button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Close-ready CTA (hidden until triggered) -->
-              <div id="cmd-close-ready" style="display:none;margin-bottom:14px">
-                <div style="background:linear-gradient(135deg,rgba(61,220,132,.15),rgba(61,220,132,.05));border:2px solid var(--green);border-radius:var(--radius-lg);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-                  <div>
-                    <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:3px">⚡ Close Ready</div>
-                    <div style="font-size:13px;font-weight:700;color:var(--text)">You have enough to ask for the next step.</div>
-                  </div>
-                  <button onclick="openDrawer('close',document.querySelector('[data-p=close]'))" style="background:var(--green);border:none;border-radius:8px;padding:10px 20px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap;flex-shrink:0">Move to Close →</button>
-                </div>
-              </div>
-
-              <!-- Live signals -->
-              <div style="margin-top:12px">
-                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:6px">Live signals</div>
-                <div class="trigger-row">
-                  <button class="trigger-btn" onclick="quickTrigger('price')">💰 Mentioned price</button>
-                  <button class="trigger-btn" onclick="quickTrigger('competitor')">🥊 Uses a competitor</button>
-                  <button class="trigger-btn" onclick="quickTrigger('hesitant')">😶 Hesitant</button>
-                  <button class="trigger-btn" onclick="quickTrigger('quiet')">🔇 Gone quiet</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div><!-- end panel-main -->
-
-
-<div class="panel drawer" id="panel-prep"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">PREP</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
-          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Prep</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Set the deal. The system adapts everything else.</div>
-
-          <div class="field-row">
-            <div><label class="field-label">Client name</label><input class="field" id="p-client" type="text" placeholder="e.g. Acme Inc" oninput="debouncedSync()" autocapitalize="words" style="text-transform:capitalize"></div>
-            <div><label class="field-label">Industry</label>
-              <select class="field" id="p-industry" onchange="syncDeal()">
-                <option value="">Unknown</option>
-                <option>E-commerce</option>
-                <option>Manufacturing</option>
-                <option>Distribution / Wholesale</option>
-                <option>3PL / Logistics</option>
-                <option>Food & Beverage</option>
-                <option>Building Materials</option>
-                <option>Other</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="field-row">
-            <div><label class="field-label">Current tool / process</label>
-              <select class="field" id="p-tool" onchange="syncDeal()">
-                <option value="">Unknown</option>
-                <option value="freightcom">FreightCOM / ClickShip</option>
-                <option value="2ship">2Ship</option>
-                <option value="eshipper">eShipper</option>
-                <option value="shiptime">ShipTime</option>
-                <option value="shipstation">ShipStation</option>
-                <option value="internal">Internal / Manual</option>
-                <option value="broker">Broker only</option>
-                <option value="none">None</option>
-              </select>
-            </div>
-            <div><label class="field-label">Primary concern</label>
-              <select class="field" id="p-concern" onchange="syncDeal()">
-                <option value="">Unknown</option>
-                <option value="cost">Cost</option>
-                <option value="visibility">Visibility</option>
-                <option value="control">Control</option>
-                <option value="speed">Speed</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="field-row">
-            <div><label class="field-label">Client size</label>
-              <select class="field" id="p-size" onchange="syncDeal()">
-                <option value="smb">SMB</option>
-                <option value="large">Large</option>
-                <option value="whale">Whale</option>
-              </select>
-            </div>
-            <div><label class="field-label">Stakeholder role</label>
-              <select class="field" id="p-role" onchange="syncDeal()">
-                <option value="operations">Operations</option>
-                <option value="logistics">Logistics / Shipping</option>
-                <option value="procurement">Procurement</option>
-                <option value="finance">Finance</option>
-                <option value="executive">Executive</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="field-row">
-            <div><label class="field-label">Deal stage</label>
-              <select class="field" id="p-stage" onchange="syncDeal()">
-                <option value="prep">Prep</option>
-                <option value="discover">Discover</option>
-                <option value="position">Position</option>
-                <option value="handle">Handle</option>
-                <option value="roi">ROI</option>
-                <option value="next">Next</option>
-                <option value="close">Close</option>
-                <option value="advance">Advance</option>
-              </select>
-            </div>
-            <div><label class="field-label">Deal momentum</label>
-              <select class="field" id="p-momentum" onchange="syncDeal()">
-                <option value="neutral">Neutral</option>
-                <option value="advancing">Advancing</option>
-                <option value="stalling">Stalling</option>
-              </select>
-            </div>
-          </div>
-
-          <div style="margin-bottom:12px">
-            <label class="field-label">Shipments / month</label>
-            <input class="field" id="p-ships" type="number" placeholder="e.g. 200" oninput="debouncedSync()">
-          </div>
-          <div style="margin-bottom:12px">
-            <label class="field-label">Number of carriers / portals</label>
-            <input class="field" id="p-carriers" type="number" placeholder="e.g. 4" oninput="debouncedSync()">
-          </div>
-          <div style="margin-bottom:16px">
-            <label class="field-label">Last objection / statement (optional)</label>
-            <input class="field" id="p-lastobj" type="text" placeholder='e.g. "We already use FreightCOM and it works fine"' oninput="debouncedSync()">
-          </div>
-
-          <button class="gen-btn" onclick="runPrep()">Generate Opening Brief →</button>
-          <div id="prep-output"><div class="ph"><div class="ph-icon">🎯</div><div class="ph-t">Ready to prep</div><div class="ph-s">Fill in the deal context above and hit Generate.</div></div></div>
-        </div>
-
-<div class="panel drawer" id="panel-handle"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">HANDLE</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
-          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Handle</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Select or type the objection. Get a word-for-word response.</div>
-          <div class="chip-row" id="handle-chips">
-            <button class="chip" onclick="hChip(this)">Prices too high</button>
-            <button class="chip" onclick="hChip(this)">Using FreightCOM</button>
-            <button class="chip" onclick="hChip(this)">Using eShipper</button>
-            <button class="chip" onclick="hChip(this)">Happy with setup</button>
-            <button class="chip" onclick="hChip(this)">Not the right time</button>
-            <button class="chip" onclick="hChip(this)">Need to think</button>
-            <button class="chip" onclick="hChip(this)">Have a TMS</button>
-            <button class="chip" onclick="hChip(this)">Rates not competitive</button>
-          </div>
-          <div style="margin-bottom:12px"><label class="field-label">Or type it</label><input class="field" id="h-custom" type="text" placeholder='e.g. "We use a broker for everything"' oninput="clearHChips()"></div>
-          <div style="margin-bottom:16px"><label class="field-label">Context (optional)</label><input class="field" id="h-ctx" type="text" placeholder="e.g. Mid-call, seemed interested before this…"></div>
-          <button class="gen-btn" onclick="runHandle()">Handle It →</button>
-          <div id="handle-output"><div class="ph"><div class="ph-icon">🛡️</div><div class="ph-t">Ready to handle</div><div class="ph-s">Select the objection and hit Handle It.</div></div></div>
-        </div>
-
-<div class="panel drawer" id="panel-roi">
-  <div class="drawer-close">
-    <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">ROI</div>
-    <button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button>
-  </div>
-
-  <!-- State 1: Prefilled (shown when deal has data) -->
-  <div id="roi-prefilled" style="display:none">
-    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:900;margin-bottom:4px">ROI Ready</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.55">Pre-filled from discovery. Review and recalculate.</div>
-    <div style="background:var(--g2);border:1px solid var(--g3);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:10px">From discovery</div>
-      <div style="display:flex;flex-direction:column;gap:7px">
-        <div style="display:flex;justify-content:space-between;font-size:13px">
-          <span style="color:var(--muted)">Shipments / month</span>
-          <span style="font-weight:700;color:var(--text)" id="roi-pre-ships">—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:13px">
-          <span style="color:var(--muted)">Carrier portals</span>
-          <span style="font-weight:700;color:var(--text)" id="roi-pre-portals">—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:13px">
-          <span style="color:var(--muted)">Manual involvement</span>
-          <span style="font-weight:700;color:var(--text)" id="roi-pre-manual">—</span>
-        </div>
-      </div>
-    </div>
-    <button class="gen-btn" style="margin-bottom:10px" onclick="roiCalculateFromDeal()">Calculate Impact →</button>
-    <button style="width:100%;background:none;border:none;font-size:12px;color:var(--subtle);cursor:pointer;padding:4px" onclick="roiShowManual()">Enter different numbers</button>
-  </div>
-
-  <!-- State 2: Manual input (shown when no deal data) -->
-  <div id="roi-manual" style="display:none">
-    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:900;margin-bottom:4px">ROI Setup</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Let's quantify this quickly.</div>
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:6px">Anchor question — ask this first</div>
-      <div style="font-size:13px;color:var(--text);font-style:italic">"How many different systems or portals does your team use to manage shipping?"</div>
-    </div>
-    <div class="field-row">
-      <div><label class="field-label">Monthly shipments</label><input class="field" id="r-ships" type="number" placeholder="e.g. 200" oninput="calcROI()"></div>
-      <div><label class="field-label">Carrier portals</label><input class="field" id="r-portals" type="number" placeholder="e.g. 4" oninput="calcROI()"></div>
-    </div>
-    <div class="field-row">
-      <div><label class="field-label">Admin hrs / week</label><input class="field" id="r-hrs" type="number" placeholder="e.g. 10" oninput="calcROI()"></div>
-      <div><label class="field-label">Hourly rate ($/hr)</label><input class="field" id="r-rate" type="number" placeholder="e.g. 25" oninput="calcROI()"></div>
-    </div>
-    <div style="margin-bottom:14px"><label class="field-label">Locations</label><input class="field" id="r-locs" type="number" placeholder="e.g. 3" oninput="calcROI()"></div>
-    <div style="margin-bottom:6px">
-      <label class="field-label">Manual involvement</label>
-      <div style="display:flex;gap:8px;margin-top:6px">
-        <button class="chip" onclick="roiSetManual('low',this)">Low</button>
-        <button class="chip" onclick="roiSetManual('medium',this)">Medium</button>
-        <button class="chip on" onclick="roiSetManual('high',this)" id="roi-manual-high">High</button>
-      </div>
-    </div>
-    <button class="gen-btn" style="margin-top:12px" onclick="calcROI()">Calculate Impact →</button>
-  </div>
-
-  <!-- State 3: Results (shown after calculation) -->
-  <div id="roi-results" style="display:none">
-    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:900;margin-bottom:4px">Estimated Impact</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Based on your operation.</div>
-
-    <!-- Numbers -->
-    <div class="metric-grid">
-      <div class="metric"><div class="met-num" id="roi-m1">—</div><div class="met-label">Monthly admin hours wasted</div></div>
-      <div class="metric"><div class="met-num" id="roi-m2">—</div><div class="met-label">Monthly labor cost</div></div>
-      <div class="metric closer">
-        <div class="met-eyebrow">Annual Cost of Staying Fragmented</div>
-        <div class="met-num big" id="roi-m3">—</div>
-        <div style="width:40px;height:2px;background:var(--green);margin:12px auto;opacity:.4"></div>
-        <div style="font-size:13px;color:var(--muted)">Before rate optimization. Fragmentation cost alone.</div>
-      </div>
-    </div>
-
-    <!-- Compound warning -->
-    <div id="roi-compound" style="display:none;background:var(--r2);border:1px solid var(--r3);border-left:4px solid var(--red);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px"></div>
-
-    <!-- Drivers -->
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px">Cost drivers</div>
-      <div id="roi-drivers" style="font-size:13px;color:var(--muted);line-height:1.8"></div>
-    </div>
-
-    <!-- Say this -->
-    <div style="background:linear-gradient(135deg,rgba(61,220,132,.12),rgba(61,220,132,.04));border:2px solid var(--green);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">
-      <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:8px">▶ Say this now</div>
-      <div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.72" id="roi-say">—</div>
-    </div>
-
-    <!-- Force next step -->
-    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">
-      <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:6px">Next Step</div>
-      <div style="font-size:13px;color:var(--text);margin-bottom:12px">Make the cost visible, then move to close.</div>
-      <button class="gen-btn" style="margin-bottom:0" onclick="roiMoveToClose()">Move to Close →</button>
-    </div>
-
-    <button style="width:100%;background:none;border:none;font-size:12px;color:var(--subtle);cursor:pointer;padding:4px;margin-bottom:8px" onclick="roiShowManual()">Adjust numbers</button>
-  </div>
-
-</div>
-
-<div class="panel drawer" id="panel-next"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">NEXT</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
-          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Next</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">What is happening and what to do right now.</div>
-          <div style="margin-bottom:12px"><label class="field-label">Live signal -- what just happened?</label><input class="field" id="nx-signal" type="text" placeholder='e.g. "They said they like it but need to loop in their boss"'></div>
-          <div style="margin-bottom:16px"><label class="field-label">Current tone</label>
-            <select class="field" id="nx-tone">
-              <option value="neutral">Neutral</option>
-              <option value="positive">Positive / Interested</option>
-              <option value="hesitant">Hesitant</option>
-              <option value="objecting">Objecting</option>
-              <option value="rushed">Rushed / Short on time</option>
-              <option value="disengaged">Disengaged / Quiet</option>
-            </select>
-          </div>
-          <button class="gen-btn" onclick="runNext()">Get Next Move →</button>
-          <div id="next-output"><div class="ph"><div class="ph-icon">🧭</div><div class="ph-t">Describe what just happened</div><div class="ph-s">Enter the live signal and hit Generate.</div></div></div>
-        </div>
-
-<div class="panel drawer" id="panel-close"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">CLOSE</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
-          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Close</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Convert momentum. Get the next concrete step.</div>
-          <div class="chip-row" id="close-chips">
-            <button class="chip" onclick="cChip(this)">Interested but hesitant</button>
-            <button class="chip" onclick="cChip(this)">Wants to think</button>
-            <button class="chip" onclick="cChip(this)">Price concern</button>
-            <button class="chip" onclick="cChip(this)">Needs approval</button>
-            <button class="chip" onclick="cChip(this)">Gone quiet</button>
-            <button class="chip" onclick="cChip(this)">Ready to move</button>
-          </div>
-          <div style="margin-bottom:16px"><label class="field-label">Main blocker (optional)</label><input class="field" id="c-blocker" type="text" placeholder='e.g. "CFO needs to sign off"'></div>
-          <button class="gen-btn" onclick="runClose()">Close It →</button>
-          <div id="close-output"><div class="ph"><div class="ph-icon">🔐</div><div class="ph-t">Select their situation</div><div class="ph-s">Pick where they are and hit Close It.</div></div></div>
-        </div>
-
-<div class="panel drawer" id="panel-advance"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">ADVANCE</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
-          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Advance</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Post-call. Move the deal forward.</div>
-          <div style="margin-bottom:12px"><label class="field-label">What happened on the call?</label><textarea class="field" id="adv-call" rows="3" placeholder="e.g. Good call, they liked the ROI demo. CFO wants a written summary before next meeting."></textarea></div>
-          <div style="margin-bottom:16px"><label class="field-label">What did they ask for / request?</label><input class="field" id="adv-req" type="text" placeholder='e.g. "Send a one-pager and availability for next week"'></div>
-          <button class="gen-btn" onclick="runAdvance()">Generate Follow-Up →</button>
-          <div id="advance-output"><div class="ph"><div class="ph-icon">🚀</div><div class="ph-t">What happened?</div><div class="ph-s">Summarize the call and hit Generate.</div></div></div>
-        </div>
-
-<div class="panel drawer" id="panel-wherewewin"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">WHERE WE WIN</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
-          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Where We Win</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Scenario-specific strength framing.</div>
-          <div style="margin-bottom:12px"><label class="field-label">Scenario / lane / use case</label><input class="field" id="www-scenario" type="text" placeholder="e.g. Multi-location LTL, cross-border parcel, 5+ carriers…"></div>
-          <button class="gen-btn" onclick="runWWW()">Get Framing →</button>
-          <div id="www-output"><div class="ph"><div class="ph-icon">🏆</div><div class="ph-t">Describe the scenario</div><div class="ph-s">Enter the lane or use case and hit Generate.</div></div></div>
-        </div>
-
-<div class="panel drawer" id="panel-objtracker"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">OBJTRACKER </div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
-          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Objection Tracker</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Track patterns. Spot recurring friction.</div>
-          <div style="display:flex;gap:8px;margin-bottom:16px">
-            <input class="field" id="ot-input" type="text" placeholder="Log an objection…" style="flex:1">
-            <button class="gen-btn" style="width:auto;padding:10px 16px;margin-bottom:0;flex-shrink:0" onclick="logObj()">Log</button>
-          </div>
-          <div id="ot-list"><div class="ph" style="padding:24px"><div class="ph-icon">🔁</div><div class="ph-t">No objections logged yet</div></div></div>
-        </div>
-
-<div class="panel drawer" id="panel-battlecard">
-<div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">BATTLECARD</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
-  <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Battlecard</div>
-  <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Type a competitor to get the full breakdown — win probability, top angles, what not to say.</div>
-  <div id="bc-deal-hint" style="display:none;margin-bottom:14px"></div>
-
-  <div class="bc-search-wrap">
-    <span class="bc-search-ico">🔍</span>
-    <input class="bc-search" id="bc-input" type="text" placeholder="Type a competitor name…" autocomplete="off" oninput="bcFilter(this.value)" onkeydown="bcKey(event)">
-    <button class="bc-clear" id="bc-clear" onclick="bcClear()">✕</button>
-    <div class="bc-drop" id="bc-drop">
-      <div id="bc-drop-list"></div>
-      <div id="bc-drop-empty" style="display:none;padding:16px;text-align:center;font-size:13px;color:var(--muted)">No match found.</div>
-    </div>
-  </div>
-  <div style="font-size:11px;color:var(--subtle);margin-bottom:18px;padding-left:3px">15 platforms: FreightCOM · eShipper · ShipTime · Freightview · ShipStation · Shippo · NetParcel and more</div>
-
-  <div class="bc-placeholder" id="bc-placeholder" style="background:var(--bg3);border:1.5px dashed var(--border2);border-radius:var(--radius-lg);padding:48px 24px;text-align:center">
-    <div style="font-size:40px;margin-bottom:11px">🥊</div>
-    <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:5px">Type a competitor to load the battlecard</div>
-    <div style="font-size:12px;color:var(--muted);max-width:340px;margin:0 auto;line-height:1.6">Win probability, top 3 angles, what not to say, and full feature comparison.</div>
-  </div>
-
-  <div id="bc-results" style="display:none">
-    <div class="bc-score">
-      <div class="bc-score-lazr"><div class="bc-score-lbl" style="color:var(--green)">LAZR</div><div class="bc-score-num" style="color:var(--green)" id="bc-lazr-score">--</div><div class="bc-score-sub" style="color:var(--green)">features ✓</div></div>
-      <div class="bc-score-mid">VS</div>
-      <div class="bc-score-comp"><div class="bc-score-lbl" style="color:var(--muted)" id="bc-comp-lbl">COMP</div><div class="bc-score-num" style="color:var(--red)" id="bc-comp-score">--</div><div class="bc-score-sub" style="color:var(--muted)">features ✓</div></div>
-    </div>
-    <!-- WIN PROBABILITY -->
-    <div class="win-prob" style="margin-bottom:14px">
-      <div style="flex:1"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--green);margin-bottom:6px">Win Probability</div><div class="win-prob-bar"><div class="win-prob-fill" id="bc-win-bar"></div></div></div>
-      <div class="win-prob-num" id="bc-win-pct">--%</div>
-    </div>
-    <!-- TOP 3 -->
-    <div class="bc-top3" style="margin-bottom:14px"><div class="bc-top3-card" id="bc-t1"><div class="bc-top3-num">--</div><div class="bc-top3-label">--</div></div><div class="bc-top3-card" id="bc-t2"><div class="bc-top3-num">--</div><div class="bc-top3-label">--</div></div><div class="bc-top3-card" id="bc-t3"><div class="bc-top3-num">--</div><div class="bc-top3-label">--</div></div></div>
-    <!-- ANGLES -->
-    <div id="bc-excl" style="margin-bottom:12px"></div>
-    <div id="bc-deal-angle-wrap" style="display:none;margin-bottom:10px;background:linear-gradient(135deg,rgba(61,220,132,.11) 0%,rgba(61,220,132,.03) 100%);border:1px solid var(--g3);border-radius:10px;padding:13px 15px">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--green);margin-bottom:6px">🎯 Best Angle For This Deal</div>
-      <div id="bc-deal-angle-text" style="font-size:13px;color:var(--text);line-height:1.7"></div>
-    </div>
-    <div class="g2" style="margin-bottom:12px">
-      <div class="bc-angle"><div class="bc-angle-title">✅ General best angle</div><div id="bc-angle-text" style="font-size:13px;color:var(--text);line-height:1.7">--</div></div>
-      <div class="bc-dont"><div class="bc-dont-title">🚫 What NOT to say</div><div id="bc-dont-text" style="font-size:13px;color:var(--muted);line-height:1.65">--</div></div>
-    </div>
-    <!-- VIEW TOGGLE -->
-    <div style="display:flex;gap:8px;margin-bottom:11px;flex-wrap:wrap">
-      <button class="bc-view-btn on" onclick="bcSetView('wins',this)">🏆 Where Lazr Wins</button>
-      <button class="bc-view-btn" onclick="bcSetView('all',this)">📋 All Features</button>
-      <button class="bc-view-btn" onclick="bcSetView('tied',this)">🤝 Where They Match</button>
-    </div>
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:13px">
-      <div style="display:grid;gr
 
 <script>
 
@@ -1238,10 +503,16 @@ function switchTab(t){
 }
 
 // ── BYPASS ──
+var _bypassTimes=[];
 function bypass(){
-  bypassClicks++;clearTimeout(bypassTimer);
-  bypassTimer=setTimeout(function(){bypassClicks=0;},1500);
-  if(bypassClicks>=3){bypassClicks=0;doLogin({username:'devon',password:'lazr2026',name:'Devon'});showToast('Admin bypass ⚡');}
+  var now=Date.now();
+  _bypassTimes.push(now);
+  _bypassTimes=_bypassTimes.filter(function(t){return now-t<2000;});
+  if(_bypassTimes.length>=3){
+    _bypassTimes=[];
+    doLogin({username:'devon',password:'lazr2026',name:'Devon'});
+    showToast('Admin bypass ⚡');
+  }
 }
 document.addEventListener('keydown',function(e){
   if(e.ctrlKey&&e.shiftKey&&e.key==='D'){e.preventDefault();doLogin({username:'devon',password:'lazr2026',name:'Devon'});showToast('Admin bypass ⚡');}
@@ -1265,7 +536,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v12.9 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v13.0 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -3162,5 +2433,745 @@ function showPanel(id){
 }
 
 </script>
+
+
+
+<div class="sb-overlay" id="sb-overlay" onclick="closeSB()"></div>
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="toast" id="toast"></div>
+
+<!-- API KEY MODAL -->
+<div id="api-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9995;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:28px;max-width:400px;width:100%">
+    <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:10px">⚙️ API Key</div>
+    <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:900;color:var(--text);margin-bottom:8px">Connect Anthropic</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6">Your key is stored locally and never sent anywhere except Anthropic's API.</div>
+    <input id="api-key-input" type="password" placeholder="sk-ant-..." style="width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:9px;padding:11px 14px;color:var(--text);font-size:13px;outline:none;margin-bottom:10px;font-family:'DM Sans',sans-serif">
+    <div style="display:flex;gap:8px">
+      <button onclick="saveApiKey()" style="flex:1;background:var(--green);border:none;border-radius:9px;padding:11px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer">Save Key</button>
+      <button onclick="closeApiModal()" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:9px;padding:11px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer">Cancel</button>
+    </div>
+    <div id="api-key-status" style="font-size:12px;margin-top:10px;text-align:center"></div>
+  </div>
+</div>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="lbox">
+    <button class="l-logo" onclick="bypass()">LAZR<span>.</span></button>
+    <div class="l-tag">Command OS</div>
+    <div class="l-tabs">
+      <button class="l-tab on" id="tab-si" onclick="switchTab('si')">Sign In</button>
+      <button class="l-tab" id="tab-su" onclick="switchTab('su')">Sign Up</button>
+    </div>
+    <div id="form-si">
+      <form onsubmit="login(event)">
+        <input class="lf" id="l-u" type="text" placeholder="Username" autocapitalize="off" autocomplete="username">
+        <input class="lf" id="l-p" type="password" placeholder="Password" autocomplete="current-password">
+        <button class="lbtn" type="submit">Sign In →</button>
+      </form>
+      <div class="lerr" id="l-err"></div>
+    </div>
+    <div id="form-su" style="display:none">
+      <form onsubmit="signup(event)">
+        <input class="lf" id="su-n" type="text" placeholder="Full name" autocapitalize="words">
+        <input class="lf" id="su-u" type="text" placeholder="Username" autocapitalize="off">
+        <input class="lf" id="su-p" type="password" placeholder="Password (min 6)">
+        <input class="lf" id="su-p2" type="password" placeholder="Confirm password">
+        <button class="lbtn" type="submit">Create Account →</button>
+      </form>
+      <div class="lerr" id="su-err"></div>
+      <div class="lsuccess" id="su-ok" style="display:none">✅ Created — signing you in…</div>
+    </div>
+    <div class="l-hint">Triple-click LAZR. or Ctrl+Shift+D to bypass</div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button id="menu-btn" style="display:none;background:none;border:none;color:var(--muted);font-size:18px;padding:0 6px 0 0" onclick="toggleSB()">☰</button>
+    <button class="tb-logo" onclick="bypass()">LAZR<span>.</span></button>
+    <div class="tb-stage-bar" id="stage-bar">
+      <div class="stage-pip">Prep</div>
+      <span class="stage-sep">›</span>
+      <div class="stage-pip">Discover</div>
+      <span class="stage-sep">›</span>
+      <div class="stage-pip">Position</div>
+      <span class="stage-sep">›</span>
+      <div class="stage-pip">ROI</div>
+      <span class="stage-sep">›</span>
+      <div class="stage-pip">Close</div>
+      <span class="stage-sep">›</span>
+      <div class="stage-pip">Advance</div>
+    </div>
+    <div class="tb-right">
+      <span class="tb-user" id="tb-user"></span>
+      <button class="tb-btn" onclick="toggleLang()" id="lang-btn">🇫🇷</button>
+      <button class="tb-btn" onclick="toggleTheme()" id="theme-btn">☀️</button>
+      <button class="tb-btn" onclick="showApiKeyModal()" id="api-btn" title="Set API key">⚙️</button>
+      <button class="tb-btn red" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="app-body">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+      <div class="sb-nav">
+        <div class="sb-item on" onclick="nav('main',this)" data-p="main" style="margin-bottom:4px">
+          <span class="si-icon" style="font-size:18px">⚡</span>
+          <span class="si-label" style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--green)">LAZR</span>
+        </div>
+        <div class="sb-sec">Tools</div>
+        <div class="sb-item" onclick="openDrawer('prep',this)" data-p="prep"><span class="si-icon">🎯</span><span class="si-label">Deal Setup</span></div>
+        <div class="sb-item" onclick="openDrawer('handle',this)" data-p="handle"><span class="si-icon">🛡️</span><span class="si-label">Handle</span></div>
+        <div class="sb-item" onclick="openDrawer('roi',this)" data-p="roi"><span class="si-icon">📊</span><span class="si-label">ROI</span></div>
+        <div class="sb-item" onclick="openDrawer('close',this)" data-p="close"><span class="si-icon">🔐</span><span class="si-label">Close</span></div>
+        <div class="sb-item" onclick="openDrawer('advance',this)" data-p="advance"><span class="si-icon">🚀</span><span class="si-label">Advance</span></div>
+        <div class="sb-item" onclick="openDrawer('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
+      </div>
+      <div class="sb-foot">
+        <div class="sb-ver" id="sb-ver">v13.0</div>
+        <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+      <div class="panel-wrap">
+
+        <!-- ══ MAIN PANEL ══ -->
+        <div class="panel on" id="panel-main">
+
+          <!-- LAYER 0: No deal -->
+          <div id="main-nodeal" style="text-align:center;padding:60px 20px;display:none">
+            <div style="font-size:36px;margin-bottom:14px;opacity:.25">⚡</div>
+            <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:900;color:var(--muted);margin-bottom:6px">No active deal</div>
+            <div style="font-size:12px;color:var(--subtle);margin-bottom:24px">Create a deal to begin the guided flow.</div>
+            <button class="gen-btn" style="width:auto;padding:11px 28px" onclick="createDeal()">+ New Deal</button>
+          </div>
+
+          <!-- LAYER 1: Status strip -->
+          <div id="main-status" style="display:none">
+            <div id="status-strip" style="display:flex;align-items:center;gap:8px;padding:8px 0;margin-bottom:14px;border-bottom:1px solid var(--border);flex-wrap:wrap">
+              <!-- Prospect selector -->
+              <div style="position:relative">
+                <button class="prospect-btn" onclick="toggleProspectMenu()" style="background:none;border:1px solid var(--border2);border-radius:7px;padding:4px 10px;font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:5px;max-width:160px;overflow:hidden">
+                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="dash-client">—</span>
+                  <span style="font-size:9px;color:var(--muted);flex-shrink:0">▾</span>
+                </button>
+                <div class="drop-menu" id="prospect-menu" style="top:calc(100% + 5px);left:0;min-width:200px">
+                  <div id="prospect-menu-list"></div>
+                  <div class="drop-divider"></div>
+                  <div class="drop-item" onclick="createDeal();document.getElementById('prospect-menu').classList.remove('open')">
+                    <span style="color:var(--green)">＋</span> New prospect
+                  </div>
+                  <div class="drop-item" onclick="viewArchivedDeals();document.getElementById('prospect-menu').classList.remove('open')">
+                    <span>📁</span> View archived
+                  </div>
+                </div>
+              </div>
+              <span style="color:var(--border2);font-size:11px">·</span>
+              <span id="dash-stage-chip" style="font-size:9px;font-weight:800;text-transform:uppercase;color:var(--green)">—</span>
+              <span style="color:var(--border2);font-size:11px">·</span>
+              <span id="dash-progress-text" style="font-size:11px;color:var(--muted)">—</span>
+              <span style="color:var(--border2);font-size:11px">·</span>
+              <span id="dash-momentum-chip" style="font-size:11px;color:var(--subtle)">🟡</span>
+              <div style="margin-left:auto;display:flex;align-items:center;gap:4px">
+                <button id="dash-flow-btn" onclick="continueDealFromDashboard()" style="display:none;background:var(--green);border:none;border-radius:7px;padding:6px 14px;font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap">Continue →</button>
+                <button id="status-edit-btn" onclick="openDrawer('prep',document.querySelector('[data-p=prep]'))" style="background:none;border:none;padding:4px 7px;font-size:12px;cursor:pointer" title="Edit deal">✏️</button>
+                <!-- More options -->
+                <div style="position:relative">
+                  <button onclick="toggleMoreMenu()" style="background:none;border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-size:13px;color:var(--muted);cursor:pointer;line-height:1" title="More options">⋯</button>
+                  <div class="drop-menu" id="more-menu" style="top:calc(100%+5px);right:0">
+                    <div class="drop-item" onclick="openDrawer('prep',document.querySelector('[data-p=prep]'));document.getElementById('more-menu').classList.remove('open')">✏️ Edit prospect</div>
+                    <div class="drop-item warn" onclick="archiveProspect();document.getElementById('more-menu').classList.remove('open')">📁 Archive</div>
+                    <div class="drop-item danger" id="status-del-btn" onclick="showDeleteModal();document.getElementById('more-menu').classList.remove('open')">🗑 Delete</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LAYER 2: Discovery -->
+          <div id="main-discovery" style="display:none">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+              <div>
+                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px">Building your</div>
+                <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:900;color:var(--text);margin-bottom:2px">Shipping Efficiency Score</div>
+                <div style="font-size:12px;color:var(--muted)">Each answer reveals where cost and time are being lost.</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0">
+                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:2px">Score</div>
+                <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:900;color:var(--green);line-height:1" id="disc-eff-score">100</div>
+                <div style="font-size:9px;color:var(--muted);margin-top:1px" id="disc-eff-label">Efficient</div>
+              </div>
+            </div>
+            <div style="background:var(--bg3);border-radius:3px;height:3px;margin-bottom:16px;overflow:hidden">
+              <div id="disc-eff-bar" style="background:var(--green);height:100%;width:100%;border-radius:3px;transition:width .6s ease,background .4s ease"></div>
+            </div>
+
+            <!-- Progress -->
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Progress</div>
+                <div style="font-size:12px;font-weight:800;color:var(--green)" id="disc-progress-label">0 / 11</div>
+              </div>
+              <div style="background:var(--bg3);border-radius:4px;height:4px;overflow:hidden;margin-bottom:7px">
+                <div id="disc-progress-bar" style="background:var(--green);height:100%;width:0%;border-radius:4px;transition:width .4s ease"></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div style="font-size:11px;color:var(--subtle)" id="disc-current-level">L1 · Execution · Q1</div>
+                <div style="font-size:11px;color:var(--green);font-weight:700" id="disc-next-focus">Next focus: Tools</div>
+              </div>
+            </div>
+
+            <!-- Insight flash -->
+            <div id="disc-insight-flash" style="display:none;margin-bottom:14px;animation:fup .25s ease">
+              <!-- Insight card -->
+              <div style="background:var(--bg2);border-left:4px solid var(--green);border:1px solid var(--g3);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+                  <span style="font-size:13px" id="disc-flash-icon">✔</span>
+                  <span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green)" id="disc-flash-label">Insight captured</span>
+                </div>
+                <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px" id="disc-insight-answer">—</div>
+                <div style="font-size:12px;color:var(--muted);margin-bottom:2px" id="disc-insight-text">—</div>
+                <div style="font-size:12px;color:var(--green);font-weight:700;margin-top:5px" id="disc-insight-next">—</div>
+              </div>
+
+            </div>
+
+            <!-- Question block -->
+            <div id="disc-question-block" style="background:linear-gradient(135deg,rgba(61,220,132,.12) 0%,rgba(61,220,132,.04) 100%);border:2px solid var(--green);border-radius:var(--radius-lg);padding:20px 22px;margin-bottom:14px">
+              <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:5px">Current Step</div>
+              <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:12px" id="disc-q-level">L1 · Execution</div>
+              <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:12px" id="disc-q-text">—</div>
+              <div style="font-size:11px;color:var(--subtle);margin-bottom:14px;font-style:italic" id="disc-q-hint">—</div>
+              <div style="margin-bottom:10px">
+                <label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px;display:block">What they said</label>
+                <textarea id="disc-answer-input" rows="2" placeholder="Type their answer here…" style="width:100%;background:rgba(0,0,0,.25);border:1.5px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;resize:none;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='var(--border2)'"></textarea>
+              </div>
+              <button id="disc-answered-btn" onclick="discSaveAnswer()" style="width:100%;background:var(--green);border:none;border-radius:8px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer">Save Answer →</button>
+              <button id="disc-skip-btn" onclick="discSkip()" style="width:100%;background:none;border:none;padding:8px;font-size:11px;color:var(--subtle);cursor:pointer;margin-top:4px">Skip this question</button>
+            </div>
+
+            <!-- All questions (collapsed) -->
+            <details style="margin-bottom:14px">
+              <summary style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);cursor:pointer;padding:8px 0">All questions ▾</summary>
+              <div id="disc-q-list" style="margin-top:8px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px"></div>
+            </details>
+
+            <!-- Discovery Complete transition -->
+            <div id="disc-complete-area" style="display:none">
+              <div style="background:linear-gradient(135deg,rgba(61,220,132,.15),rgba(61,220,132,.05));border:2px solid var(--green);border-radius:var(--radius-lg);padding:20px;margin-bottom:12px;text-align:center">
+                <div style="font-size:28px;margin-bottom:8px">✅</div>
+                <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:900;color:var(--green);margin-bottom:6px">Discovery Complete</div>
+                <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:4px">You have enough signal to position value and run execution guidance.</div>
+                <div style="font-size:11px;color:var(--subtle);margin-bottom:16px" id="disc-complete-count">— questions answered</div>
+                <button class="gen-btn" style="margin-bottom:0;font-size:15px;padding:14px" onclick="discComplete();showLayer('command')">Go to Command →</button>
+                <div style="font-size:11px;color:var(--subtle);margin-top:10px;line-height:1.6">Next step: Move into Command to position Lazr around the operational gaps uncovered.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LAYER 3: Command -->
+          <div id="main-command" style="display:none">
+            <!-- Locked state -->
+            <div id="cmd-lock" style="display:none;text-align:center;padding:48px 20px">
+              <div style="font-size:28px;margin-bottom:12px;opacity:.3">🔒</div>
+              <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:900;color:var(--text);margin-bottom:8px">⚡ Command Locked</div>
+              <div style="font-size:13px;color:var(--muted);margin-bottom:6px;max-width:260px;margin-left:auto;margin-right:auto">Complete discovery to unlock live execution guidance.</div>
+              <div style="font-size:11px;color:var(--subtle);opacity:.7;margin-bottom:20px;font-style:italic">Every answer you capture sharpens the directive.</div>
+              <button style="background:var(--green);border:none;border-radius:8px;padding:11px 24px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer" onclick="showLayer('discovery')">Go to Discovery →</button>
+            </div>
+
+            <!-- Command surface -->
+            <div id="cmd-surface">
+              <div id="command-flow-banner" style="margin-bottom:12px">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+                  <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text)" id="command-stage-now">—</div>
+                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);background:var(--g2);border:1px solid var(--g3);border-radius:4px;padding:2px 7px" id="command-stage-badge">—</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="font-size:11px;color:var(--subtle)" id="command-stage-next">—</div>
+                  <div style="font-size:11px;color:var(--green);font-weight:700" id="command-stage-action">—</div>
+                </div>
+              </div>
+
+              <!-- Next action block -->
+              <div id="command-next-action" style="background:linear-gradient(135deg,rgba(61,220,132,.13) 0%,rgba(61,220,132,.04) 100%);border:2px solid var(--green);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:14px;display:none">
+                <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:10px;font-style:italic" id="cna-question">—</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+                  <div style="font-size:11px;color:var(--muted)" id="cna-progress">—</div>
+                  <button id="cna-btn" style="background:var(--green);border:none;border-radius:8px;padding:9px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer">Continue →</button>
+                </div>
+              </div>
+
+              <!-- Directive -->
+              <div class="directive" id="deal-directive">
+                <span class="dir-eye">▶ Do This Now</span>
+                <div class="dir-field">
+                  <span class="dir-field-label">Say this</span>
+                  <div class="say-text" id="d-say">Complete discovery to get your first directive.</div>
+                </div>
+                <div class="dir-field">
+                  <span class="dir-field-label">Then ask</span>
+                  <div class="ask-text" id="d-ask">—</div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+                  <div class="dir-field" style="margin-bottom:0">
+                    <span class="dir-field-label">What this means</span>
+                    <div class="insight-text" id="d-means">—</div>
+                  </div>
+                  <div class="dir-field" style="margin-bottom:0">
+                    <span class="dir-field-label">Risk if unchanged</span>
+                    <div class="risk-text" id="d-risk">—</div>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:flex-end">
+                  <div class="dir-status" id="d-status">🟡</div>
+                </div>
+                <button class="copy-btn" onclick="copyDirective()">Copy</button>
+              </div>
+
+              <!-- Post-positioning sequence (hidden until positioning done) -->
+              <div id="cmd-post-pos" style="display:none">
+
+                <!-- Alignment check -->
+                <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px">
+                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:8px">Alignment Check</div>
+                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Say this</div>
+                  <div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:rgba(61,220,132,.07);border-left:3px solid var(--green);border-radius:6px;margin-bottom:0" id="pp-align-say">Does that align with how things are working on your end today?</div>
+                </div>
+
+                <!-- Micro-commitment -->
+                <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px">
+                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--blue);margin-bottom:8px">Micro-Commitment</div>
+                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Then ask</div>
+                  <div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:var(--b2);border-left:3px solid var(--blue);border-radius:6px" id="pp-commit-ask">If that was streamlined into one system, would that make things easier for your team?</div>
+                </div>
+
+                <!-- ROI trigger (shown when numbers not yet shown) -->
+                <div id="pp-roi-block" style="display:none;background:rgba(255,95,87,.06);border:2px solid var(--r3);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px">
+                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--red);margin-bottom:8px">⛔ Stop — Show This</div>
+                  <div style="font-size:13px;color:var(--muted);margin-bottom:10px" id="pp-roi-insight">You are likely losing meaningful time and cost every month from fragmentation alone — before rate optimization even begins.</div>
+                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Say this</div>
+                  <div style="font-size:13px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:rgba(61,220,132,.07);border-left:3px solid var(--green);border-radius:6px;margin-bottom:10px">If nothing changes, this continues every month before rate optimization even begins.</div>
+                  <button onclick="openDrawer('roi',document.querySelector('[data-p=roi]'));flowState.numbersShown=true;deal.flowState=Object.assign({},flowState);saveDeals();document.getElementById('pp-roi-block').style.display='none';document.getElementById('pp-close-block').style.display='block';" style="width:100%;background:var(--red);border:none;border-radius:8px;padding:11px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#fff;cursor:pointer">Use ROI →</button>
+                </div>
+
+                <!-- Close-ready block -->
+                <div id="pp-close-block" style="display:none;background:linear-gradient(135deg,rgba(61,220,132,.13),rgba(61,220,132,.04));border:2px solid var(--green);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px">
+                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:10px">⚡ Close Ready</div>
+                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Say this</div>
+                  <div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:rgba(61,220,132,.07);border-left:3px solid var(--green);border-radius:6px;margin-bottom:8px">The next step would just be to validate this using your actual shipment data.</div>
+                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Then ask</div>
+                  <div style="font-size:13px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:var(--b2);border-left:3px solid var(--blue);border-radius:6px;margin-bottom:8px">Would you be open to sending over a few recent shipments?</div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+                    <div style="padding:10px 12px;background:var(--bg3);border-radius:8px">
+                      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:3px">What this means</div>
+                      <div style="font-size:12px;color:var(--text);line-height:1.6">They understand the problem. Now convert interest into action.</div>
+                    </div>
+                    <div style="padding:10px 12px;background:var(--am2);border-radius:8px;border:1px solid var(--am3)">
+                      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--amber);margin-bottom:3px">Risk if unchanged</div>
+                      <div style="font-size:12px;color:var(--text);line-height:1.6">Without a concrete next step, momentum fades and the problem stays theoretical.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Required next step CTA -->
+                <div id="pp-nextstep-block" style="display:none;margin-bottom:14px">
+                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px">Required Next Step</div>
+                  <div style="display:flex;flex-direction:column;gap:7px" id="pp-nextstep-btns"></div>
+                </div>
+
+              </div><!-- end cmd-post-pos -->
+
+              <!-- Advance Deal button (shown at close stage) -->
+              <div id="cmd-advance-deal" style="display:none;margin-bottom:14px">
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <button onclick="openDrawer('advance',document.querySelector('[data-p=advance]'))" style="width:100%;background:var(--green);border:none;border-radius:9px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer">Advance Deal →</button>
+                  <div style="display:flex;gap:8px">
+                    <button onclick="openDrawer('advance',document.querySelector('[data-p=advance]'));showToast('Request shipment data')" style="flex:1;background:none;border:1px solid var(--border2);border-radius:8px;padding:9px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer">📋 Request Data</button>
+                    <button onclick="openDrawer('advance',document.querySelector('[data-p=advance]'));showToast('Book follow-up')" style="flex:1;background:none;border:1px solid var(--border2);border-radius:8px;padding:9px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer">📅 Book Follow-Up</button>
+                    <button onclick="openDrawer('advance',document.querySelector('[data-p=advance]'));showToast('Loop in stakeholder')" style="flex:1;background:none;border:1px solid var(--border2);border-radius:8px;padding:9px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer">👥 Loop In</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Close-ready CTA (hidden until triggered) -->
+              <div id="cmd-close-ready" style="display:none;margin-bottom:14px">
+                <div style="background:linear-gradient(135deg,rgba(61,220,132,.15),rgba(61,220,132,.05));border:2px solid var(--green);border-radius:var(--radius-lg);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                  <div>
+                    <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:3px">⚡ Close Ready</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text)">You have enough to ask for the next step.</div>
+                  </div>
+                  <button onclick="openDrawer('close',document.querySelector('[data-p=close]'))" style="background:var(--green);border:none;border-radius:8px;padding:10px 20px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap;flex-shrink:0">Move to Close →</button>
+                </div>
+              </div>
+
+              <!-- Live signals -->
+              <div style="margin-top:12px">
+                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:6px">Live signals</div>
+                <div class="trigger-row">
+                  <button class="trigger-btn" onclick="quickTrigger('price')">💰 Mentioned price</button>
+                  <button class="trigger-btn" onclick="quickTrigger('competitor')">🥊 Uses a competitor</button>
+                  <button class="trigger-btn" onclick="quickTrigger('hesitant')">😶 Hesitant</button>
+                  <button class="trigger-btn" onclick="quickTrigger('quiet')">🔇 Gone quiet</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- end panel-main -->
+
+
+<div class="panel drawer" id="panel-prep"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">PREP</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
+          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Prep</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Set the deal. The system adapts everything else.</div>
+
+          <div class="field-row">
+            <div><label class="field-label">Client name</label><input class="field" id="p-client" type="text" placeholder="e.g. Acme Inc" oninput="debouncedSync()" autocapitalize="words" style="text-transform:capitalize"></div>
+            <div><label class="field-label">Industry</label>
+              <select class="field" id="p-industry" onchange="syncDeal()">
+                <option value="">Unknown</option>
+                <option>E-commerce</option>
+                <option>Manufacturing</option>
+                <option>Distribution / Wholesale</option>
+                <option>3PL / Logistics</option>
+                <option>Food & Beverage</option>
+                <option>Building Materials</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div><label class="field-label">Current tool / process</label>
+              <select class="field" id="p-tool" onchange="syncDeal()">
+                <option value="">Unknown</option>
+                <option value="freightcom">FreightCOM / ClickShip</option>
+                <option value="2ship">2Ship</option>
+                <option value="eshipper">eShipper</option>
+                <option value="shiptime">ShipTime</option>
+                <option value="shipstation">ShipStation</option>
+                <option value="internal">Internal / Manual</option>
+                <option value="broker">Broker only</option>
+                <option value="none">None</option>
+              </select>
+            </div>
+            <div><label class="field-label">Primary concern</label>
+              <select class="field" id="p-concern" onchange="syncDeal()">
+                <option value="">Unknown</option>
+                <option value="cost">Cost</option>
+                <option value="visibility">Visibility</option>
+                <option value="control">Control</option>
+                <option value="speed">Speed</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div><label class="field-label">Client size</label>
+              <select class="field" id="p-size" onchange="syncDeal()">
+                <option value="smb">SMB</option>
+                <option value="large">Large</option>
+                <option value="whale">Whale</option>
+              </select>
+            </div>
+            <div><label class="field-label">Stakeholder role</label>
+              <select class="field" id="p-role" onchange="syncDeal()">
+                <option value="operations">Operations</option>
+                <option value="logistics">Logistics / Shipping</option>
+                <option value="procurement">Procurement</option>
+                <option value="finance">Finance</option>
+                <option value="executive">Executive</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div><label class="field-label">Deal stage</label>
+              <select class="field" id="p-stage" onchange="syncDeal()">
+                <option value="prep">Prep</option>
+                <option value="discover">Discover</option>
+                <option value="position">Position</option>
+                <option value="handle">Handle</option>
+                <option value="roi">ROI</option>
+                <option value="next">Next</option>
+                <option value="close">Close</option>
+                <option value="advance">Advance</option>
+              </select>
+            </div>
+            <div><label class="field-label">Deal momentum</label>
+              <select class="field" id="p-momentum" onchange="syncDeal()">
+                <option value="neutral">Neutral</option>
+                <option value="advancing">Advancing</option>
+                <option value="stalling">Stalling</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-bottom:12px">
+            <label class="field-label">Shipments / month</label>
+            <input class="field" id="p-ships" type="number" placeholder="e.g. 200" oninput="debouncedSync()">
+          </div>
+          <div style="margin-bottom:12px">
+            <label class="field-label">Number of carriers / portals</label>
+            <input class="field" id="p-carriers" type="number" placeholder="e.g. 4" oninput="debouncedSync()">
+          </div>
+          <div style="margin-bottom:16px">
+            <label class="field-label">Last objection / statement (optional)</label>
+            <input class="field" id="p-lastobj" type="text" placeholder='e.g. "We already use FreightCOM and it works fine"' oninput="debouncedSync()">
+          </div>
+
+          <button class="gen-btn" onclick="runPrep()">Generate Opening Brief →</button>
+          <div id="prep-output"><div class="ph"><div class="ph-icon">🎯</div><div class="ph-t">Ready to prep</div><div class="ph-s">Fill in the deal context above and hit Generate.</div></div></div>
+        </div>
+
+<div class="panel drawer" id="panel-handle"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">HANDLE</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
+          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Handle</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Select or type the objection. Get a word-for-word response.</div>
+          <div class="chip-row" id="handle-chips">
+            <button class="chip" onclick="hChip(this)">Prices too high</button>
+            <button class="chip" onclick="hChip(this)">Using FreightCOM</button>
+            <button class="chip" onclick="hChip(this)">Using eShipper</button>
+            <button class="chip" onclick="hChip(this)">Happy with setup</button>
+            <button class="chip" onclick="hChip(this)">Not the right time</button>
+            <button class="chip" onclick="hChip(this)">Need to think</button>
+            <button class="chip" onclick="hChip(this)">Have a TMS</button>
+            <button class="chip" onclick="hChip(this)">Rates not competitive</button>
+          </div>
+          <div style="margin-bottom:12px"><label class="field-label">Or type it</label><input class="field" id="h-custom" type="text" placeholder='e.g. "We use a broker for everything"' oninput="clearHChips()"></div>
+          <div style="margin-bottom:16px"><label class="field-label">Context (optional)</label><input class="field" id="h-ctx" type="text" placeholder="e.g. Mid-call, seemed interested before this…"></div>
+          <button class="gen-btn" onclick="runHandle()">Handle It →</button>
+          <div id="handle-output"><div class="ph"><div class="ph-icon">🛡️</div><div class="ph-t">Ready to handle</div><div class="ph-s">Select the objection and hit Handle It.</div></div></div>
+        </div>
+
+<div class="panel drawer" id="panel-roi">
+  <div class="drawer-close">
+    <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">ROI</div>
+    <button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button>
+  </div>
+
+  <!-- State 1: Prefilled (shown when deal has data) -->
+  <div id="roi-prefilled" style="display:none">
+    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:900;margin-bottom:4px">ROI Ready</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.55">Pre-filled from discovery. Review and recalculate.</div>
+    <div style="background:var(--g2);border:1px solid var(--g3);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:10px">From discovery</div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="display:flex;justify-content:space-between;font-size:13px">
+          <span style="color:var(--muted)">Shipments / month</span>
+          <span style="font-weight:700;color:var(--text)" id="roi-pre-ships">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px">
+          <span style="color:var(--muted)">Carrier portals</span>
+          <span style="font-weight:700;color:var(--text)" id="roi-pre-portals">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px">
+          <span style="color:var(--muted)">Manual involvement</span>
+          <span style="font-weight:700;color:var(--text)" id="roi-pre-manual">—</span>
+        </div>
+      </div>
+    </div>
+    <button class="gen-btn" style="margin-bottom:10px" onclick="roiCalculateFromDeal()">Calculate Impact →</button>
+    <button style="width:100%;background:none;border:none;font-size:12px;color:var(--subtle);cursor:pointer;padding:4px" onclick="roiShowManual()">Enter different numbers</button>
+  </div>
+
+  <!-- State 2: Manual input (shown when no deal data) -->
+  <div id="roi-manual" style="display:none">
+    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:900;margin-bottom:4px">ROI Setup</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Let's quantify this quickly.</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:6px">Anchor question — ask this first</div>
+      <div style="font-size:13px;color:var(--text);font-style:italic">"How many different systems or portals does your team use to manage shipping?"</div>
+    </div>
+    <div class="field-row">
+      <div><label class="field-label">Monthly shipments</label><input class="field" id="r-ships" type="number" placeholder="e.g. 200" oninput="calcROI()"></div>
+      <div><label class="field-label">Carrier portals</label><input class="field" id="r-portals" type="number" placeholder="e.g. 4" oninput="calcROI()"></div>
+    </div>
+    <div class="field-row">
+      <div><label class="field-label">Admin hrs / week</label><input class="field" id="r-hrs" type="number" placeholder="e.g. 10" oninput="calcROI()"></div>
+      <div><label class="field-label">Hourly rate ($/hr)</label><input class="field" id="r-rate" type="number" placeholder="e.g. 25" oninput="calcROI()"></div>
+    </div>
+    <div style="margin-bottom:14px"><label class="field-label">Locations</label><input class="field" id="r-locs" type="number" placeholder="e.g. 3" oninput="calcROI()"></div>
+    <div style="margin-bottom:6px">
+      <label class="field-label">Manual involvement</label>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="chip" onclick="roiSetManual('low',this)">Low</button>
+        <button class="chip" onclick="roiSetManual('medium',this)">Medium</button>
+        <button class="chip on" onclick="roiSetManual('high',this)" id="roi-manual-high">High</button>
+      </div>
+    </div>
+    <button class="gen-btn" style="margin-top:12px" onclick="calcROI()">Calculate Impact →</button>
+  </div>
+
+  <!-- State 3: Results (shown after calculation) -->
+  <div id="roi-results" style="display:none">
+    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:900;margin-bottom:4px">Estimated Impact</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Based on your operation.</div>
+
+    <!-- Numbers -->
+    <div class="metric-grid">
+      <div class="metric"><div class="met-num" id="roi-m1">—</div><div class="met-label">Monthly admin hours wasted</div></div>
+      <div class="metric"><div class="met-num" id="roi-m2">—</div><div class="met-label">Monthly labor cost</div></div>
+      <div class="metric closer">
+        <div class="met-eyebrow">Annual Cost of Staying Fragmented</div>
+        <div class="met-num big" id="roi-m3">—</div>
+        <div style="width:40px;height:2px;background:var(--green);margin:12px auto;opacity:.4"></div>
+        <div style="font-size:13px;color:var(--muted)">Before rate optimization. Fragmentation cost alone.</div>
+      </div>
+    </div>
+
+    <!-- Compound warning -->
+    <div id="roi-compound" style="display:none;background:var(--r2);border:1px solid var(--r3);border-left:4px solid var(--red);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px"></div>
+
+    <!-- Drivers -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px">Cost drivers</div>
+      <div id="roi-drivers" style="font-size:13px;color:var(--muted);line-height:1.8"></div>
+    </div>
+
+    <!-- Say this -->
+    <div style="background:linear-gradient(135deg,rgba(61,220,132,.12),rgba(61,220,132,.04));border:2px solid var(--green);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">
+      <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:8px">▶ Say this now</div>
+      <div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.72" id="roi-say">—</div>
+    </div>
+
+    <!-- Force next step -->
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">
+      <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:6px">Next Step</div>
+      <div style="font-size:13px;color:var(--text);margin-bottom:12px">Make the cost visible, then move to close.</div>
+      <button class="gen-btn" style="margin-bottom:0" onclick="roiMoveToClose()">Move to Close →</button>
+    </div>
+
+    <button style="width:100%;background:none;border:none;font-size:12px;color:var(--subtle);cursor:pointer;padding:4px;margin-bottom:8px" onclick="roiShowManual()">Adjust numbers</button>
+  </div>
+
+</div>
+
+<div class="panel drawer" id="panel-next"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">NEXT</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
+          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Next</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">What is happening and what to do right now.</div>
+          <div style="margin-bottom:12px"><label class="field-label">Live signal -- what just happened?</label><input class="field" id="nx-signal" type="text" placeholder='e.g. "They said they like it but need to loop in their boss"'></div>
+          <div style="margin-bottom:16px"><label class="field-label">Current tone</label>
+            <select class="field" id="nx-tone">
+              <option value="neutral">Neutral</option>
+              <option value="positive">Positive / Interested</option>
+              <option value="hesitant">Hesitant</option>
+              <option value="objecting">Objecting</option>
+              <option value="rushed">Rushed / Short on time</option>
+              <option value="disengaged">Disengaged / Quiet</option>
+            </select>
+          </div>
+          <button class="gen-btn" onclick="runNext()">Get Next Move →</button>
+          <div id="next-output"><div class="ph"><div class="ph-icon">🧭</div><div class="ph-t">Describe what just happened</div><div class="ph-s">Enter the live signal and hit Generate.</div></div></div>
+        </div>
+
+<div class="panel drawer" id="panel-close"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">CLOSE</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
+          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Close</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Convert momentum. Get the next concrete step.</div>
+          <div class="chip-row" id="close-chips">
+            <button class="chip" onclick="cChip(this)">Interested but hesitant</button>
+            <button class="chip" onclick="cChip(this)">Wants to think</button>
+            <button class="chip" onclick="cChip(this)">Price concern</button>
+            <button class="chip" onclick="cChip(this)">Needs approval</button>
+            <button class="chip" onclick="cChip(this)">Gone quiet</button>
+            <button class="chip" onclick="cChip(this)">Ready to move</button>
+          </div>
+          <div style="margin-bottom:16px"><label class="field-label">Main blocker (optional)</label><input class="field" id="c-blocker" type="text" placeholder='e.g. "CFO needs to sign off"'></div>
+          <button class="gen-btn" onclick="runClose()">Close It →</button>
+          <div id="close-output"><div class="ph"><div class="ph-icon">🔐</div><div class="ph-t">Select their situation</div><div class="ph-s">Pick where they are and hit Close It.</div></div></div>
+        </div>
+
+<div class="panel drawer" id="panel-advance"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">ADVANCE</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
+          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Advance</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Post-call. Move the deal forward.</div>
+          <div style="margin-bottom:12px"><label class="field-label">What happened on the call?</label><textarea class="field" id="adv-call" rows="3" placeholder="e.g. Good call, they liked the ROI demo. CFO wants a written summary before next meeting."></textarea></div>
+          <div style="margin-bottom:16px"><label class="field-label">What did they ask for / request?</label><input class="field" id="adv-req" type="text" placeholder='e.g. "Send a one-pager and availability for next week"'></div>
+          <button class="gen-btn" onclick="runAdvance()">Generate Follow-Up →</button>
+          <div id="advance-output"><div class="ph"><div class="ph-icon">🚀</div><div class="ph-t">What happened?</div><div class="ph-s">Summarize the call and hit Generate.</div></div></div>
+        </div>
+
+<div class="panel drawer" id="panel-wherewewin"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">WHERE WE WIN</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
+          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Where We Win</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Scenario-specific strength framing.</div>
+          <div style="margin-bottom:12px"><label class="field-label">Scenario / lane / use case</label><input class="field" id="www-scenario" type="text" placeholder="e.g. Multi-location LTL, cross-border parcel, 5+ carriers…"></div>
+          <button class="gen-btn" onclick="runWWW()">Get Framing →</button>
+          <div id="www-output"><div class="ph"><div class="ph-icon">🏆</div><div class="ph-t">Describe the scenario</div><div class="ph-s">Enter the lane or use case and hit Generate.</div></div></div>
+        </div>
+
+<div class="panel drawer" id="panel-objtracker"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">OBJTRACKER </div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
+          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Objection Tracker</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Track patterns. Spot recurring friction.</div>
+          <div style="display:flex;gap:8px;margin-bottom:16px">
+            <input class="field" id="ot-input" type="text" placeholder="Log an objection…" style="flex:1">
+            <button class="gen-btn" style="width:auto;padding:10px 16px;margin-bottom:0;flex-shrink:0" onclick="logObj()">Log</button>
+          </div>
+          <div id="ot-list"><div class="ph" style="padding:24px"><div class="ph-icon">🔁</div><div class="ph-t">No objections logged yet</div></div></div>
+        </div>
+
+<div class="panel drawer" id="panel-battlecard">
+<div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">BATTLECARD</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
+  <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Battlecard</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Type a competitor to get the full breakdown — win probability, top angles, what not to say.</div>
+  <div id="bc-deal-hint" style="display:none;margin-bottom:14px"></div>
+
+  <div class="bc-search-wrap">
+    <span class="bc-search-ico">🔍</span>
+    <input class="bc-search" id="bc-input" type="text" placeholder="Type a competitor name…" autocomplete="off" oninput="bcFilter(this.value)" onkeydown="bcKey(event)">
+    <button class="bc-clear" id="bc-clear" onclick="bcClear()">✕</button>
+    <div class="bc-drop" id="bc-drop">
+      <div id="bc-drop-list"></div>
+      <div id="bc-drop-empty" style="display:none;padding:16px;text-align:center;font-size:13px;color:var(--muted)">No match found.</div>
+    </div>
+  </div>
+  <div style="font-size:11px;color:var(--subtle);margin-bottom:18px;padding-left:3px">15 platforms: FreightCOM · eShipper · ShipTime · Freightview · ShipStation · Shippo · NetParcel and more</div>
+
+  <div class="bc-placeholder" id="bc-placeholder" style="background:var(--bg3);border:1.5px dashed var(--border2);border-radius:var(--radius-lg);padding:48px 24px;text-align:center">
+    <div style="font-size:40px;margin-bottom:11px">🥊</div>
+    <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:5px">Type a competitor to load the battlecard</div>
+    <div style="font-size:12px;color:var(--muted);max-width:340px;margin:0 auto;line-height:1.6">Win probability, top 3 angles, what not to say, and full feature comparison.</div>
+  </div>
+
+  <div id="bc-results" style="display:none">
+    <div class="bc-score">
+      <div class="bc-score-lazr"><div class="bc-score-lbl" style="color:var(--green)">LAZR</div><div class="bc-score-num" style="color:var(--green)" id="bc-lazr-score">--</div><div class="bc-score-sub" style="color:var(--green)">features ✓</div></div>
+      <div class="bc-score-mid">VS</div>
+      <div class="bc-score-comp"><div class="bc-score-lbl" style="color:var(--muted)" id="bc-comp-lbl">COMP</div><div class="bc-score-num" style="color:var(--red)" id="bc-comp-score">--</div><div class="bc-score-sub" style="color:var(--muted)">features ✓</div></div>
+    </div>
+    <!-- WIN PROBABILITY -->
+    <div class="win-prob" style="margin-bottom:14px">
+      <div style="flex:1"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--green);margin-bottom:6px">Win Probability</div><div class="win-prob-bar"><div class="win-prob-fill" id="bc-win-bar"></div></div></div>
+      <div class="win-prob-num" id="bc-win-pct">--%</div>
+    </div>
+    <!-- TOP 3 -->
+    <div class="bc-top3" style="margin-bottom:14px"><div class="bc-top3-card" id="bc-t1"><div class="bc-top3-num">--</div><div class="bc-top3-label">--</div></div><div class="bc-top3-card" id="bc-t2"><div class="bc-top3-num">--</div><div class="bc-top3-label">--</div></div><div class="bc-top3-card" id="bc-t3"><div class="bc-top3-num">--</div><div class="bc-top3-label">--</div></div></div>
+    <!-- ANGLES -->
+    <div id="bc-excl" style="margin-bottom:12px"></div>
+    <div id="bc-deal-angle-wrap" style="display:none;margin-bottom:10px;background:linear-gradient(135deg,rgba(61,220,132,.11) 0%,rgba(61,220,132,.03) 100%);border:1px solid var(--g3);border-radius:10px;padding:13px 15px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--green);margin-bottom:6px">🎯 Best Angle For This Deal</div>
+      <div id="bc-deal-angle-text" style="font-size:13px;color:var(--text);line-height:1.7"></div>
+    </div>
+    <div class="g2" style="margin-bottom:12px">
+      <div class="bc-angle"><div class="bc-angle-title">✅ General best angle</div><div id="bc-angle-text" style="font-size:13px;color:var(--text);line-height:1.7">--</div></div>
+      <div class="bc-dont"><div class="bc-dont-title">🚫 What NOT to say</div><div id="bc-dont-text" style="font-size:13px;color:var(--muted);line-height:1.65">--</div></div>
+    </div>
+    <!-- VIEW TOGGLE -->
+    <div style="display:flex;gap:8px;margin-bottom:11px;flex-wrap:wrap">
+      <button class="bc-view-btn on" onclick="bcSetView('wins',this)">🏆 Where Lazr Wins</button>
+      <button class="bc-view-btn" onclick="bcSetView('all',this)">📋 All Features</button>
+      <button class="bc-view-btn" onclick="bcSetView('tied',this)">🤝 Where They Match</button>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:13px">
+      <div style="display:grid;gr
+
+
+
 </body>
 </html>
