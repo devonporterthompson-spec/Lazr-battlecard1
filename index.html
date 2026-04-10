@@ -339,7 +339,7 @@ body.light select.field option{background:var(--bg3)}
         <div class="sb-item" onclick="nav('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v11.9</div>
+        <div class="sb-ver" id="sb-ver">v12.0</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
@@ -452,7 +452,7 @@ body.light select.field option{background:var(--bg3)}
                   <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:2px">⚡ Next Step</div>
                   <div style="font-size:13px;font-weight:700;color:var(--text)" id="disc-next-step-label">Move to: Tools</div>
                 </div>
-                <button onclick="discAdvance()" style="background:var(--green);border:none;border-radius:8px;padding:10px 20px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap;flex-shrink:0">Continue →</button>
+                <button id="disc-next-step-btn" onclick="if(_discAdvanceTimer){clearTimeout(_discAdvanceTimer);_discAdvanceTimer=null;}discAdvance();" style="background:var(--green);border:none;border-radius:8px;padding:10px 20px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap;flex-shrink:0">Continue →</button>
               </div>
             </div>
 
@@ -1134,7 +1134,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v11.9 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v12.0 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -2052,6 +2052,10 @@ var DISC_HINTS = [
 ];
 
 function updateDiscoveryPanel(){
+  // Always hide insight flash when panel re-renders (clean slate for next question)
+  var flash=document.getElementById('disc-insight-flash');
+  if(flash) flash.style.display='none';
+
   // Only hide edit/delete if discovery layer is the active layer
   var discLayer=document.getElementById('main-discovery');
   if(discLayer&&discLayer.style.display!=='none'){
@@ -2151,7 +2155,7 @@ var _discAdvanceTimer=null;
 function discSaveAnswer(){
   // Guard: don't fire if already in the "next question" phase
   var btn=document.getElementById('disc-answered-btn');
-  if(btn&&btn.textContent==='Next Question →') return;
+  if(!btn||btn.textContent!=='Save Answer →') return;
 
   var answerEl=document.getElementById('disc-answer-input');
   var answerText=answerEl?answerEl.value.trim():'';
@@ -2222,19 +2226,17 @@ function discAdvance(){
   if(cur >= DISCOVERY_QUESTIONS.length) return;
   discoveryProgress.current=Math.min(cur+1, DISCOVERY_QUESTIONS.length);
 
-  // Reset button
+  // Reset button to Save Answer → (strict)
   var btn=document.getElementById('disc-answered-btn');
   if(btn){
     btn.textContent='Save Answer →';
     btn.onclick=discSaveAnswer;
-    btn.style.background='var(--green)';
-    btn.style.color='#050f0b';
-    btn.style.border='none';
+    btn.style.cssText='width:100%;background:var(--green);border:none;border-radius:8px;padding:13px;font-family:Syne,sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer';
   }
   var answerEl=document.getElementById('disc-answer-input');
-  if(answerEl) answerEl.disabled=false;
+  if(answerEl){answerEl.disabled=false;answerEl.value='';}
 
-  // Hide flash
+  // Hide flash — updateDiscoveryPanel will also hide it, belt+suspenders
   var flash=document.getElementById('disc-insight-flash');
   if(flash) flash.style.display='none';
 
