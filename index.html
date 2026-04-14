@@ -232,15 +232,251 @@ body.light .chip{background:var(--bg3)}
 body.light .metric{background:var(--bg3)}
 body.light select.field option{background:var(--bg3)}
 
+
+/* ── BATTLECARD TABS ── */
+.bc-tab{background:none;border:1px solid var(--border2);border-radius:7px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s}
+.bc-tab:hover{color:var(--text);border-color:var(--border3)}
+.bc-tab.on{background:var(--g2);border-color:var(--g3);color:var(--green);font-weight:700}
+
 /* ── BATTLECARD ──*/
+
+/* ── BATTLECARD SEARCH ── */
+.bc-search-wrap{position:relative;margin-bottom:6px}
+.bc-search{
+  width:100%;background:var(--bg);border:2px solid var(--border2);
+  border-radius:12px;padding:13px 44px 13px 44px;
+  color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;
+  outline:none;transition:border-color .2s;
+}
+.bc-search:focus{border-color:var(--green)}
+.bc-search::placeholder{color:var(--subtle)}
+.bc-search-ico{
+  position:absolute;left:15px;top:50%;transform:translateY(-50%);
+  font-size:15px;pointer-events:none;color:var(--muted);
+}
+.bc-clear{
+  display:none;position:absolute;right:13px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:var(--muted);cursor:pointer;
+  font-size:14px;padding:4px;line-height:1;
+}
+.bc-clear:hover{color:var(--text)}
+.bc-drop{
+  display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;
+  background:var(--bg2);border:1.5px solid var(--border2);border-radius:12px;
+  z-index:300;box-shadow:0 12px 40px rgba(0,0,0,.5);overflow:hidden;
+  max-height:260px;overflow-y:auto;
+}
+.bc-drop.open{display:block;animation:fup .12s ease}
+.bc-di{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 15px;cursor:pointer;transition:background .1s;
+  border-bottom:1px solid var(--border);
+}
+.bc-di:last-child{border-bottom:none}
+.bc-di:hover,.bc-di.focus{background:var(--bg3)}
+.bc-di-name{font-size:13px;font-weight:600;color:var(--text);flex:1}
+.bc-di-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.bc-di-tag{
+  font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  padding:2px 7px;border-radius:99px;background:var(--bg3);color:var(--muted);
+  border:1px solid var(--border2);white-space:nowrap;
+}
+/* Feature table */
+.bc-row{
+  display:grid;grid-template-columns:1fr 80px 80px;align-items:start;
+  padding:10px 14px;border-bottom:1px solid var(--border);gap:8px;
+  cursor:pointer;transition:background .1s;
+}
+.bc-row:last-child{border-bottom:none}
+.bc-row:hover{background:var(--bg3)}
+.bc-row.win{background:rgba(61,220,132,.04)}
+.bc-row.win:hover{background:rgba(61,220,132,.08)}
+.bc-feat-name{font-size:12px;font-weight:600;color:var(--text);line-height:1.35;display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.bc-feat-detail{display:none;margin-top:6px;padding:7px 10px;background:var(--g2);border-radius:7px;font-size:11px;color:var(--green);line-height:1.55}
+.bc-row.open .bc-feat-detail{display:block}
+.bc-cell{text-align:center;padding-top:2px}
+.bc-yes{color:var(--green);font-size:15px;font-weight:700;display:block;text-align:center}
+.bc-no{color:var(--red);font-size:15px;display:block;text-align:center}
+.bc-part{font-size:10px;font-weight:700;color:var(--amber);display:block;text-align:center}
+.bc-road{font-size:9px;font-weight:700;color:var(--amber);text-transform:uppercase;display:block;text-align:center;line-height:1.4}
+.bc-win-pill{font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 6px;border-radius:99px;background:var(--g2);color:var(--green);border:1px solid var(--g3)}
+.bc-view-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s}
+.bc-view-btn:hover{color:var(--text);border-color:var(--border3)}
+.bc-view-btn.on{color:var(--green);border-color:var(--g3);background:var(--g2);font-weight:700}
 
 /* ══ DISCOVERY ══ */
 /* (styles inline on elements) */
+
+/* ══ MOBILE ENHANCEMENTS ══ */
+@media(max-width:600px){
+  .panel-wrap{padding:12px 12px 80px}
+  .directive{padding:14px 15px}
+  .say-text,.ask-text{font-size:12px}
+  .panel.drawer{padding:16px 14px}
+  .field-row{grid-template-columns:1fr}
+  .metric-grid{grid-template-columns:1fr}
+  .sf-breakdown-grid,.sf-compare-grid,.trigger-row{grid-template-columns:1fr}
+  .gen-btn,.primary-btn,.nb-btn,.sf-cta,.sf-cta-final{padding:15px;font-size:15px;min-height:48px}
+  .chip{padding:9px 14px;font-size:13px;min-height:40px}
+  .sb-item{min-height:44px}
+  .stage-pip{font-size:9px;padding:3px 6px}
+  .stage-sep{font-size:8px}
+}
+
 </style>
 </head>
 <body>
 
 <script>
+var WWW_SCENARIOS = {
+  'Multi-location LTL': {why:'Lazr gives every location its own visibility while rolling up into one reporting view. Carriers, costs, and tracking — unified across all sites without changing how each team ships.',say:'Multi-location operations are where fragmentation costs compound the fastest. Each site is managing their own carriers, their own invoices, their own exceptions. Lazr centralizes the visibility without forcing everyone onto one workflow.',ask:'Right now, does your head office have real-time visibility into what each location is spending on freight?'},
+  'Cross-border parcel': {why:'Lazr manages cross-border parcel alongside domestic in one place — customs documentation, carrier comparison, and landed cost visibility without switching systems.',say:'Cross-border is where most teams hit a wall because their domestic carrier setup does not translate. Lazr handles both modes and gives you one view of cost and compliance across the border.',ask:'Is your cross-border volume going through the same platform as your domestic, or is that handled separately?'},
+  '5+ carriers': {why:'With 5+ carriers, the switching cost alone is significant. Lazr eliminates the portal-hopping and creates a single comparison layer so carrier decisions are data-driven, not habitual.',say:'At five or more carriers, you are not managing shipping — you are managing the overhead of managing shipping. Lazr collapses that into one surface.',ask:'When you need to book a shipment, how long does it take to compare options across your carriers right now?'},
+  'High volume parcel': {why:'At high parcel volume, invoice errors compound fast. Lazr audits every invoice automatically and flags discrepancies before they get paid.',say:'At your volume, a two percent invoice error rate is not a small problem. Lazr catches those automatically — most teams find the tool pays for itself in auditing alone.',ask:'Are you auditing carrier invoices manually, or does that process have gaps?'},
+  'Replacing a TMS': {why:'Lazr is not a full TMS replacement — it fills the financial and visibility gap that most TMS platforms leave open. Most customers run both.',say:'We are not asking you to replace your TMS. Lazr sits on top of your existing setup and adds the cost control and visibility layer that most TMS platforms do not cover well.',ask:'What does your TMS do well, and where do you feel like you are still doing things manually around it?'},
+  'Invoice auditing': {why:'Lazr audits every carrier invoice automatically against the original quote — flagging overcharges, accessorial errors, and duplicate billings before payment.',say:'Most teams are paying invoice errors they do not know about. The average is six to twelve percent overbilling when you add up accessorials, weight corrections, and duplicate charges. Lazr catches all of it.',ask:'Right now, what is your process for verifying a carrier invoice before it gets paid?'},
+  'Team visibility': {why:'Lazr gives role-based access so every stakeholder sees what they need — ops teams see shipment status, finance sees cost per lane, management sees aggregate performance.',say:'Visibility problems usually come from the right data sitting in the wrong system. Lazr gives your team one place where everyone can see their slice — without giving everyone access to everything.',ask:'Who else in your organization needs visibility into freight — is it just the shipping team, or does finance or ops leadership need it too?'}
+};
+
+function wwwChip(el){
+  document.querySelectorAll('#panel-wherewewin .chip').forEach(function(c){c.classList.remove('on');});
+  el.classList.add('on');
+  var scenario = el.textContent.trim();
+  var inp = document.getElementById('www-scenario');
+  if(inp) inp.value = scenario;
+  var data = WWW_SCENARIOS[scenario];
+  if(data){
+    var why=document.getElementById('www-why');
+    var say=document.getElementById('www-say');
+    var ask=document.getElementById('www-ask');
+    var stat=document.getElementById('www-static');
+    if(why)why.textContent=data.why;
+    if(say)say.textContent=data.say;
+    if(ask)ask.textContent=data.ask;
+    if(stat)stat.style.display='block';
+  }
+}
+
+var _advStatusVal='';
+function advStatus(val,el){
+  _advStatusVal=val;
+  document.querySelectorAll('#adv-status-chips .chip').forEach(function(c){c.classList.remove('on');});
+  if(el)el.classList.add('on');
+  if(deal.client){deal.momentum=val==='Closed won'?'advancing':val==='Closed lost'?'stalling':deal.momentum;deal.status=val;saveDeals();showToast('Status: '+val);}
+}
+var ADV_TEMPLATES={
+  followup:{subj:'Follow-up — [C] + Lazr Freight',body:function(c,act){return 'Hi [Name],\n\nThanks for the time today.\n\nBased on our conversation, the core opportunity is centralizing your freight operation — reducing manual overhead across your carrier portals and getting full visibility in one place.\n\nNext step:\n→ '+act+'\n\nLet me know if you have any questions.\n\nBest,\nDevon\nLazr Freight';}},
+  roi:{subj:'Your freight cost breakdown — [C]',body:function(c,act){var annual=deal.ships?(Math.round(deal.ships*0.04*1.8*22*4.33)*12).toLocaleString():'[AMOUNT]';return 'Hi [Name],\n\nFollowing up on the numbers from our call.\n\nBased on '+(deal.ships||'your')+' shipments/month across '+(deal.carriers||'your')+' portals, the estimated annual overhead from fragmentation is $'+annual+' — before touching rates.\n\nMost teams recover 18–32% of this within the first 30 days of centralizing.\n\nWorth a deeper look?\n\nBest,\nDevon\nLazr Freight';}},
+  'data-request':{subj:'Quick request — shipment data for your analysis',body:function(c,act){return 'Hi [Name],\n\nTo complete the cost analysis, I need a few recent shipments.\n\nAll I need:\n· 5–10 recent invoices (any format)\n· Carrier names and modes if possible\n\nThis takes about 5 minutes and lets me show you the exact number — not an estimate.\n\nWhere should I send the upload link?\n\nBest,\nDevon\nLazr Freight';}},
+  stakeholder:{subj:'Intro — [C] + Lazr Freight',body:function(c,act){return 'Hi [Name],\n\nI wanted to loop you in on a conversation I\'ve been having with [COLLEAGUE] about Lazr Freight.\n\nWe\'ve identified a meaningful opportunity to centralize your freight operation — reducing manual overhead and getting full cost visibility across carriers.\n\nWould you be open to a 20-minute call?\n\nBest,\nDevon\nLazr Freight';}}
+};
+function advTemplate(key,el){
+  document.querySelectorAll('#panel-advance .chip').forEach(function(c){c.classList.remove('on');});
+  if(el)el.classList.add('on');
+  var t=ADV_TEMPLATES[key];if(!t)return;
+  var c=deal.client||'[Company]';
+  var act=(document.getElementById('adv-action')&&document.getElementById('adv-action').value)||'[Follow-up action]';
+  var subj=document.getElementById('adv-email-subject');
+  var body=document.getElementById('adv-email-body');
+  var prev=document.getElementById('adv-email-preview');
+  if(subj)subj.textContent=t.subj.replace('[C]',c);
+  if(body)body.textContent=t.body(c,act);
+  if(prev)prev.style.display='block';
+}
+
+var STATIC_OBJ={
+  'Prices too high':{ack:'That is fair — cost always matters.',say:'Most teams that raise that are comparing list rates. The real question is what fragmentation is already costing. Before we look at pricing, would it help to see what your current setup is costing per month?',ask:'What are you paying today across all portals and admin time combined?',means:'Price objection is a buying signal. Redirect to total cost of status quo.'},
+  'Using FreightCOM':{ack:'FreightCOM is solid for LTL.',say:'A lot of our customers came from FreightCOM. The difference is usually visibility beyond LTL — parcel, FTL, cross-border, invoice auditing in one place. The question is whether you are managing multiple portals alongside it.',ask:'Is FreightCOM handling everything, or are there other systems running in parallel?',means:'Gap is usually multi-mode. Parallel systems = fragmentation confirmed.'},
+  'Happy with setup':{ack:'Makes sense — if it is working, why change.',say:'That is exactly where most teams are when we start talking. The question is: happy with the result, or happy enough to not want to deal with switching? Because teams we work with were mostly in the second camp.',ask:'If you had perfect visibility across every carrier right now, what would that change for your team?',means:'Dig into whether happy means optimized or just adapted to friction.'},
+  'Not the right time':{ack:'Timing is real.',say:'Understood. Freight costs and admin overhead do not wait for a good time though. Is the timing about budget, bandwidth, or something else on the roadmap?',ask:'What would need to change for this to be the right time?',means:'Timing objection is usually about internal friction. Find the real blocker.'},
+  'Need to think':{ack:'Absolutely — this is a real decision.',say:'What I usually suggest: let me send a one-page summary of what we covered so you have something concrete to review. That way you are not thinking about a conversation — you are looking at actual numbers.',ask:'Is there someone else you would want to loop in before making a call on this?',means:'Stall = missing stakeholder or missing clarity. Offer a concrete artifact.'},
+  'Have a TMS':{ack:'A TMS is a different category than what Lazr does.',say:'Most TMS platforms handle routing rules and carrier management. What Lazr adds is the financial layer: invoice auditing, cost-per-shipment visibility, cross-carrier comparison. Most customers run both.',ask:'Is your TMS connected to carrier invoices, or is that still a separate process?',means:'TMS does not make Lazr redundant. Position around the financial and visibility gap.'},
+  'Rates not competitive':{ack:'Rate competitiveness always matters.',say:'Rates are one piece. But most teams pay 8 to 15 percent more than they should because of manual errors, missed audits, and habit-based carrier selection — not base rates. That is what we fix first.',ask:'When a shipment goes out, how is the carrier chosen — data or habit?',means:'Rate objection often masks process problems. Win on process before rates.'},
+  'Using eShipper':{ack:'eShipper is well-known in Canada.',say:'eShipper works well for parcel. Where teams usually hit limits is scaling LTL or cross-border — those tend to land in a separate workflow. Does that match what you are seeing?',ask:'Are all your modes going through eShipper, or are there gaps handled elsewhere?',means:'Multi-mode is the opening. If parallel systems exist, fragmentation is confirmed.'}
+};
+function renderHandleStatic(resp){
+  var out=document.getElementById('handle-output');if(!out)return;
+  out.innerHTML='<div style="animation:fup .2s ease">'
+    +'<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 15px;margin-bottom:10px">'
+    +'<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:5px">Acknowledge</div>'
+    +'<div style="font-size:13px;color:var(--muted);font-style:italic">'+resp.ack+'</div></div>'
+    +'<div style="background:linear-gradient(135deg,rgba(61,220,132,.1),rgba(61,220,132,.03));border:2px solid var(--green);border-radius:10px;padding:12px 15px;margin-bottom:10px">'
+    +'<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:5px">Say this</div>'
+    +'<div style="font-size:13px;color:var(--text);line-height:1.7;font-style:italic">'+resp.say+'</div></div>'
+    +'<div style="background:var(--b2);border:1px solid var(--b3);border-radius:10px;padding:12px 15px;margin-bottom:10px">'
+    +'<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--blue);margin-bottom:5px">Then ask</div>'
+    +'<div style="font-size:13px;color:var(--text);line-height:1.7;font-style:italic">'+resp.ask+'</div></div>'
+    +'<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px">'
+    +'<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px">What this means</div>'
+    +'<div style="font-size:12px;color:var(--muted);line-height:1.6">'+resp.means+'</div></div></div>';
+}
+
+function stagePipClick(stage){
+  if(!deal.client){showToast('Set up a deal first.');return;}
+  if(stage==='prep')openDrawer('prep',document.querySelector('[data-p=prep]'));
+  else if(stage==='roi')openDrawer('roi',document.querySelector('[data-p=roi]'));
+  else if(stage==='close')openDrawer('close',document.querySelector('[data-p=close]'));
+  else if(stage==='advance')openDrawer('advance',document.querySelector('[data-p=advance]'));
+  else if(stage==='discover'){showLayer('discovery');updateDiscoveryPanel();}
+  else if(stage==='position'){showLayer('command');updateCommandSurface();}
+}
+
+// ── BATTLECARD TABS ──
+function bcSwitchTab(tab, el){
+  document.querySelectorAll('.bc-tab').forEach(function(b){b.classList.remove('on');});
+  if(el)el.classList.add('on');
+  var rep=document.getElementById('bc-rep-view');
+  var cli=document.getElementById('bc-client-view');
+  if(tab==='rep'){if(rep)rep.style.display='block';if(cli)cli.style.display='none';}
+  else{if(rep)rep.style.display='none';if(cli)cli.style.display='block';cvSync();}
+}
+
+function cvSync(){
+  // Sync client view with current competitor if one is selected
+  var compData=window._bcCurrentComp;
+  var cvCompData=document.getElementById('cv-comp-data');
+  var cvCompEmpty=document.getElementById('cv-comp-empty');
+  if(compData){
+    var lazrWins=[];
+    var compWins=[];
+    bcFeatures.forEach(function(f,i){
+      if(lazrData[i]>=1&&(!compData.data[i]||compData.data[i]<1)) lazrWins.push('✓ '+f.name);
+      else if(compData.data[i]>=1) compWins.push('✓ '+f.name);
+    });
+    var lf=document.getElementById('cv-lazr-features');
+    var cf=document.getElementById('cv-comp-features');
+    var cn=document.getElementById('cv-comp-name');
+    if(lf)lf.innerHTML=lazrWins.slice(0,8).join('<br>');
+    if(cf)cf.innerHTML=compWins.slice(0,8).join('<br>');
+    if(cn)cn.textContent=(compData.name||'COMPETITOR').toUpperCase();
+    if(cvCompData)cvCompData.style.display='block';
+    if(cvCompEmpty)cvCompEmpty.style.display='none';
+  } else {
+    if(cvCompData)cvCompData.style.display='none';
+    if(cvCompEmpty)cvCompEmpty.style.display='block';
+  }
+  // Pre-fill ROI from deal
+  var cs=document.getElementById('cv-ships');
+  var cp=document.getElementById('cv-portals');
+  if(cs&&deal.ships&&!cs.value)cs.value=deal.ships;
+  if(cp&&deal.carriers&&!cp.value)cp.value=deal.carriers;
+  if((cs&&cs.value)||(cp&&cp.value))cvCalc();
+}
+
+function cvCalc(){
+  var ships=parseInt(document.getElementById('cv-ships')&&document.getElementById('cv-ships').value)||0;
+  var portals=parseInt(document.getElementById('cv-portals')&&document.getElementById('cv-portals').value)||0;
+  if(!ships&&!portals)return;
+  var fmult=portals>=4?1.8:portals>=3?1.4:portals>=2?1.15:1.0;
+  var monthly=Math.round(ships*0.04*fmult*1.3*22*4.33);
+  var annual=monthly*12;
+  var res=document.getElementById('cv-result');
+  var annEl=document.getElementById('cv-annual');
+  if(annEl)annEl.textContent='$'+annual.toLocaleString();
+  if(res)res.style.display='block';
+}
+
+
 
 
 // ══ DEAL MEMORY ══
@@ -536,7 +772,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v13.0 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v13.5 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -795,11 +1031,12 @@ function setNextBar(text, btnLabel, action){
 }
 
 function resetDirective(){
-  document.getElementById('d-say').textContent    = 'Set your deal context in Prep to get your first move.';
-  document.getElementById('d-ask').textContent    = 'Use Prep to start the flow.';
-  document.getElementById('d-means').textContent  = '--';
-  document.getElementById('d-risk').textContent   = '--';
-  document.getElementById('d-status').textContent = '🟡 Set deal first';
+  function _set(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+  _set('d-say','Set your deal context in Prep to get your first move.');
+  _set('d-ask','Use Prep to start the flow.');
+  _set('d-means','--');
+  _set('d-risk','--');
+  _set('d-status','🟡 Set deal first');
 }
 
 function resetFlowState(){
@@ -1085,23 +1322,21 @@ function openDrawer(id, el){
   if(id==='battlecard'){if(typeof bcRender==='function')bcRender();}
   // ROI panel — auto-determine state
   if(id==='roi'){
-    setTimeout(function(){
-      var hasShips=deal.ships&&deal.ships>0;
-      var hasPortals=deal.carriers&&deal.carriers>0;
-      if(hasShips||hasPortals){
-        var preShips=document.getElementById('roi-pre-ships');
-        var prePorts=document.getElementById('roi-pre-portals');
-        var preManual=document.getElementById('roi-pre-manual');
-        if(preShips)preShips.textContent=(deal.ships||'—')+' / month';
-        if(prePorts)prePorts.textContent=(deal.carriers||'—')+' portals';
-        var autoAns=(deal.discoveryAnswers&&deal.discoveryAnswers.automation)||'';
-        var manLabel=/manual|mostly manual/i.test(autoAns)?'High':/partial|some/i.test(autoAns)?'Medium':'High';
-        if(preManual)preManual.textContent=manLabel;
-        roiShowState('prefilled');
-      } else {
-        roiShowState('manual');
-      }
-    },50);
+    var hasShips=deal.ships&&deal.ships>0;
+    var hasPortals=deal.carriers&&deal.carriers>0;
+    if(hasShips||hasPortals){
+      var preShips=document.getElementById('roi-pre-ships');
+      var prePorts=document.getElementById('roi-pre-portals');
+      var preManual=document.getElementById('roi-pre-manual');
+      if(preShips)preShips.textContent=(deal.ships||'—')+' / month';
+      if(prePorts)prePorts.textContent=(deal.carriers||'—')+' portals';
+      var autoAns=(deal.discoveryAnswers&&deal.discoveryAnswers.automation)||'';
+      var manLabel=/manual|mostly manual/i.test(autoAns)?'High':/partial|some/i.test(autoAns)?'Medium':'High';
+      if(preManual)preManual.textContent=manLabel;
+      roiShowState('prefilled');
+    } else {
+      roiShowState('manual');
+    }
   }
 }
 
@@ -1205,10 +1440,10 @@ function closeSB(){document.getElementById('sidebar').classList.remove('open');d
 function toggleTheme(){
   isDark=!isDark;
   document.body.classList.toggle('light', !isDark);
-  document.getElementById('theme-btn').textContent=isDark?'☀️':'🌙';
+  var tbt=document.getElementById('theme-btn');if(tbt)tbt.textContent=isDark?'☀️':'🌙';
   localStorage.setItem('cos_theme', isDark?'dark':'light');
 }
-function toggleLang(){currentLang=currentLang==='en'?'fr':'en';document.getElementById('lang-btn').textContent=currentLang==='fr'?'🇨🇦':'🇫🇷';showToast(currentLang==='fr'?'Français activé':'English mode');}
+function toggleLang(){currentLang=currentLang==='en'?'fr':'en';var lbt=document.getElementById('lang-btn');if(lbt)lbt.textContent=currentLang==='fr'?'🇨🇦':'🇫🇷';showToast(currentLang==='fr'?'Français activé':'English mode');}
 
 // ══ AI UTILITIES ══
 
@@ -1475,43 +1710,13 @@ function completeDiscovery(){
 }
 
 // ── HANDLE ──
-function hChip(el){document.querySelectorAll('#handle-chips .chip').forEach(function(c){c.classList.remove('on');});el.classList.add('on');document.getElementById('h-custom').value='';}
-function clearHChips(){document.querySelectorAll('#handle-chips .chip').forEach(function(c){c.classList.remove('on');});}
-async function runHandle(){
-  var chip=document.querySelector('#handle-chips .chip.on');
-  var custom=val('h-custom');
-  var obj=chip?chip.textContent:custom;
-  if(!obj){showToast('Select or type an objection first.');return;}
-  var ctx=val('h-ctx');
-  var prompt='MODE: HANDLE\nObjection: '+obj+(ctx?'\nContext: '+ctx:'')+buildDealContext();
-  var out=document.getElementById('handle-output');
-  await callAI(prompt,out,'handle',function(text,o){
-    var ack=extr(text,'ACK'),reframe=extr(text,'REFRAME'),ask=extr(text,'ASK'),next=extr(text,'NEXT');
-    if(ack){var b=makeBlock('Acknowledge first',ack,'amber',ack);b.querySelector('.ob-body').style.fontStyle='italic';o.appendChild(b);}
-    if(reframe)o.appendChild(makeSayBlock(reframe));
-    if(ask)o.appendChild(makeBlock('Regain control -- ask this',ask,'blue',ask));
-    if(next)o.appendChild(makeBlock('Next move',next,'',next));
-    // After handling: clear objection, set handled flag, push forward to ROI
-    flowState.objectionActive=false;
-    flowState.objectionHandled=true;
-    deal.lastObj='';
-    deal.flowState=Object.assign({},flowState);
-    addEvent('handle','Objection handled');
-    saveDeals();
-    // Add next step block
-    var fwdDiv=document.createElement('div');
-    fwdDiv.style.cssText='margin-top:12px;background:var(--g2);border:1px solid var(--g3);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;justify-content:space-between';
-    fwdDiv.innerHTML='<div style="font-size:12px;font-weight:700;color:var(--green)">Objection handled → Next: Show ROI</div>';
-    var roiBtn=document.createElement('button');
-    roiBtn.textContent='Show ROI →';
-    roiBtn.style.cssText='background:var(--green);border:none;border-radius:7px;padding:8px 16px;font-family:Syne,sans-serif;font-size:12px;font-weight:800;color:#050f0b;cursor:pointer';
-    roiBtn.onclick=function(){closeDrawer();openDrawer('roi',document.querySelector('[data-p="roi"]'));};
-    fwdDiv.appendChild(roiBtn);
-    o.appendChild(fwdDiv);
-    updateCommandSurface();
-    updateDashboard();
-    showToast('Objection handled -- move to ROI');
-  });
+function hChip(el){
+  document.querySelectorAll('#handle-chips .chip').forEach(function(c){c.classList.remove('on');});
+  el.classList.add('on');
+  var obj=el.textContent.trim();
+  var hi=document.getElementById('h-obj');if(hi)hi.value=obj;
+  var resp=STATIC_OBJ[obj];
+  if(resp)renderHandleStatic(resp);
 }
 
 
@@ -2133,17 +2338,18 @@ function bcDrawRows(comp){
 }
 function bcRender(key){
   var comp=vsCompetitors[key];if(!comp)return;
+  window._bcCurrentComp=comp;
   document.getElementById('bc-placeholder').style.display='none';
   document.getElementById('bc-results').style.display='block';
   var ls=0,cs=0;
   lazrData.forEach(function(v,i){if(v>=1&&v!==0.3)ls++;if(comp.data[i]>=1)cs++;});
-  document.getElementById('bc-lazr-score').textContent=ls;
-  document.getElementById('bc-comp-score').textContent=cs;
+  var bls=document.getElementById('bc-lazr-score');if(bls)bls.textContent=ls;
+  var bcs=document.getElementById('bc-comp-score');if(bcs)bcs.textContent=cs;
   var short=comp.name.split(/[/,]/)[0].trim().toUpperCase();
-  document.getElementById('bc-comp-lbl').textContent=short;
-  document.getElementById('bc-col-hdr').textContent=short;
+  var bcl=document.getElementById('bc-comp-lbl');if(bcl)bcl.textContent=short;
+  var bch=document.getElementById('bc-col-comp');if(bch)bch.textContent=short;
   var wp=winProb[key]||70;
-  document.getElementById('bc-win-pct').textContent=wp+'%';
+  var bwp=document.getElementById('bc-win-pct');if(bwp)bwp.textContent=wp+'%';
   document.getElementById('bc-win-bar').style.width=wp+'%';
   var exc=[];lazrData.forEach(function(v,i){if(v>=1&&v!==0.3&&comp.data[i]===0)exc.push(bcFeatures[i].name);});
   ['bc-t1','bc-t2','bc-t3'].forEach(function(id,i){
@@ -2170,8 +2376,8 @@ function bcRender(key){
   if(dealAngleWrap) dealAngleWrap.style.display = dealAngle ? 'block' : 'none';
   var dalEl = document.getElementById('bc-deal-angle-text');
   if(dalEl) dalEl.textContent = dealAngle;
-  document.getElementById('bc-dont-text').textContent=comp.dont||'Acknowledge their strengths before pivoting to gaps.';
-  document.getElementById('bc-hook').innerHTML='<b style="color:var(--amber)">Bottom line:</b> '+comp.hook;
+  var bdt=document.getElementById('bc-dont-text');if(bdt)bdt.textContent=comp.dont||'Acknowledge their strengths before pivoting to gaps.';
+  var _bh=document.getElementById('bc-hook');if(_bh)_bh.innerHTML='<b style="color:var(--amber)">Bottom line:</b> '+comp.hook;
   bcDrawRows(comp);
 }
 
@@ -2211,11 +2417,12 @@ function renderObjLog(){
 }
 // ══ DEAL RESET + DELETE ══
 function resetDirective(){
-  document.getElementById('d-say').textContent    = 'Set your deal context in Prep to get your first move.';
-  document.getElementById('d-ask').textContent    = 'Use Prep to start the flow.';
-  document.getElementById('d-means').textContent  = '--';
-  document.getElementById('d-risk').textContent   = '--';
-  document.getElementById('d-status').textContent = '🟡 Set deal first';
+  function _set(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+  _set('d-say','Set your deal context in Prep to get your first move.');
+  _set('d-ask','Use Prep to start the flow.');
+  _set('d-means','--');
+  _set('d-risk','--');
+  _set('d-status','🟡 Set deal first');
 }
 
 function resetFlowState(){
@@ -2354,9 +2561,18 @@ function toggleProspectMenu(){
   m.innerHTML='';
   named.forEach(function(d){
     var isA=d.id===activeDealId;
-    var div=document.createElement('div');div.className='drop-item';
-    div.innerHTML=(isA?'<span style="color:var(--green)">●</span> ':'<span style="color:var(--subtle)">○</span> ')
-      +'<span style="font-weight:'+(isA?700:400)+';color:var(--text)">'+d.client+'</span>';
+    var health=calculateHealth(d);var hl=healthLabel(health);
+    var hCol=health>=70?'var(--green)':health>=40?'var(--amber)':'var(--red)';
+    var stage=resolveStage(d);
+    var div=document.createElement('div');div.className='drop-item';div.style.cssText='flex-direction:column;align-items:flex-start;gap:3px;padding:9px 14px';
+    div.innerHTML='<div style="display:flex;align-items:center;gap:7px;width:100%">'
+      +(isA?'<span style="color:var(--green);font-size:9px">●</span>':'<span style="color:var(--subtle);font-size:9px">○</span>')
+      +'<span style="font-weight:'+(isA?700:500)+';color:var(--text);flex:1;font-size:13px">'+d.client+'</span>'
+      +'<span style="font-size:10px;font-weight:800;color:'+hCol+'">'+health+'</span></div>'
+      +'<div style="display:flex;align-items:center;gap:6px;margin-left:16px">'
+      +'<span style="font-size:9px;text-transform:uppercase;color:var(--muted)">'+cap(stage)+'</span>'
+      +'<div style="width:44px;height:3px;background:var(--bg3);border-radius:99px;overflow:hidden"><div style="width:'+health+'%;height:100%;background:'+hCol+';border-radius:99px"></div></div>'
+      +'</div>';
     div.onclick=(function(id){return function(){m.classList.remove('open');_openDeal(id);};})(d.id);
     m.appendChild(div);
   });
@@ -2495,17 +2711,17 @@ function showPanel(id){
     <button id="menu-btn" style="display:none;background:none;border:none;color:var(--muted);font-size:18px;padding:0 6px 0 0" onclick="toggleSB()">☰</button>
     <button class="tb-logo" onclick="bypass()">LAZR<span>.</span></button>
     <div class="tb-stage-bar" id="stage-bar">
-      <div class="stage-pip">Prep</div>
+      <div class="stage-pip" onclick="stagePipClick('prep')">Prep</div>
       <span class="stage-sep">›</span>
-      <div class="stage-pip">Discover</div>
+      <div class="stage-pip" onclick="stagePipClick('discover')">Discover</div>
       <span class="stage-sep">›</span>
-      <div class="stage-pip">Position</div>
+      <div class="stage-pip" onclick="stagePipClick('position')">Position</div>
       <span class="stage-sep">›</span>
-      <div class="stage-pip">ROI</div>
+      <div class="stage-pip" onclick="stagePipClick('roi')">ROI</div>
       <span class="stage-sep">›</span>
-      <div class="stage-pip">Close</div>
+      <div class="stage-pip" onclick="stagePipClick('close')">Close</div>
       <span class="stage-sep">›</span>
-      <div class="stage-pip">Advance</div>
+      <div class="stage-pip" onclick="stagePipClick('advance')">Advance</div>
     </div>
     <div class="tb-right">
       <span class="tb-user" id="tb-user"></span>
@@ -2535,7 +2751,7 @@ function showPanel(id){
         <div class="sb-item" onclick="openDrawer('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v13.0</div>
+        <div class="sb-ver" id="sb-ver">v13.5</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
@@ -2671,7 +2887,8 @@ function showPanel(id){
                 <div style="font-size:28px;margin-bottom:8px">✅</div>
                 <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:900;color:var(--green);margin-bottom:6px">Discovery Complete</div>
                 <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:4px">You have enough signal to position value and run execution guidance.</div>
-                <div style="font-size:11px;color:var(--subtle);margin-bottom:16px" id="disc-complete-count">— questions answered</div>
+                <div style="font-size:11px;color:var(--subtle);margin-bottom:12px" id="disc-complete-count">— questions answered</div>
+                <div id="disc-summary-card" style="text-align:left;background:var(--bg3);border-radius:10px;padding:12px 14px;margin-bottom:14px"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:7px">What you learned</div><div id="disc-summary-list" style="font-size:12px;color:var(--muted);line-height:1.85"></div></div>
                 <button class="gen-btn" style="margin-bottom:0;font-size:15px;padding:14px" onclick="discComplete();showLayer('command')">Go to Command →</button>
                 <div style="font-size:11px;color:var(--subtle);margin-top:10px;line-height:1.6">Next step: Move into Command to position Lazr around the operational gaps uncovered.</div>
               </div>
@@ -2984,7 +3201,7 @@ function showPanel(id){
   </div>
 
   <!-- State 2: Manual input (shown when no deal data) -->
-  <div id="roi-manual" style="display:none">
+  <div id="roi-manual" style="display:block">
     <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:900;margin-bottom:4px">ROI Setup</div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Let's quantify this quickly.</div>
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px">
@@ -3089,22 +3306,90 @@ function showPanel(id){
           <div id="close-output"><div class="ph"><div class="ph-icon">🔐</div><div class="ph-t">Select their situation</div><div class="ph-s">Pick where they are and hit Close It.</div></div></div>
         </div>
 
-<div class="panel drawer" id="panel-advance"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">ADVANCE</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
-          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Advance</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Post-call. Move the deal forward.</div>
-          <div style="margin-bottom:12px"><label class="field-label">What happened on the call?</label><textarea class="field" id="adv-call" rows="3" placeholder="e.g. Good call, they liked the ROI demo. CFO wants a written summary before next meeting."></textarea></div>
-          <div style="margin-bottom:16px"><label class="field-label">What did they ask for / request?</label><input class="field" id="adv-req" type="text" placeholder='e.g. "Send a one-pager and availability for next week"'></div>
-          <button class="gen-btn" onclick="runAdvance()">Generate Follow-Up →</button>
-          <div id="advance-output"><div class="ph"><div class="ph-icon">🚀</div><div class="ph-t">What happened?</div><div class="ph-s">Summarize the call and hit Generate.</div></div></div>
+<div class="panel drawer" id="panel-advance">
+  <div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800">ADVANCE</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
+  <div style="margin-bottom:14px"><label class="field-label">Deal status</label>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px" id="adv-status-chips">
+      <button class="chip" onclick="advStatus('Sent follow-up',this)">📤 Sent follow-up</button>
+      <button class="chip" onclick="advStatus('Booked next call',this)">📅 Booked next call</button>
+      <button class="chip" onclick="advStatus('Awaiting data',this)">⏳ Awaiting data</button>
+      <button class="chip" onclick="advStatus('Decision pending',this)">🔄 Decision pending</button>
+      <button class="chip" onclick="advStatus('Stakeholder loop-in',this)">👥 Loop in stakeholder</button>
+      <button class="chip" onclick="advStatus('Closed won',this)">✅ Closed won</button>
+      <button class="chip" onclick="advStatus('Closed lost',this)">❌ Closed lost</button>
+    </div></div>
+  <div class="field-row" style="margin-bottom:14px">
+    <div><label class="field-label">Follow-up date</label><input class="field" id="adv-date" type="date"></div>
+    <div><label class="field-label">Next action</label><input class="field" id="adv-action" type="text" placeholder="e.g. Send one-pager"></div>
+  </div>
+  <div style="margin-bottom:14px"><label class="field-label">Email template</label>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;margin-bottom:8px">
+      <button class="chip" onclick="advTemplate('followup',this)">Follow-up recap</button>
+      <button class="chip" onclick="advTemplate('roi',this)">ROI summary</button>
+      <button class="chip" onclick="advTemplate('data-request',this)">Data request</button>
+      <button class="chip" onclick="advTemplate('stakeholder',this)">Stakeholder intro</button>
+    </div>
+    <div id="adv-email-preview" style="display:none">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px">
+        <div style="padding:9px 13px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:11px;font-weight:700;color:var(--muted)" id="adv-email-subject">Subject</div>
+          <button class="copy-btn" style="position:static" onclick="copyText(document.getElementById('adv-email-body').textContent,this)">Copy</button>
         </div>
+        <div style="padding:14px;font-size:13px;color:var(--text);line-height:1.75;white-space:pre-wrap" id="adv-email-body"></div>
+      </div>
+    </div>
+  </div>
+  <label class="field-label" style="margin-bottom:6px;display:block">Call notes (for AI generation)</label>
+  <textarea class="field" id="adv-call" rows="2" placeholder="What happened? What did they say?"></textarea>
+  <button class="gen-btn" style="margin-top:10px" onclick="runAdvance()">Generate Custom Follow-Up →</button>
+  <div id="advance-output"></div>
+</div>
+<div class="panel drawer" id="panel-wherewewin">
+  <div class="drawer-close">
+    <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800">WHERE WE WIN</div>
+    <button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button>
+  </div>
+  <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Where We Win</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Scenario-specific strength framing for complex or competitive situations.</div>
 
-<div class="panel drawer" id="panel-wherewewin"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">WHERE WE WIN</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
-          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Where We Win</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Scenario-specific strength framing.</div>
-          <div style="margin-bottom:12px"><label class="field-label">Scenario / lane / use case</label><input class="field" id="www-scenario" type="text" placeholder="e.g. Multi-location LTL, cross-border parcel, 5+ carriers…"></div>
-          <button class="gen-btn" onclick="runWWW()">Get Framing →</button>
-          <div id="www-output"><div class="ph"><div class="ph-icon">🏆</div><div class="ph-t">Describe the scenario</div><div class="ph-s">Enter the lane or use case and hit Generate.</div></div></div>
-        </div>
+  <!-- Quick scenario chips -->
+  <div style="margin-bottom:12px">
+    <label class="field-label">Common scenarios</label>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:7px">
+      <button class="chip" onclick="wwwChip(this)">Multi-location LTL</button>
+      <button class="chip" onclick="wwwChip(this)">Cross-border parcel</button>
+      <button class="chip" onclick="wwwChip(this)">5+ carriers</button>
+      <button class="chip" onclick="wwwChip(this)">High volume parcel</button>
+      <button class="chip" onclick="wwwChip(this)">Replacing a TMS</button>
+      <button class="chip" onclick="wwwChip(this)">Invoice auditing</button>
+      <button class="chip" onclick="wwwChip(this)">Team visibility</button>
+    </div>
+  </div>
+
+  <div style="margin-bottom:12px">
+    <label class="field-label">Or describe the scenario</label>
+    <input class="field" id="www-scenario" type="text" placeholder="e.g. 3 warehouses, using FedEx + Purolator + DHL…">
+  </div>
+
+  <!-- Static strengths shown immediately on chip click -->
+  <div id="www-static" style="display:none;margin-bottom:12px">
+    <div style="background:var(--g2);border:1px solid var(--g3);border-radius:10px;padding:14px 16px;margin-bottom:10px">
+      <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:8px">✅ Lazr wins here because</div>
+      <div id="www-why" style="font-size:13px;color:var(--text);line-height:1.75"></div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:10px">
+      <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:6px">▶ Say this</div>
+      <div id="www-say" style="font-size:13px;font-style:italic;color:var(--text);line-height:1.7"></div>
+    </div>
+    <div style="background:var(--b2);border:1px solid var(--b3);border-radius:10px;padding:13px 15px">
+      <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--blue);margin-bottom:6px">Then ask</div>
+      <div id="www-ask" style="font-size:13px;font-style:italic;color:var(--text);line-height:1.7"></div>
+    </div>
+  </div>
+
+  <button class="gen-btn" onclick="runWWW()">Get AI Framing →</button>
+  <div id="www-output"></div>
+</div>
 
 <div class="panel drawer" id="panel-objtracker"><div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">OBJTRACKER </div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
           <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Objection Tracker</div>
@@ -3117,61 +3402,170 @@ function showPanel(id){
         </div>
 
 <div class="panel drawer" id="panel-battlecard">
-<div class="drawer-close"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)">BATTLECARD</div><button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button></div>
-  <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px">Battlecard</div>
-  <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Type a competitor to get the full breakdown — win probability, top angles, what not to say.</div>
-  <div id="bc-deal-hint" style="display:none;margin-bottom:14px"></div>
 
-  <div class="bc-search-wrap">
-    <span class="bc-search-ico">🔍</span>
-    <input class="bc-search" id="bc-input" type="text" placeholder="Type a competitor name…" autocomplete="off" oninput="bcFilter(this.value)" onkeydown="bcKey(event)">
-    <button class="bc-clear" id="bc-clear" onclick="bcClear()">✕</button>
-    <div class="bc-drop" id="bc-drop">
-      <div id="bc-drop-list"></div>
-      <div id="bc-drop-empty" style="display:none;padding:16px;text-align:center;font-size:13px;color:var(--muted)">No match found.</div>
+  <!-- Tab bar -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:14px">
+    <div style="display:flex;gap:4px">
+      <button class="bc-tab on" id="bc-tab-rep" onclick="bcSwitchTab('rep',this)">Rep View</button>
+      <button class="bc-tab" id="bc-tab-client" onclick="bcSwitchTab('client',this)">Client View</button>
     </div>
-  </div>
-  <div style="font-size:11px;color:var(--subtle);margin-bottom:18px;padding-left:3px">15 platforms: FreightCOM · eShipper · ShipTime · Freightview · ShipStation · Shippo · NetParcel and more</div>
-
-  <div class="bc-placeholder" id="bc-placeholder" style="background:var(--bg3);border:1.5px dashed var(--border2);border-radius:var(--radius-lg);padding:48px 24px;text-align:center">
-    <div style="font-size:40px;margin-bottom:11px">🥊</div>
-    <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:5px">Type a competitor to load the battlecard</div>
-    <div style="font-size:12px;color:var(--muted);max-width:340px;margin:0 auto;line-height:1.6">Win probability, top 3 angles, what not to say, and full feature comparison.</div>
+    <button class="drawer-close-btn" onclick="closeDrawer()">✕ Close</button>
   </div>
 
-  <div id="bc-results" style="display:none">
-    <div class="bc-score">
-      <div class="bc-score-lazr"><div class="bc-score-lbl" style="color:var(--green)">LAZR</div><div class="bc-score-num" style="color:var(--green)" id="bc-lazr-score">--</div><div class="bc-score-sub" style="color:var(--green)">features ✓</div></div>
-      <div class="bc-score-mid">VS</div>
-      <div class="bc-score-comp"><div class="bc-score-lbl" style="color:var(--muted)" id="bc-comp-lbl">COMP</div><div class="bc-score-num" style="color:var(--red)" id="bc-comp-score">--</div><div class="bc-score-sub" style="color:var(--muted)">features ✓</div></div>
-    </div>
-    <!-- WIN PROBABILITY -->
-    <div class="win-prob" style="margin-bottom:14px">
-      <div style="flex:1"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--green);margin-bottom:6px">Win Probability</div><div class="win-prob-bar"><div class="win-prob-fill" id="bc-win-bar"></div></div></div>
-      <div class="win-prob-num" id="bc-win-pct">--%</div>
-    </div>
-    <!-- TOP 3 -->
-    <div class="bc-top3" style="margin-bottom:14px"><div class="bc-top3-card" id="bc-t1"><div class="bc-top3-num">--</div><div class="bc-top3-label">--</div></div><div class="bc-top3-card" id="bc-t2"><div class="bc-top3-num">--</div><div class="bc-top3-label">--</div></div><div class="bc-top3-card" id="bc-t3"><div class="bc-top3-num">--</div><div class="bc-top3-label">--</div></div></div>
-    <!-- ANGLES -->
-    <div id="bc-excl" style="margin-bottom:12px"></div>
-    <div id="bc-deal-angle-wrap" style="display:none;margin-bottom:10px;background:linear-gradient(135deg,rgba(61,220,132,.11) 0%,rgba(61,220,132,.03) 100%);border:1px solid var(--g3);border-radius:10px;padding:13px 15px">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--green);margin-bottom:6px">🎯 Best Angle For This Deal</div>
-      <div id="bc-deal-angle-text" style="font-size:13px;color:var(--text);line-height:1.7"></div>
-    </div>
-    <div class="g2" style="margin-bottom:12px">
-      <div class="bc-angle"><div class="bc-angle-title">✅ General best angle</div><div id="bc-angle-text" style="font-size:13px;color:var(--text);line-height:1.7">--</div></div>
-      <div class="bc-dont"><div class="bc-dont-title">🚫 What NOT to say</div><div id="bc-dont-text" style="font-size:13px;color:var(--muted);line-height:1.65">--</div></div>
-    </div>
-    <!-- VIEW TOGGLE -->
-    <div style="display:flex;gap:8px;margin-bottom:11px;flex-wrap:wrap">
-      <button class="bc-view-btn on" onclick="bcSetView('wins',this)">🏆 Where Lazr Wins</button>
-      <button class="bc-view-btn" onclick="bcSetView('all',this)">📋 All Features</button>
-      <button class="bc-view-btn" onclick="bcSetView('tied',this)">🤝 Where They Match</button>
-    </div>
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:13px">
-      <div style="display:grid;gr
+  <!-- ══ REP VIEW ══ -->
+  <div id="bc-rep-view">
 
+    <!-- Search -->
+    <div style="margin-bottom:6px">
+      <div class="bc-search-wrap">
+        <span class="bc-search-ico">🔍</span>
+        <input class="bc-search" id="bc-input" type="text" placeholder="Type a competitor name…" autocomplete="off" oninput="bcFilter(this.value)" onkeydown="bcKey(event)">
+        <button class="bc-clear" id="bc-clear" onclick="bcClear()">✕</button>
+        <div class="bc-drop" id="bc-drop">
+          <div id="bc-drop-list"></div>
+          <div id="bc-drop-empty" style="display:none;padding:16px;text-align:center;font-size:13px;color:var(--muted)">No match found.</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">
+        <span style="font-size:10px;color:var(--muted);background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:2px 8px">FreightCOM</span>
+        <span style="font-size:10px;color:var(--muted);background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:2px 8px">eShipper</span>
+        <span style="font-size:10px;color:var(--muted);background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:2px 8px">ShipTime</span>
+        <span style="font-size:10px;color:var(--muted);background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:2px 8px">Freightview</span>
+        <span style="font-size:10px;color:var(--muted);background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:2px 8px">ShipStation</span>
+        <span style="font-size:10px;color:var(--muted);background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:2px 8px">Shippo</span>
+        <span style="font-size:10px;color:var(--muted);background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:2px 8px">+9 more</span>
+      </div>
+    </div>
 
+    <!-- Placeholder -->
+    <div id="bc-placeholder" style="margin-top:24px;text-align:center;padding:40px 20px">
+      <div style="font-size:44px;margin-bottom:12px">🥊</div>
+      <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:900;color:var(--text);margin-bottom:6px">Search a competitor</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.65;max-width:280px;margin:0 auto">Win probability, top angles, what not to say, and full feature comparison.</div>
+    </div>
+
+    <!-- Results -->
+    <div id="bc-results" style="display:none">
+
+      <!-- Score strip -->
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:14px">
+        <div style="padding:16px 18px;text-align:center;background:var(--g2)">
+          <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:6px">LAZR</div>
+          <div style="font-family:'Syne',sans-serif;font-size:40px;font-weight:900;color:var(--green);line-height:1" id="bc-lazr-score">--</div>
+          <div style="font-size:10px;color:var(--green);opacity:.7;margin-top:4px">features ✓</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;padding:0 14px;background:var(--bg3);font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:var(--subtle)">VS</div>
+        <div style="padding:16px 18px;text-align:center">
+          <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px" id="bc-comp-lbl">COMP</div>
+          <div style="font-family:'Syne',sans-serif;font-size:40px;font-weight:900;color:var(--red);line-height:1" id="bc-comp-score">--</div>
+          <div style="font-size:10px;color:var(--muted);opacity:.7;margin-top:4px">features ✓</div>
+        </div>
+      </div>
+
+      <!-- Win probability -->
+      <div style="background:var(--g2);border:1px solid var(--g3);border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px">
+        <div style="flex:1">
+          <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--green);margin-bottom:6px">Win Probability</div>
+          <div style="background:var(--bg3);border-radius:99px;height:7px;overflow:hidden">
+            <div id="bc-win-bar" style="height:100%;border-radius:99px;background:var(--green);transition:width .6s ease;width:0%"></div>
+          </div>
+        </div>
+        <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;color:var(--green);white-space:nowrap" id="bc-win-pct">--%</div>
+      </div>
+
+      <!-- Top 3 stats -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+        <div id="bc-t1" style="background:var(--bg2);border:1px solid var(--g3);border-radius:10px;padding:11px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--green);margin-bottom:3px">--</div><div style="font-size:10px;color:var(--muted);line-height:1.4">--</div></div>
+        <div id="bc-t2" style="background:var(--bg2);border:1px solid var(--g3);border-radius:10px;padding:11px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--green);margin-bottom:3px">--</div><div style="font-size:10px;color:var(--muted);line-height:1.4">--</div></div>
+        <div id="bc-t3" style="background:var(--bg2);border:1px solid var(--g3);border-radius:10px;padding:11px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--green);margin-bottom:3px">--</div><div style="font-size:10px;color:var(--muted);line-height:1.4">--</div></div>
+      </div>
+
+      <!-- Deal-specific angle -->
+      <div id="bc-deal-hint" style="display:none;margin-bottom:10px"></div>
+      <div id="bc-deal-angle-wrap" style="display:none;background:linear-gradient(135deg,rgba(61,220,132,.11),rgba(61,220,132,.03));border:1px solid var(--g3);border-radius:10px;padding:13px 15px;margin-bottom:10px">
+        <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--green);margin-bottom:6px">🎯 Best Angle For This Deal</div>
+        <div id="bc-deal-angle-text" style="font-size:13px;color:var(--text);line-height:1.7"></div>
+      </div>
+
+      <!-- Exclusive features -->
+      <div id="bc-excl" style="margin-bottom:12px"></div>
+
+      <!-- Angles & dont-say -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+        <div style="background:var(--g2);border:1px solid var(--g3);border-radius:10px;padding:13px">
+          <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--green);margin-bottom:7px">✅ Best angle</div>
+          <div id="bc-angle-text" style="font-size:12px;color:var(--text);line-height:1.65">--</div>
+        </div>
+        <div style="background:var(--r2);border:1px solid var(--r3);border-radius:10px;padding:13px">
+          <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--red);margin-bottom:7px">🚫 Don't say</div>
+          <div id="bc-dont-text" style="font-size:12px;color:var(--muted);line-height:1.65">--</div>
+        </div>
+      </div>
+
+      <!-- View toggle -->
+      <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+        <button class="bc-view-btn on" onclick="bcSetView('wins',this)">🏆 Where Lazr Wins</button>
+        <button class="bc-view-btn" onclick="bcSetView('all',this)">📋 All Features</button>
+        <button class="bc-view-btn" onclick="bcSetView('tied',this)">🤝 Where They Match</button>
+      </div>
+
+      <!-- Feature table -->
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:14px" id="bc-table-wrap">
+        <div style="display:grid;grid-template-columns:1fr 80px 80px;background:var(--bg3);border-bottom:1px solid var(--border);padding:8px 14px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">
+          <div>Feature</div><div style="text-align:center">Lazr</div><div id="bc-col-comp" style="text-align:center">Comp</div>
+        </div>
+        <div id="bc-feature-rows"></div>
+      </div>
+
+    </div><!-- bc-results -->
+  </div><!-- bc-rep-view -->
+
+  <!-- ══ CLIENT VIEW ══ -->
+  <div id="bc-client-view" style="display:none">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;color:var(--text);margin-bottom:4px">LAZR.</div>
+      <div style="font-size:12px;color:var(--muted)">Freight Intelligence Platform</div>
+    </div>
+
+    <!-- ROI section -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:14px">
+      <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:12px">Your Cost of Fragmentation</div>
+      <div class="field-row">
+        <div><label class="field-label">Shipments / month</label><input class="field" id="cv-ships" type="number" placeholder="e.g. 200" oninput="cvCalc()"></div>
+        <div><label class="field-label">Carrier portals</label><input class="field" id="cv-portals" type="number" placeholder="e.g. 4" oninput="cvCalc()"></div>
+      </div>
+      <div id="cv-result" style="display:none;margin-top:12px">
+        <div style="background:var(--r2);border:1px solid var(--r3);border-radius:10px;padding:16px;text-align:center;margin-bottom:10px">
+          <div style="font-size:11px;color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Estimated Annual Overhead</div>
+          <div style="font-family:'Syne',sans-serif;font-size:40px;font-weight:900;color:var(--red);line-height:1" id="cv-annual">—</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">before rate optimization</div>
+        </div>
+        <div style="font-size:13px;font-style:italic;color:var(--text);line-height:1.7;padding:12px 14px;background:rgba(61,220,132,.07);border-left:3px solid var(--green);border-radius:6px">
+          "If nothing changes, this continues every month — before we even look at improving your rates."
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison vs competitor -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px" id="cv-comp-section">
+      <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:12px">Platform Comparison</div>
+      <div id="cv-comp-empty" style="font-size:13px;color:var(--subtle);text-align:center;padding:20px 0">Search a competitor in Rep View to populate</div>
+      <div id="cv-comp-data" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:var(--g2);border:1px solid var(--g3);border-radius:10px;padding:14px">
+            <div style="font-size:11px;font-weight:800;color:var(--green);margin-bottom:10px">LAZR</div>
+            <div id="cv-lazr-features" style="font-size:12px;color:var(--muted);line-height:1.9"></div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px">
+            <div style="font-size:11px;font-weight:800;color:var(--muted);margin-bottom:10px" id="cv-comp-name">COMPETITOR</div>
+            <div id="cv-comp-features" style="font-size:12px;color:var(--muted);line-height:1.9"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- bc-client-view -->
+
+</div>
 
 </body>
 </html>
