@@ -772,7 +772,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v13.5 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v13.6 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1808,9 +1808,13 @@ var DISC_HINTS = [
 ];
 
 function updateDiscoveryPanel(){
-  // Always hide insight flash when panel re-renders (clean slate for next question)
+  // Clean slate for next question
   var flash=document.getElementById('disc-insight-flash');
   if(flash) flash.style.display='none';
+  var nextWrap=document.getElementById('disc-next-btn-wrap');
+  if(nextWrap)nextWrap.style.display='none';
+  var qBlock2=document.getElementById('disc-question-block');
+  if(qBlock2)qBlock2.style.display='block';
 
   // Only hide edit/delete if discovery layer is the active layer
   var discLayer=document.getElementById('main-discovery');
@@ -1965,11 +1969,15 @@ function discSaveAnswer(){
   // Update efficiency score
   updateEfficiencyScore();
 
-  // Phase 2: single dominant CTA — Next Question →
+  // Phase 2: hide question block, show insight + standalone Next Question →
+  var qBlock=document.getElementById('disc-question-block');
+  if(qBlock)qBlock.style.display='none';
+  var nextWrap=document.getElementById('disc-next-btn-wrap');
+  if(nextWrap)nextWrap.style.display='block';
+  // Keep btn updated as fallback
   if(btn){
     btn.textContent='Next Question →';
     btn.onclick=discAdvance;
-    btn.style.cssText='width:100%;background:var(--green);border:none;border-radius:8px;padding:13px;font-family:Syne,sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer;margin-top:8px';
   }
   if(answerEl) answerEl.value='';
   if(answerEl) answerEl.disabled=true;
@@ -1983,7 +1991,7 @@ function discAdvance(){
   if(cur >= DISCOVERY_QUESTIONS.length) return;
   discoveryProgress.current=Math.min(cur+1, DISCOVERY_QUESTIONS.length);
 
-  // Reset button to Save Answer → (strict)
+  // Reset button
   var btn=document.getElementById('disc-answered-btn');
   if(btn){
     btn.textContent='Save Answer →';
@@ -1992,8 +2000,12 @@ function discAdvance(){
   }
   var answerEl=document.getElementById('disc-answer-input');
   if(answerEl){answerEl.disabled=false;answerEl.value='';}
-
-  // Hide flash — updateDiscoveryPanel will also hide it, belt+suspenders
+  // Restore question block, hide next button wrap
+  var qBlock=document.getElementById('disc-question-block');
+  if(qBlock)qBlock.style.display='block';
+  var nextWrap=document.getElementById('disc-next-btn-wrap');
+  if(nextWrap)nextWrap.style.display='none';
+  // Hide flash
   var flash=document.getElementById('disc-insight-flash');
   if(flash) flash.style.display='none';
 
@@ -2751,7 +2763,7 @@ function showPanel(id){
         <div class="sb-item" onclick="openDrawer('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v13.5</div>
+        <div class="sb-ver" id="sb-ver">v13.6</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
@@ -2857,6 +2869,11 @@ function showPanel(id){
                 <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px" id="disc-insight-answer">—</div>
                 <div style="font-size:12px;color:var(--muted);margin-bottom:2px" id="disc-insight-text">—</div>
                 <div style="font-size:12px;color:var(--green);font-weight:700;margin-top:5px" id="disc-insight-next">—</div>
+              </div>
+
+              <!-- Standalone Next Question button (shown after save) -->
+              <div id="disc-next-btn-wrap" style="display:none">
+                <button onclick="discAdvance()" style="width:100%;background:var(--green);border:none;border-radius:9px;padding:14px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer">Next Question →</button>
               </div>
 
             </div>
