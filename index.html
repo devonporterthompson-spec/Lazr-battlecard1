@@ -328,6 +328,28 @@ body.light select.field option{background:var(--bg3)}
 <body>
 
 <script>
+async function generateBriefing(){
+  var brief=document.getElementById('cmd-briefing-output');
+  var btn=document.getElementById('cmd-briefing-btn');
+  if(!brief)return;
+  if(btn){btn.disabled=true;btn.textContent='Generating…';}
+  var prompt='MODE: BRIEFING\nSummarize: (1) what we know about their operation, (2) top 2-3 pain signals, (3) recommended positioning angle, (4) what to watch for, (5) single most important action right now.'+buildDealContext();
+  await callAI(prompt,brief,'briefing',function(text,el){
+    el.innerHTML='<div class="out-block green" style="border-left:4px solid var(--green)"><span class="ob-eye say-eye">Deal Brief</span><div class="ob-body" style="font-size:13px;line-height:1.8">'+text.replace(/\n/g,'<br>')+'</div></div>';
+  });
+  if(btn){btn.disabled=false;btn.textContent='Refresh Brief';}
+}
+
+async function runHandle(){
+  var obj=val('h-obj')||'';
+  if(!obj){showToast('Select or type an objection first.');return;}
+  var out=document.getElementById('handle-output');if(!out)return;
+  var prompt='MODE: HANDLE\nObjection: '+obj+buildDealContext();
+  await callAI(prompt,out,'handle',function(text,el){
+    el.innerHTML='<div class="out-block green" style="border-left:4px solid var(--green);margin-top:12px"><span class="ob-eye say-eye">AI Response</span><div class="ob-body" style="font-size:13px;line-height:1.8">'+text.replace(/\n/g,'<br>')+'</div></div>';
+  });
+}
+
 var WWW_SCENARIOS = {
   'Multi-location LTL': {why:'Lazr gives every location its own visibility while rolling up into one reporting view. Carriers, costs, and tracking — unified across all sites without changing how each team ships.',say:'Multi-location operations are where fragmentation costs compound the fastest. Each site is managing their own carriers, their own invoices, their own exceptions. Lazr centralizes the visibility without forcing everyone onto one workflow.',ask:'Right now, does your head office have real-time visibility into what each location is spending on freight?'},
   'Cross-border parcel': {why:'Lazr manages cross-border parcel alongside domestic in one place — customs documentation, carrier comparison, and landed cost visibility without switching systems.',say:'Cross-border is where most teams hit a wall because their domestic carrier setup does not translate. Lazr handles both modes and gives you one view of cost and compliance across the border.',ask:'Is your cross-border volume going through the same platform as your domestic, or is that handled separately?'},
@@ -772,7 +794,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v13.6 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v13.7 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1485,124 +1507,60 @@ function makeSayBlock(text){
 }
 function buildDealContext(){
   if(!deal.client)return '';
-  return '\n\nDEAL CONTEXT:\nClient: '+(deal.client||'Unknown')
-    +'\nIndustry: '+(deal.industry||'Unknown')
-    +'\nCurrent tool: '+(deal.tool||'Unknown')
+  var f=flowState||{};
+  var ctx='\n\nDEAL CONTEXT:'
+    +'\nClient: '+(deal.client||'Unknown')
+    +'\nTool: '+(deal.tool||'Unknown')
     +'\nConcern: '+(deal.concern||'Unknown')
-    +'\nSize: '+deal.size
-    +'\nRole: '+deal.role
-    +'\nStage: '+deal.stage
-    +'\nMomentum: '+deal.momentum
+    +'\nSize: '+deal.size+'  Role: '+deal.role
+    +'\nStage: '+resolveStage(deal)+'  Momentum: '+(deal.momentum||'neutral')
     +(deal.ships?'\nShipments/mo: '+deal.ships:'')
-    +(deal.carriers?'\nCarriers/portals: '+deal.carriers:'')
+    +(deal.carriers?'\nPortals: '+deal.carriers:'')
+    +'\nDiscovery done: '+(deal.discoveryDone?'Yes':'No')
+    +'\nROI shown: '+(f.numbersShown?'Yes':'No')
+    +'\nPositioned: '+(f.positioningDone?'Yes':'No')
     +(deal.lastObj?'\nLast objection: '+deal.lastObj:'');
+  if(deal.discoveryAnswers){
+    var a=deal.discoveryAnswers,ctx2='';
+    if(a.execution)ctx2+='\nBooking process: '+a.execution;
+    if(a.tools)ctx2+='\nPortals used: '+a.tools;
+    if(a.people)ctx2+='\nOwnership: '+a.people;
+    if(a.time)ctx2+='\nTime loss: '+a.time;
+    if(a.costs)ctx2+='\nInvoice verify: '+a.costs;
+    if(a.carriers)ctx2+='\nCarrier selection: '+a.carriers;
+    if(a.volume)ctx2+='\nVolume: '+a.volume;
+    if(a.automation)ctx2+='\nAutomation: '+a.automation;
+    if(a.scale)ctx2+='\nScale risk: '+a.scale;
+    if(a.fit)ctx2+='\nVision: '+a.fit;
+    if(ctx2)ctx+='\n\nDISCOVERY ANSWERS:'+ctx2;
+  }
+  return ctx;
 }
-var SYS=`You are LAZR Command OS.
+var SYS=`You are LAZR Command OS — a real-time Deal Acceleration Engine for Lazr Freight.
 
-You are NOT a chatbot. You are a strict, real-time Deal Acceleration System and Command Flow Engine.
+ROLE: Direct, decisive, deal-focused. Not a chatbot. Every output is usable mid-call, word for word.
 
-You control what the user says, what they ask, and what they do next. Your purpose is to eliminate thinking during sales conversations, guide the full deal lifecycle, enforce structured discovery, and move every deal forward with absolute clarity.
+LAZR (2026): One platform — LTL, parcel, FTL, cross-border. Automated invoice auditing (80% of invoices have errors). Free to start. Bring your own carriers. No rip-and-replace. Live in 24-48 hours. Multi-user role access. ERP/EDI integrations.
 
-CORE PRINCIPLES (NON-NEGOTIABLE):
-- Be decisive, not suggestive. Never provide multiple options.
-- Always choose the best action and push toward it.
-- Keep outputs short -- every line usable live, mid-call.
-- No fluff. No teaching. No passive states. You are directing, not assisting.
+OUTPUT RULES:
+1. Every response ends with ONE explicit next action. Never vague. Never optional.
+2. Reference specific discovery answers when available. Generic = wasted.
+3. All lines to be spoken must be in quotes.
+4. Max 200 words. Reps are mid-call.
+5. No teaching. No fluff. Direct only.
 
-NEXT STEP CLARITY RULE (CRITICAL):
-Every output must end with ONE next action: singular, specific, immediately actionable, impossible to misinterpret.
-BAD: "Follow up later" / "Consider calling"
-GOOD: "Send follow-up now and request last 5 shipments" / "Call them now"
-The user must NEVER hesitate after reading your output.
+NEXT STEP RULE: End every output with "NEXT: [exact action]" — singular, specific, time-bound.
 
-LAZR PRODUCT (2026 POSITIONING):
-- Lazr is logistics infrastructure, not a transactional tool. Never position as a pricing tool.
-- One platform: LTL, parcel, FTL, cross-border. EDI/API, ERP integrations, automated invoice auditing.
-- 80% of invoices have errors -- Lazr catches them pre-payment. Multi-user role-based access.
-- Bring your own carriers + Lazr network. Free to start, no rip-and-replace.
-- Lazr is the Airbnb of transportation: centralizes fragmented, complex carrier access into one structured platform.
-- Typical results: 10-30% cost reduction, 40-70% less admin time.
-- Target: larger, more complex, more durable customers. Quality over quantity. We sell a vision, not a price.
-- Golden rule: Shipping simple = Lazr is nice to have. Shipping complex = Lazr is indispensable.
-
-DEAL MEMORY -- adapt ALL outputs to context:
-Client Size: SMB = fast/direct. Large = structured/multi-stakeholder. Whale = strategic/executive/governance.
-Stakeholder: Logistics = ease/speed. Ops = process/control. Procurement = consolidation. Finance = cost/savings. Executive = strategic impact.
-Competitor: FreightCOM = acknowledge carrier access, expose centralized control gaps. 2Ship = acknowledge automation, expose optimization intelligence gaps. Internal = acknowledge familiarity, expose fragmentation/hidden cost. Never attack -- acknowledge briefly, reframe, reposition.
-
-FLOW (enforce this order):
-Prep - Discover - Qualify - Position - Handle - ROI - Next - Close - Advance
-
-MANDATORY DISCOVERY QUESTIONS (from Lazr 2026 Enterprise Discovery Framework):
-These 11 questions MUST guide the discovery conversation in order. Track answered vs missing.
-
-Q1  [EXECUTION]:  "How are your shipments executed today?"
-Q2  [TOOLS]:      "How many tools or portals do you use?"
-Q3  [PEOPLE]:     "Who is responsible for shipping? More than one person?"
-Q4  [TIME]:       "Where do you lose the most time?"
-Q5  [SERVICES]:   "Which transportation services do you use? (LTL, parcel, FTL, etc.)"
-Q6  [CARRIERS]:   "Which carriers do you work with?"
-Q7  [VOLUME]:     "What is your annual shipping volume by service?"
-Q8  [MANAGEMENT]: "How do you manage your carriers?"
-Q9  [AUTOMATION]: "Are your processes manual or automated?"
-Q10 [COSTS]:      "How do you track costs and performance?"
-Q11 [SCALE]:      "What happens when your volume increases?"
-
-DISCOVERY LOCK RULE: Cannot proceed to Qualify until process is understood and inefficiencies are identified.
-If information is missing: say "Walk me through how you are currently managing [missing area]."
-Progress signal: If they talk about process, tools, and data = GOOD FIT signal.
-
-DISCOVERY LEVEL FRAMEWORK:
-L1 Execution (Q1): How shipments are booked today
-L2 Tools (Q2): How many portals/systems are used
-L3 People (Q3): Who handles shipping and decisions
-L4 Process (Q4, Q9): Where time is lost, manual vs automated
-L5 Control (Q8, Q10): Carrier management and cost tracking
-L6 Scale (Q11): What happens under growth pressure
-
-QUALIFICATION ENGINE (auto-assess after discovery):
-GREEN FLAGS (good fit): talks about process / multiple tools / multiple users or locations / mentions growth as a challenge / wants visibility and reporting / has tried to patch together a solution / actively looking for a platform
-RED FLAGS (bad fit): only wants the best rate / no ERP or structure / shops across multiple platforms / no interest in improvement / ultra-fast price-based decision / very low or highly seasonal volume / niche cargo (frozen, oversized, wide loads)
-If good fit: "Move to positioning -- frame Lazr as control layer"
-If bad fit: "Reduce depth and move to light close -- do not overinvest"
-
-BATTLECARD FORMAT (trigger when competitor mentioned):
-[HEADLINE]: "Lazr vs [Competitor] -- [core difference in one line]"
-[D1][D2][D3]: Control, Visibility, Scalability differentiators
-[ANGLE]: Best angle based on role and size
-[DONTSAY]: What not to say
-Tone: conversation ammo, not a report.
-
-POSITIONING RULE:
-Frame Lazr as logistics infrastructure -- control, visibility, scalability, and long-term partnership.
-Use discovery insights to expose the specific gap. NEVER lead with price.
-Lazr is not just a vendor -- Lazr is the partner with whom the customer upgrades their supply chain.
-Avoid: "Comparing rates" / "Shipping fast" / "A simple platform" / "Feature X" -- these are NOT differentiators.
-
-HANDLE: Acknowledge briefly, reframe logically, redirect with a question. Inject battlecard when competitor is mentioned.
-
-ROI: Quantify inefficiency. Use 10-25% baseline if no data. Convert to urgency with a specific dollar amount or time cost.
-
-NEXT: Interpret situation, direct next move. Call trigger -- if silence, hesitation, or delay: [NEXT] = "Call them now."
-
-CLOSE: Define ONE concrete next step. No vague language. Options: data review, rate upload, trial shipment, next meeting.
-
-ADVANCE: Generate follow-up message, data request, next step, and status.
-
-OUTPUT FORMAT -- ONLY these markers. No preamble. No alternatives.
-
-Standard:   [SAY] [ASK] [MEANS] [RISK] [STATUS]
-PREP:       [OPEN] [GAP] [ANGLE]
-            -- OPEN: one opening sentence. GAP: the likely gap. ANGLE: best positioning angle. NO questions.
-DISCOVER:   [Q1] [Q2] [Q3] [Q4] [Q5] [Q6] [Q7] [Q8] [Q9] [Q10] [Q11]
-            -- Return all 11 official discovery questions in order. Each as one clean sentence.
-HANDLE:     [ACK] [REFRAME] [ASK] [NEXT]
-ROI:        [IMPACT] [EXPLAIN] [SAY] [NEXT]
-CLOSE:      [INSIGHT] [CLOSE] [STEP] [NEXT]
-ADVANCE:    [FOLLOWUP] [REQUEST] [NEXTSTEP] [STATUS]
-BATTLECARD: [HEADLINE] [D1] [D2] [D3] [ANGLE] [DONTSAY]
-
-Rules: max 2 sentences per field. No bullets. Always use deal context. Tone: confident, decisive. [NEXT] = one immediately actionable instruction.`
+MODES:
+DISCOVERY — Probe based on what is known. Surface pain. Identify the gap.
+POSITION — Use their exact answers. Name their problem. Frame Lazr as the fix.
+HANDLE — Acknowledge, reframe, ask. Three steps. Redirect to cost of status quo.
+ROI — Calculate or estimate fragmentation cost. Make the number specific.
+ADVANCE — Follow-up email + what to do in next 2 hours + how to open next call.
+BRIEFING — Full deal summary: what we know, top pain signals, recommended angle, ONE priority action.
+WHEREWEWIN — Scenario-specific positioning statement + follow-up question.
+CLOSE — Exact closing sequence: say this, ask this, handle the pause, get the next step.
+`
 
 
 
@@ -1790,6 +1748,8 @@ function updateDashboard(){
   if(momEl)momEl.textContent=(mom==='advancing'?'🟢':mom==='stalling'?'🔴':'🟡')+' '+cap(mom);
   var fbEl=document.getElementById('dash-flow-btn');
   if(fbEl&&fbEl.style.display!=='none'){fbEl.textContent=deal.discoveryDone?'Go to Command →':'Start discovery →';}
+  var _hint=document.getElementById('dash-next-hint');
+  if(_hint){var _hmap={prep:'→ Complete deal setup',discover:'→ Run discovery',position:'→ Position Lazr',roi:'→ Show the cost',close:'→ Ask for next step',advance:'→ Send follow-up now'};_hint.textContent=_hmap[resolveStage(deal)]||'';}
 }
 
 // ══ DISCOVERY PANEL ══
@@ -2149,17 +2109,18 @@ async function runClose(){
 // ── ADVANCE ──
 async function runAdvance(){
   var callSum=val('adv-call');
-  var req=val('adv-req');
-  if(!callSum){showToast('Summarize what happened on the call.');return;}
-  var prompt='MODE: ADVANCE\nCall summary: '+callSum+(req?'\nThey requested: '+req:'')+buildDealContext();
+  var req=val('adv-req')||val('adv-action')||'';
   var out=document.getElementById('advance-output');
-  await callAI(prompt,out,'advance',function(text,o){
-    var followup=extr(text,'FOLLOWUP'),request=extr(text,'REQUEST'),nextstep=extr(text,'NEXTSTEP'),status=extr(text,'STATUS');
-    if(followup)o.appendChild(makeSayBlock(followup));
-    if(request)o.appendChild(makeBlock('What to request',request,'blue',request));
-    if(nextstep)o.appendChild(makeBlock('Next step',nextstep,'green',nextstep));
-    if(status)o.appendChild(makeBlock('Deal status',status,'',status));
-    flowState.callEnded=true;deal.flowState=Object.assign({},flowState);addEvent('advance','Follow-up generated');saveDeals();updateCommandSurface();updateDashboard();
+  if(!out)return;
+  if(!callSum&&!req){showToast('Add a note about what happened on the call.');return;}
+  var prompt='MODE: ADVANCE'
+    +'\nCall summary: '+(callSum||'Not provided')
+    +'\nWhat they asked for: '+(req||'Not specified')
+    +'\nStatus: '+(_advStatusVal||'Not set')
+    +'\nGenerate: (1) follow-up email, (2) action in next 2 hours, (3) opening line for next call.'
+    +buildDealContext();
+  await callAI(prompt,out,'advance',function(text,el){
+    el.innerHTML='<div class="out-block green" style="border-left:4px solid var(--green);margin-top:14px"><span class="ob-eye say-eye">AI Follow-Up Plan</span><div class="ob-body" style="font-size:13px;line-height:1.8">'+text.replace(/\n/g,'<br>')+'</div></div>';
   });
 }
 
@@ -2617,6 +2578,8 @@ function updateDashboard(){
   if(momEl)momEl.textContent=(mom==='advancing'?'🟢':mom==='stalling'?'🔴':'🟡')+' '+cap(mom);
   var fbEl=document.getElementById('dash-flow-btn');
   if(fbEl&&fbEl.style.display!=='none'){fbEl.textContent=deal.discoveryDone?'Go to Command →':'Start discovery →';}
+  var _hint=document.getElementById('dash-next-hint');
+  if(_hint){var _hmap={prep:'→ Complete deal setup',discover:'→ Run discovery',position:'→ Position Lazr',roi:'→ Show the cost',close:'→ Ask for next step',advance:'→ Send follow-up now'};_hint.textContent=_hmap[resolveStage(deal)]||'';}
 }
 
 function calcEfficiencyScore(){
@@ -2763,7 +2726,7 @@ function showPanel(id){
         <div class="sb-item" onclick="openDrawer('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v13.6</div>
+        <div class="sb-ver" id="sb-ver">v13.7</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
@@ -2810,7 +2773,7 @@ function showPanel(id){
               <span style="color:var(--border2);font-size:11px">·</span>
               <span id="dash-momentum-chip" style="font-size:11px;color:var(--subtle)">🟡</span>
               <div style="margin-left:auto;display:flex;align-items:center;gap:4px">
-                <button id="dash-flow-btn" onclick="continueDealFromDashboard()" style="display:none;background:var(--green);border:none;border-radius:7px;padding:6px 14px;font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap">Continue →</button>
+                <span id="dash-next-hint" style="font-size:11px;color:var(--green);font-weight:700;flex:1"></span><button id="dash-flow-btn" onclick="continueDealFromDashboard()" style="display:none;background:var(--green);border:none;border-radius:7px;padding:6px 14px;font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap">Continue →</button>
                 <button id="status-edit-btn" onclick="openDrawer('prep',document.querySelector('[data-p=prep]'))" style="background:none;border:none;padding:4px 7px;font-size:12px;cursor:pointer" title="Edit deal">✏️</button>
                 <!-- More options -->
                 <div style="position:relative">
@@ -2925,6 +2888,16 @@ function showPanel(id){
 
             <!-- Command surface -->
             <div id="cmd-surface">
+
+              <!-- Deal Briefing -->
+              <div id="cmd-briefing" style="margin-bottom:14px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)">Deal Brief</div>
+                  <button id="cmd-briefing-btn" onclick="generateBriefing()" style="background:none;border:1px solid var(--border2);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer">Generate Brief</button>
+                </div>
+                <div id="cmd-briefing-output" style="font-size:12px;color:var(--subtle);font-style:italic;padding:8px 0">Hit Generate Brief for a full AI summary of this deal before you speak.</div>
+              </div>
+
               <div id="command-flow-banner" style="margin-bottom:12px">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
                   <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text)" id="command-stage-now">—</div>
