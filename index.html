@@ -7,6 +7,9 @@
 <title>LAZR · Command OS</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
+
+
+
 /* ── TOKENS ── */
 :root{
   --bg:#08100e;--bg2:#0d1814;--bg3:#131f1b;--bg4:#182420;
@@ -304,30 +307,273 @@ body.light select.field option{background:var(--bg3)}
 .bc-view-btn:hover{color:var(--text);border-color:var(--border3)}
 .bc-view-btn.on{color:var(--green);border-color:var(--g3);background:var(--g2);font-weight:700}
 
-/* ══ DISCOVERY ══ */
-/* (styles inline on elements) */
 
-/* ══ MOBILE ENHANCEMENTS ══ */
-@media(max-width:600px){
-  .panel-wrap{padding:12px 12px 80px}
-  .directive{padding:14px 15px}
-  .say-text,.ask-text{font-size:12px}
-  .panel.drawer{padding:16px 14px}
-  .field-row{grid-template-columns:1fr}
-  .metric-grid{grid-template-columns:1fr}
-  .sf-breakdown-grid,.sf-compare-grid,.trigger-row{grid-template-columns:1fr}
-  .gen-btn,.primary-btn,.nb-btn,.sf-cta,.sf-cta-final{padding:15px;font-size:15px;min-height:48px}
-  .chip{padding:9px 14px;font-size:13px;min-height:40px}
-  .sb-item{min-height:44px}
-  .stage-pip{font-size:9px;padding:3px 6px}
-  .stage-sep{font-size:8px}
+/* ══ POST-POSITIONING STEPS ══ */
+.pp-step{animation:fup .22s ease}
+.pp-step-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:12px}
+.pp-say-card{background:rgba(61,220,132,.07);border-left:3px solid var(--green);border-radius:8px;padding:14px 16px;margin-bottom:4px}
+.pp-say-card.pp-blue{background:var(--b2);border-left-color:var(--blue)}
+.pp-eyebrow{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.pp-eyebrow.green{color:var(--green)}
+.pp-eyebrow.blue{color:var(--blue)}
+.pp-say-text{font-size:14px;font-style:italic;color:var(--text);line-height:1.72}
+.pp-note{font-size:11px;color:var(--subtle);line-height:1.6;margin:8px 0 12px;padding:8px 12px;background:var(--bg3);border-radius:7px}
+.pp-a
+// ══ POST-POSITIONING STEP FLOW ══
+var _ppStep=1;
+
+function ppAdvance(nextStep){
+  for(var i=1;i<=5;i++){var el=document.getElementById('pp-step-'+i);if(el)el.style.display='none';}
+  var next=document.getElementById('pp-step-'+nextStep);
+  if(next){next.style.display='block';next.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  _ppStep=nextStep;
+  if(nextStep===5){
+    flowState.closeReady=true;flowState.numbersShown=true;
+    deal.flowState=Object.assign({},flowState);saveDeals();
+    renderNextStepCTAs();updateCommandSurface();
+  }
 }
+
+function ppShowROI(){
+  var ships=deal.ships||100;var portals=deal.carriers||3;
+  var fmult=portals>=7?2.8:portals>=5?2.2:portals>=4?1.8:portals>=3?1.4:portals>=2?1.15:1.0;
+  var autoAns=(deal.discoveryAnswers&&deal.discoveryAnswers.automation)||'';
+  var manMult=/manual|mostly/i.test(autoAns)?1.3:1.0;
+  var monthly=Math.round(ships*0.04*fmult*manMult*22*4.33);
+  var annual=monthly*12;
+  var numEl=document.getElementById('pp-roi-num');
+  if(numEl){
+    var start=Date.now();
+    (function tick(){
+      var p=Math.min((Date.now()-start)/900,1);
+      var ease=1-Math.pow(1-p,3);
+      numEl.textContent='$'+Math.round(ease*annual).toLocaleString();
+      if(p<1)requestAnimationFrame(tick);
+      else numEl.textContent='$'+annual.toLocaleString();
+    })();
+  }
+  var drivers=[];
+  if(portals>=3)drivers.push(portals+' carrier portals');
+  drivers.push('Manual booking overhead');drivers.push('No invoice audit');
+  var dEl=document.getElementById('pp-roi-drivers');
+  if(dEl)dEl.innerHTML='Drivers: '+drivers.join(' · ');
+  var sayEl=document.getElementById('pp-roi-say');
+  if(sayEl)sayEl.textContent='"If nothing changes, that is $'+annual.toLocaleString()+' every year — before we even touch your rates."';
+  flowState.numbersShown=true;deal.flowState=Object.assign({},flowState);saveDeals();
+  ppAdvance(4);
+}
+
+
+
+async function generateBriefing(){
+  var brief=document.getElementById('cmd-briefing-output');
+  var btn=document.getElementById('cmd-briefing-btn');
+  if(!brief)return;
+  if(btn){btn.disabled=true;btn.textContent='Generating…';}
+  var prompt='MODE: BRIEFING\nSummarize: (1) what we know about their operation, (2) top 2-3 pain signals, (3) recommended positioning angle, (4) what to watch for, (5) single most important action right now.'+buildDealContext();
+  await callAI(prompt,brief,'briefing',function(text,el){
+    el.innerHTML='
+/* ══ POST-POSITIONING STEPS ══ */
+.pp-step{animation:fup .22s ease}
+.pp-step-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:12px}
+.pp-say-card{background:rgba(61,220,132,.07);border-left:3px solid var(--green);border-radius:8px;padding:14px 16px;margin-bottom:4px}
+.pp-say-card.pp-blue{background:var(--b2);border-left-color:var(--blue)}
+.pp-eyebrow{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.pp-eyebrow.green{color:var(--green)}
+.pp-eyebrow.blue{color:var(--blue)}
+.pp-say-text{font-size:14px;font-style:italic;color:var(--text);line-height:1.72}
+.pp-note{font-size:11px;color:var(--subtle);line-height:1.6;margin:8px 0 12px;padding:8px 12px;background:var(--bg3);border-radius:7px}
+.pp-advance-btn{width:100%;background:var(--green);border:none;border-radius:9px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer;transition:all .18s;letter-spacing:.02em;margin-top:4px}
+.pp-advance-btn:hover{opacity:.9;transform:translateY(-1px)}
+
+
+/* ══ CLEANUP — UTILITY CLASSES ══ */
+
+/* Status strip */
+.prospect-btn{background:none;border:1px solid var(--border2);border-radius:7px;padding:5px 11px;font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;max-width:170px;overflow:hidden;cursor:pointer;transition:border-color .15s}
+.prospect-btn:hover{border-color:var(--border3)}
+.prospect-btn .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+
+/* More / prospect menu trigger */
+.icon-btn{background:none;border:1px solid var(--border2);border-radius:6px;padding:4px 9px;font-size:13px;color:var(--muted);cursor:pointer;line-height:1;transition:all .15s}
+.icon-btn:hover{color:var(--text);border-color:var(--border3)}
+
+/* Next bar */
+.next-bar{flex-shrink:0;border-top:1px solid var(--border);padding:10px 16px;display:none;background:var(--bg);position:sticky;bottom:0;z-index:10}
+.next-bar.show{display:block}
+#nb-btn{width:100%;padding:13px;font-size:14px;font-family:'Syne',sans-serif;font-weight:800;letter-spacing:.02em;background:var(--green);border:none;border-radius:8px;color:#050f0b;cursor:pointer;transition:opacity .15s}
+#nb-btn:hover{opacity:.9}
+
+/* Deal briefing card */
+.brief-card{margin-bottom:14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.brief-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.brief-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.brief-btn{background:none;border:1px solid var(--border2);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .15s}
+.brief-btn:hover{color:var(--green);border-color:var(--g3)}
+.brief-output{font-size:12px;color:var(--subtle);font-style:italic;line-height:1.6}
+
+/* Flow banner */
+.flow-banner{margin-bottom:14px}
+.flow-banner-top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.flow-stage-name{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text)}
+.flow-stage-badge{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);background:var(--g2);border:1px solid var(--g3);border-radius:4px;padding:2px 7px}
+.flow-banner-sub{display:flex;align-items:center;gap:10px}
+.flow-next-label{font-size:11px;color:var(--subtle)}
+.flow-next-action{font-size:11px;color:var(--green);font-weight:700}
+
+/* Discovery progress card */
+.disc-progress-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px}
+.disc-progress-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.disc-progress-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.disc-progress-count{font-size:12px;font-weight:800;color:var(--green)}
+.disc-progress-bar-wrap{background:var(--bg3);border-radius:4px;height:4px;overflow:hidden;margin-bottom:7px}
+.disc-progress-bar-fill{background:var(--green);height:100%;width:0;border-radius:4px;transition:width .4s ease}
+.disc-progress-footer{display:flex;align-items:center;justify-content:space-between}
+.disc-level-lbl{font-size:11px;color:var(--subtle)}
+.disc-next-focus-lbl{font-size:11px;color:var(--green);font-weight:700}
+
+/* Discovery question block */
+.disc-q-block{background:linear-gradient(135deg,rgba(61,220,132,.12),rgba(61,220,132,.04));border:2px solid var(--green);border-radius:var(--radius-lg);padding:20px 22px;margin-bottom:14px}
+.disc-q-step{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:5px}
+.disc-q-level{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:12px}
+.disc-q-text{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:10px}
+.disc-q-hint{font-size:11px;color:var(--subtle);margin-bottom:14px;font-style:italic}
+.disc-answer-wrap{margin-bottom:10px}
+.disc-answer-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px;display:block}
+.disc-answer-input{width:100%;background:rgba(0,0,0,.25);border:1.5px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;resize:none;outline:none;transition:border-color .2s}
+.disc-answer-input:focus{border-color:var(--green)}
+.disc-answer-input::placeholder{color:var(--subtle)}
+#disc-answered-btn{width:100%;background:var(--green);border:none;border-radius:8px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer;transition:background .15s}
+#disc-skip-btn{width:100%;background:none;border:none;padding:8px;font-size:11px;color:var(--subtle);cursor:pointer;margin-top:4px}
+#disc-skip-btn:hover{color:var(--muted)}
+
+/* Directive card clean */
+.directive .dir-eye{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:var(--green);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.directive .dir-eye::before{content:'';width:8px;height:8px;background:var(--green);border-radius:50%;display:inline-block;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+
+/* Insight flash card */
+.ins-card{background:var(--bg2);border-left:4px solid var(--green);border:1px solid var(--g3);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px}
+.ins-card.level-2{border-color:var(--am3);border-left-color:var(--amber)}
+.ins-card.level-3{border-color:var(--r3);border-left-color:var(--red)}
+.ins-header{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.ins-icon{font-size:13px}
+.ins-badge{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em}
+.ins-answer{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.ins-text{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:4px}
+.ins-next{font-size:12px;color:var(--green);font-weight:700;margin-top:5px}
+
+
+/* ══ ADDITIONAL CLEANUP ══ */
+
+/* Status strip prospect selector */
+#status-strip{display:flex;align-items:center;gap:8px;padding:8px 0;margin-bottom:14px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+#dash-client{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#dash-next-hint{font-size:11px;color:var(--green);font-weight:700;flex:1;text-align:right;padding-right:6px}
+#dash-flow-btn{background:var(--green);border:none;border-radius:7px;padding:6px 14px;font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap}
+#status-edit-btn{background:none;border:none;padding:4px 7px;font-size:14px;cursor:pointer;color:var(--muted)}
+#status-edit-btn:hover{color:var(--text)}
+
+/* Insight flash */
+#disc-insight-flash{margin-bottom:14px;animation:fup .25s ease}
+.ins-card{background:var(--bg2);border-left:4px solid var(--green);border:1px solid var(--g3);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px}
+.ins-level-2{border-color:var(--am3)!important;border-left-color:var(--amber)!important}
+.ins-level-3{border-color:var(--r3)!important;border-left-color:var(--red)!important}
+
+/* Discovery score header */
+.disc-score-wrap{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.disc-score-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px}
+.disc-score-heading{font-family:'Syne',sans-serif;font-size:20px;font-weight:900;color:var(--text);margin-bottom:2px}
+.disc-score-sub{font-size:12px;color:var(--muted)}
+.disc-score-right{text-align:right;flex-shrink:0}
+.disc-score-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:2px}
+.disc-score-num{font-family:'Syne',sans-serif;font-size:32px;font-weight:900;color:var(--green);line-height:1}
+.disc-score-status{font-size:9px;color:var(--muted);margin-top:1px}
+.disc-eff-bar-outer{background:var(--bg3);border-radius:3px;height:3px;margin-bottom:16px;overflow:hidden}
+.disc-eff-bar-inner{background:var(--green);height:100%;width:100%;border-radius:3px;transition:width .6s ease,background .4s ease}
+
+/* Deal cards (overview) */
+.deal-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px;cursor:pointer;transition:border-color .15s,background .15s}
+.deal-card:hover{border-color:var(--border2);background:var(--bg3)}
+.deal-card.active-deal{border-color:var(--g3);background:var(--g2)}
+.dc-name{font-family:'Syne',sans-serif;font-size:17px;font-weight:900;color:var(--text);margin-bottom:6px}
+.dc-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+
+/* Drawers: consistent padding */
+.panel.drawer>*:first-child{margin-top:0}
+.drawer-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:4px;color:var(--text)}
+.drawer-sub{font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.55}
+
+/* Cmd surface clean */
+#cmd-surface{padding-top:2px}
+.cmd-section-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;display:block}
+
+/* Close-ready strip */
+#cmd-close-ready .close-ready-inner{background:linear-gradient(135deg,rgba(61,220,132,.15),rgba(61,220,132,.05));border:2px solid var(--green);border-radius:var(--radius-lg);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+#cmd-close-ready .close-ready-text{flex:1}
+#cmd-close-ready .close-ready-badge{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:3px}
+#cmd-close-ready .close-ready-msg{font-size:13px;font-weight:700;color:var(--text)}
+
+/* Remove dotted placeholder borders */
+.ph{text-align:center;padding:32px 20px;color:var(--subtle)}
+.ph-icon{font-size:28px;margin-bottom:10px;opacity:.3}
+.ph-t{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--muted);margin-bottom:5px}
+.ph-s{font-size:12px;line-height:1.6;max-width:240px;margin:0 auto}
+
+
+.pp-step{animation:fup .22s ease}
+.pp-step-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:12px}
+.pp-say-card{background:rgba(61,220,132,.07);border-left:3px solid var(--green);border-radius:8px;padding:14px 16px;margin-bottom:4px}
+.pp-say-card.pp-blue{background:var(--b2);border-left-color:var(--blue)}
+.pp-eyebrow{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.pp-eyebrow.green{color:var(--green)}
+.pp-eyebrow.blue{color:var(--blue)}
+.pp-say-text{font-size:14px;font-style:italic;color:var(--text);line-height:1.72}
+.pp-note{font-size:11px;color:var(--subtle);line-height:1.6;margin:8px 0 12px;padding:8px 12px;background:var(--bg3);border-radius:7px}
+.pp-advance-btn{width:100%;background:var(--green);border:none;border-radius:9px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer;transition:all .18s;letter-spacing:.02em;margin-top:4px}
+.pp-advance-btn:hover{opacity:.9;transform:translateY(-1px)}
 
 </style>
 </head>
 <body>
 
 <script>
+
+// ══ POST-POSITIONING STEP FLOW ══
+var _ppStep=1;
+function ppAdvance(nextStep){
+  for(var i=1;i<=5;i++){var el=document.getElementById('pp-step-'+i);if(el)el.style.display='none';}
+  var nxt=document.getElementById('pp-step-'+nextStep);
+  if(nxt){nxt.style.display='block';nxt.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  _ppStep=nextStep;
+  if(nextStep===5){
+    flowState.closeReady=true;flowState.numbersShown=true;
+    deal.flowState=Object.assign({},flowState);saveDeals();
+    renderNextStepCTAs();updateCommandSurface();
+  }
+}
+function ppShowROI(){
+  var ships=deal.ships||100;var portals=deal.carriers||3;
+  var fmult=portals>=7?2.8:portals>=5?2.2:portals>=4?1.8:portals>=3?1.4:portals>=2?1.15:1.0;
+  var autoAns=(deal.discoveryAnswers&&deal.discoveryAnswers.automation)||'';
+  var manMult=/manual|mostly/i.test(autoAns)?1.3:1.0;
+  var annual=Math.round(ships*0.04*fmult*manMult*22*4.33)*12;
+  var numEl=document.getElementById('pp-roi-num');
+  if(numEl){
+    var t0=Date.now();
+    (function tick(){
+      var p=Math.min((Date.now()-t0)/900,1),e=1-Math.pow(1-p,3);
+      numEl.textContent='$'+Math.round(e*annual).toLocaleString();
+      if(p<1)requestAnimationFrame(tick);else numEl.textContent='$'+annual.toLocaleString();
+    })();
+  }
+  var dEl=document.getElementById('pp-roi-drivers');
+  if(dEl)dEl.innerHTML='Drivers: '+(portals>=3?portals+' portals · ':'')+' Manual overhead · No invoice audit';
+  var sEl=document.getElementById('pp-roi-say');
+  if(sEl)sEl.textContent='"If nothing changes, that is $'+annual.toLocaleString()+' a year — before we even touch your rates."';
+  flowState.numbersShown=true;deal.flowState=Object.assign({},flowState);saveDeals();ppAdvance(4);
+}
+
 async function generateBriefing(){
   var brief=document.getElementById('cmd-briefing-output');
   var btn=document.getElementById('cmd-briefing-btn');
@@ -341,12 +587,21 @@ async function generateBriefing(){
 }
 
 async function runHandle(){
-  var obj=val('h-obj')||'';
-  if(!obj){showToast('Select or type an objection first.');return;}
+  var obj=typeof _currentObj!=='undefined'?_currentObj:'';
+  if(!obj){var hc=document.getElementById('h-custom');if(hc)obj=hc.value.trim();}
+  if(!obj){showToast('Select a chip or type an objection.');return;}
   var out=document.getElementById('handle-output');if(!out)return;
-  var prompt='MODE: HANDLE\nObjection: '+obj+buildDealContext();
+  var resp=STATIC_OBJ[obj];
+  if(resp){renderHandleStatic(resp);}else{out.innerHTML='';}
+  var ctx=document.getElementById('h-ctx');
+  var ctxVal=ctx?ctx.value.trim():'';
+  var prompt='MODE: HANDLE\nObjection: '+obj+(ctxVal?'\nContext: '+ctxVal:'')+buildDealContext();
   await callAI(prompt,out,'handle',function(text,el){
-    el.innerHTML='<div class="out-block green" style="border-left:4px solid var(--green);margin-top:12px"><span class="ob-eye say-eye">AI Response</span><div class="ob-body" style="font-size:13px;line-height:1.8">'+text.replace(/\n/g,'<br>')+'</div></div>';
+    var d=document.createElement('div');
+    d.style.cssText='margin-top:12px;background:var(--b2);border:1px solid var(--b3);border-left:4px solid var(--blue);border-radius:10px;padding:14px';
+    d.innerHTML='<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--blue);margin-bottom:8px">⚡ Deal-Specific Response</div>'
+      +'<div style="font-size:13px;color:var(--text);line-height:1.8">'+text.replace(/\n/g,'<br>')+'</div>';
+    el.appendChild(d);
   });
 }
 
@@ -794,7 +1049,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v13.7 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v14.1 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1395,36 +1650,13 @@ function quickTrigger(type){
 
 // ══ POST-POSITIONING SEQUENCE ══
 function triggerPostPositioning(){
-  var block=document.getElementById('cmd-post-pos');
-  if(!block||block.style.display!=='none') return; // already showing
-  block.style.display='block';
-  // Show ROI block if numbers not yet shown, else go straight to close
-  var roiBlock=document.getElementById('pp-roi-block');
-  var closeBlock=document.getElementById('pp-close-block');
-  var nsBlock=document.getElementById('pp-nextstep-block');
-  if(!flowState.numbersShown){
-    if(roiBlock) roiBlock.style.display='block';
-    if(closeBlock) closeBlock.style.display='none';
-    if(nsBlock) nsBlock.style.display='none';
-  } else {
-    if(roiBlock) roiBlock.style.display='none';
-    if(closeBlock) closeBlock.style.display='block';
-    renderNextStepCTAs();
-    if(nsBlock) nsBlock.style.display='block';
-  }
-  // Update flow banner
-  var nowEl=document.getElementById('command-stage-now');
-  var badgeEl=document.getElementById('command-stage-badge');
-  if(nowEl) nowEl.textContent='CLOSE';
-  if(badgeEl) badgeEl.textContent='CLOSE READY';
-  // Mark positioning done
-  flowState.positioningDone=true;
-  flowState.closeReady=true;
-  deal.flowState=Object.assign({},flowState);
-  saveDeals();
-  // Show the cmd-close-ready strip too
-  var cr=document.getElementById('cmd-close-ready');
-  if(cr) cr.style.display='none'; // pp-close-block handles it now
+  var block=document.getElementById('cmd-post-pos');if(!block)return;
+  block.style.display='block';_ppStep=1;
+  for(var i=1;i<=5;i++){var el=document.getElementById('pp-step-'+i);if(el)el.style.display=i===1?'block':'none';}
+  if(flowState.numbersShown){ppAdvance(5);}
+  var cr=document.getElementById('cmd-close-ready');if(cr)cr.style.display='none';
+  block.scrollIntoView({behavior:'smooth',block:'start'});
+  flowState.positioningDone=true;deal.flowState=Object.assign({},flowState);saveDeals();
 }
 
 function renderNextStepCTAs(){
@@ -1668,15 +1900,19 @@ function completeDiscovery(){
 }
 
 // ── HANDLE ──
+var _currentObj='';
 function hChip(el){
   document.querySelectorAll('#handle-chips .chip').forEach(function(c){c.classList.remove('on');});
   el.classList.add('on');
-  var obj=el.textContent.trim();
-  var hi=document.getElementById('h-obj');if(hi)hi.value=obj;
-  var resp=STATIC_OBJ[obj];
+  _currentObj=el.textContent.trim();
+  var hc=document.getElementById('h-custom');if(hc)hc.value='';
+  var resp=STATIC_OBJ[_currentObj];
   if(resp)renderHandleStatic(resp);
 }
-
+function clearHChips(){
+  _currentObj='';
+  document.querySelectorAll('#handle-chips .chip').forEach(function(c){c.classList.remove('on');});
+}
 
 // ── ROI HELPERS ──
 window._roiManualLevel = 'high';
@@ -2623,7 +2859,12 @@ function showPanel(id){
   else showToast('Opening '+id+'...');
 }
 
+
 </script>
+
+
+
+
 
 
 
@@ -2726,7 +2967,7 @@ function showPanel(id){
         <div class="sb-item" onclick="openDrawer('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v13.7</div>
+        <div class="sb-ver" id="sb-ver">v14.1</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
@@ -2737,6 +2978,11 @@ function showPanel(id){
 
         <!-- ══ MAIN PANEL ══ -->
         <div class="panel on" id="panel-main">
+
+          <!-- Next action bar (shown when deal active) -->
+          <div id="next-bar" style="display:none;position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--border);padding:10px 0;margin:0 -2px;z-index:10">
+            <button id="nb-btn" style="width:100%;padding:13px;font-size:14px;font-family:'Syne',sans-serif;font-weight:800;letter-spacing:.02em;background:var(--green);border:none;border-radius:8px;color:#050f0b;cursor:pointer">→</button>
+          </div>
 
           <!-- LAYER 0: No deal -->
           <div id="main-nodeal" style="text-align:center;padding:60px 20px;display:none">
@@ -2790,20 +3036,20 @@ function showPanel(id){
 
           <!-- LAYER 2: Discovery -->
           <div id="main-discovery" style="display:none">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+            <div class="disc-score-wrap">
               <div>
-                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px">Building your</div>
-                <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:900;color:var(--text);margin-bottom:2px">Shipping Efficiency Score</div>
-                <div style="font-size:12px;color:var(--muted)">Each answer reveals where cost and time are being lost.</div>
+                <div class="disc-score-title">Building your</div>
+                <div class="disc-score-heading">Shipping Efficiency Score</div>
+                <div class="disc-score-sub">Each answer reveals where cost and time are being lost.</div>
               </div>
-              <div style="text-align:right;flex-shrink:0">
-                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:2px">Score</div>
-                <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:900;color:var(--green);line-height:1" id="disc-eff-score">100</div>
-                <div style="font-size:9px;color:var(--muted);margin-top:1px" id="disc-eff-label">Efficient</div>
+              <div class="disc-score-right">
+                <div class="disc-score-lbl">Score</div>
+                <div class="disc-score-num" id="disc-eff-score">100</div>
+                <div class="disc-score-status" id="disc-eff-label">Efficient</div>
               </div>
             </div>
-            <div style="background:var(--bg3);border-radius:3px;height:3px;margin-bottom:16px;overflow:hidden">
-              <div id="disc-eff-bar" style="background:var(--green);height:100%;width:100%;border-radius:3px;transition:width .6s ease,background .4s ease"></div>
+            <div class="disc-eff-bar-outer">
+              <div id="disc-eff-bar" class="disc-eff-bar-inner"></div>
             </div>
 
             <!-- Progress -->
@@ -2822,16 +3068,15 @@ function showPanel(id){
             </div>
 
             <!-- Insight flash -->
-            <div id="disc-insight-flash" style="display:none;margin-bottom:14px;animation:fup .25s ease">
-              <!-- Insight card -->
-              <div style="background:var(--bg2);border-left:4px solid var(--green);border:1px solid var(--g3);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px">
-                <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-                  <span style="font-size:13px" id="disc-flash-icon">✔</span>
-                  <span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green)" id="disc-flash-label">Insight captured</span>
+            <div id="disc-insight-flash" style="display:none">
+              <div class="ins-card" id="disc-flash-card">
+                <div class="ins-header">
+                  <span class="ins-icon" id="disc-flash-icon">✔</span>
+                  <span class="ins-badge" id="disc-flash-label">Insight captured</span>
                 </div>
-                <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px" id="disc-insight-answer">—</div>
-                <div style="font-size:12px;color:var(--muted);margin-bottom:2px" id="disc-insight-text">—</div>
-                <div style="font-size:12px;color:var(--green);font-weight:700;margin-top:5px" id="disc-insight-next">—</div>
+                <div class="ins-answer" id="disc-insight-answer">—</div>
+                <div class="ins-text" id="disc-insight-text">—</div>
+                <div class="ins-next" id="disc-insight-next">—</div>
               </div>
 
               <!-- Standalone Next Question button (shown after save) -->
@@ -2842,18 +3087,18 @@ function showPanel(id){
             </div>
 
             <!-- Question block -->
-            <div id="disc-question-block" style="background:linear-gradient(135deg,rgba(61,220,132,.12) 0%,rgba(61,220,132,.04) 100%);border:2px solid var(--green);border-radius:var(--radius-lg);padding:20px 22px;margin-bottom:14px">
-              <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:5px">Current Step</div>
-              <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:12px" id="disc-q-level">L1 · Execution</div>
-              <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:12px" id="disc-q-text">—</div>
-              <div style="font-size:11px;color:var(--subtle);margin-bottom:14px;font-style:italic" id="disc-q-hint">—</div>
-              <div style="margin-bottom:10px">
-                <label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px;display:block">What they said</label>
-                <textarea id="disc-answer-input" rows="2" placeholder="Type their answer here…" style="width:100%;background:rgba(0,0,0,.25);border:1.5px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;resize:none;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='var(--border2)'"></textarea>
+            <div id="disc-question-block" class="disc-q-block">
+              <div class="disc-q-step">Current Step</div>
+              <div class="disc-q-level" id="disc-q-level">L1 · Execution</div>
+              <div class="disc-q-text" id="disc-q-text">—</div>
+              <div class="disc-q-hint" id="disc-q-hint">—</div>
+              <div class="disc-answer-wrap">
+                <label class="disc-answer-label">What they said</label>
+                <textarea id="disc-answer-input" class="disc-answer-input" rows="2" placeholder="Type their answer here…"></textarea>
               </div>
-              <button id="disc-answered-btn" onclick="discSaveAnswer()" style="width:100%;background:var(--green);border:none;border-radius:8px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer">Save Answer →</button>
-              <button id="disc-skip-btn" onclick="discSkip()" style="width:100%;background:none;border:none;padding:8px;font-size:11px;color:var(--subtle);cursor:pointer;margin-top:4px">Skip this question</button>
-            </div>
+              <button id="disc-answered-btn" onclick="discSaveAnswer()">Save Answer →</button>
+              <button id="disc-skip-btn" onclick="discSkip()">Skip this question</button>
+            </div></div>
 
             <!-- All questions (collapsed) -->
             <details style="margin-bottom:14px">
@@ -2890,22 +3135,22 @@ function showPanel(id){
             <div id="cmd-surface">
 
               <!-- Deal Briefing -->
-              <div id="cmd-briefing" style="margin-bottom:14px">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
-                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)">Deal Brief</div>
-                  <button id="cmd-briefing-btn" onclick="generateBriefing()" style="background:none;border:1px solid var(--border2);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer">Generate Brief</button>
+              <div id="cmd-briefing" class="brief-card">
+                <div class="brief-header">
+                  <span class="brief-label">Deal Brief</span>
+                  <button id="cmd-briefing-btn" class="brief-btn" onclick="generateBriefing()">Generate Brief</button>
                 </div>
-                <div id="cmd-briefing-output" style="font-size:12px;color:var(--subtle);font-style:italic;padding:8px 0">Hit Generate Brief for a full AI summary of this deal before you speak.</div>
+                <div id="cmd-briefing-output" class="brief-output">Hit Generate Brief for a full AI summary before you speak.</div>
               </div>
 
-              <div id="command-flow-banner" style="margin-bottom:12px">
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
-                  <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text)" id="command-stage-now">—</div>
-                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);background:var(--g2);border:1px solid var(--g3);border-radius:4px;padding:2px 7px" id="command-stage-badge">—</div>
+              <div id="command-flow-banner" class="flow-banner">
+                <div class="flow-banner-top">
+                  <div class="flow-stage-name" id="command-stage-now">—</div>
+                  <div class="flow-stage-badge" id="command-stage-badge">—</div>
                 </div>
-                <div style="display:flex;align-items:center;gap:10px">
-                  <div style="font-size:11px;color:var(--subtle)" id="command-stage-next">—</div>
-                  <div style="font-size:11px;color:var(--green);font-weight:700" id="command-stage-action">—</div>
+                <div class="flow-banner-sub">
+                  <div class="flow-next-label" id="command-stage-next">—</div>
+                  <div class="flow-next-action" id="command-stage-action">—</div>
                 </div>
               </div>
 
@@ -2920,7 +3165,7 @@ function showPanel(id){
 
               <!-- Directive -->
               <div class="directive" id="deal-directive">
-                <span class="dir-eye">▶ Do This Now</span>
+                <span class="dir-eye">Do This Now</span>
                 <div class="dir-field">
                   <span class="dir-field-label">Say this</span>
                   <div class="say-text" id="d-say">Complete discovery to get your first directive.</div>
@@ -2945,57 +3190,45 @@ function showPanel(id){
                 <button class="copy-btn" onclick="copyDirective()">Copy</button>
               </div>
 
-              <!-- Post-positioning sequence (hidden until positioning done) -->
+              <!-- Post-positioning sequence -->
               <div id="cmd-post-pos" style="display:none">
-
-                <!-- Alignment check -->
-                <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px">
-                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:8px">Alignment Check</div>
-                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Say this</div>
-                  <div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:rgba(61,220,132,.07);border-left:3px solid var(--green);border-radius:6px;margin-bottom:0" id="pp-align-say">Does that align with how things are working on your end today?</div>
+                <div class="pp-step" id="pp-step-1">
+                  <div class="pp-step-label">Step 1 of 5 &middot; Alignment Check</div>
+                  <div class="pp-say-card"><div class="pp-eyebrow green">Say this</div><div class="pp-say-text">&ldquo;Does that align with how things are working on your end today?&rdquo;</div></div>
+                  <div class="pp-note">Wait for confirmation. Yes = continue. No = adjust framing first.</div>
+                  <button class="pp-advance-btn" onclick="ppAdvance(2)">They confirmed &rarr;</button>
                 </div>
-
-                <!-- Micro-commitment -->
-                <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px">
-                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--blue);margin-bottom:8px">Micro-Commitment</div>
-                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Then ask</div>
-                  <div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:var(--b2);border-left:3px solid var(--blue);border-radius:6px" id="pp-commit-ask">If that was streamlined into one system, would that make things easier for your team?</div>
+                <div class="pp-step" id="pp-step-2" style="display:none">
+                  <div class="pp-step-label">Step 2 of 5 &middot; Micro-Commitment</div>
+                  <div class="pp-say-card pp-blue"><div class="pp-eyebrow blue">Then ask</div><div class="pp-say-text">&ldquo;If that was simplified into one system, would that make things easier for your team?&rdquo;</div></div>
+                  <div class="pp-note">This is where they mentally accept the solution. Wait for yes.</div>
+                  <button class="pp-advance-btn" onclick="ppAdvance(3)">They said yes &rarr;</button>
                 </div>
-
-                <!-- ROI trigger (shown when numbers not yet shown) -->
-                <div id="pp-roi-block" style="display:none;background:rgba(255,95,87,.06);border:2px solid var(--r3);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px">
-                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--red);margin-bottom:8px">⛔ Stop — Show This</div>
-                  <div style="font-size:13px;color:var(--muted);margin-bottom:10px" id="pp-roi-insight">You are likely losing meaningful time and cost every month from fragmentation alone — before rate optimization even begins.</div>
-                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Say this</div>
-                  <div style="font-size:13px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:rgba(61,220,132,.07);border-left:3px solid var(--green);border-radius:6px;margin-bottom:10px">If nothing changes, this continues every month before rate optimization even begins.</div>
-                  <button onclick="openDrawer('roi',document.querySelector('[data-p=roi]'));flowState.numbersShown=true;deal.flowState=Object.assign({},flowState);saveDeals();document.getElementById('pp-roi-block').style.display='none';document.getElementById('pp-close-block').style.display='block';" style="width:100%;background:var(--red);border:none;border-radius:8px;padding:11px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#fff;cursor:pointer">Use ROI →</button>
+                <div class="pp-step" id="pp-step-3" style="display:none">
+                  <div class="pp-step-label">Step 3 of 5 &middot; ROI Bridge</div>
+                  <div class="pp-say-card"><div class="pp-eyebrow green">Say this</div><div class="pp-say-text">&ldquo;Based on what you&rsquo;ve shared, there&rsquo;s usually a measurable cost tied to this.&rdquo;</div></div>
+                  <div class="pp-say-card pp-blue" style="margin-top:8px"><div class="pp-eyebrow blue">Then ask</div><div class="pp-say-text">&ldquo;Would it help if we quantified that quickly &mdash; so you have an actual number?&rdquo;</div></div>
+                  <div class="pp-note">ROI feels natural when they ask for it. Wait for yes.</div>
+                  <button class="pp-advance-btn" onclick="ppShowROI()">Show the number &rarr;</button>
                 </div>
-
-                <!-- Close-ready block -->
-                <div id="pp-close-block" style="display:none;background:linear-gradient(135deg,rgba(61,220,132,.13),rgba(61,220,132,.04));border:2px solid var(--green);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px">
-                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:10px">⚡ Close Ready</div>
-                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Say this</div>
-                  <div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:rgba(61,220,132,.07);border-left:3px solid var(--green);border-radius:6px;margin-bottom:8px">The next step would just be to validate this using your actual shipment data.</div>
-                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:4px">Then ask</div>
-                  <div style="font-size:13px;font-style:italic;color:var(--text);line-height:1.7;padding:10px 13px;background:var(--b2);border-left:3px solid var(--blue);border-radius:6px;margin-bottom:8px">Would you be open to sending over a few recent shipments?</div>
-                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-                    <div style="padding:10px 12px;background:var(--bg3);border-radius:8px">
-                      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:3px">What this means</div>
-                      <div style="font-size:12px;color:var(--text);line-height:1.6">They understand the problem. Now convert interest into action.</div>
-                    </div>
-                    <div style="padding:10px 12px;background:var(--am2);border-radius:8px;border:1px solid var(--am3)">
-                      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--amber);margin-bottom:3px">Risk if unchanged</div>
-                      <div style="font-size:12px;color:var(--text);line-height:1.6">Without a concrete next step, momentum fades and the problem stays theoretical.</div>
-                    </div>
+                <div class="pp-step" id="pp-step-4" style="display:none">
+                  <div class="pp-step-label">Step 4 of 5 &middot; ROI Reveal</div>
+                  <div style="background:var(--r2);border:2px solid var(--r3);border-radius:var(--radius-lg);padding:18px;margin-bottom:10px;text-align:center">
+                    <div style="font-size:9px;font-weight:800;text-transform:uppercase;color:var(--red);margin-bottom:8px">&#9940; Show This</div>
+                    <div style="font-family:'Syne',sans-serif;font-size:52px;font-weight:900;color:var(--red);line-height:1" id="pp-roi-num">&mdash;</div>
+                    <div style="font-size:12px;color:var(--muted);margin-top:4px">per year &middot; fragmentation overhead</div>
+                    <div style="font-size:11px;color:var(--subtle);margin-top:6px" id="pp-roi-drivers"></div>
                   </div>
+                  <div class="pp-say-card"><div class="pp-eyebrow green">Say immediately</div><div class="pp-say-text" id="pp-roi-say">&ldquo;If nothing changes, this continues every month &mdash; before we even touch your rates.&rdquo;</div></div>
+                  <div class="pp-note">Let the number land. Silence is fine. Then say the line above.</div>
+                  <button class="pp-advance-btn" onclick="ppAdvance(5)">Number landed &rarr; Close</button>
                 </div>
-
-                <!-- Required next step CTA -->
-                <div id="pp-nextstep-block" style="display:none;margin-bottom:14px">
-                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px">Required Next Step</div>
-                  <div style="display:flex;flex-direction:column;gap:7px" id="pp-nextstep-btns"></div>
+                <div class="pp-step" id="pp-step-5" style="display:none">
+                  <div class="pp-step-label">Step 5 of 5 &middot; Close</div>
+                  <div class="pp-say-card"><div class="pp-eyebrow green">Say this</div><div class="pp-say-text">&ldquo;The next step is simple &mdash; I just need to validate this against your actual shipments.&rdquo;</div></div>
+                  <div class="pp-say-card pp-blue" style="margin-top:8px"><div class="pp-eyebrow blue">Then ask</div><div class="pp-say-text">&ldquo;Would you be open to sending over a few recent shipments?&rdquo;</div></div>
+                  <div style="margin-top:14px"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px">Required Next Step</div><div id="pp-nextstep-btns"></div></div>
                 </div>
-
               </div><!-- end cmd-post-pos -->
 
               <!-- Advance Deal button (shown at close stage) -->
