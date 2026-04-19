@@ -1049,7 +1049,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v14.1 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v14.2 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -2967,7 +2967,7 @@ function showPanel(id){
         <div class="sb-item" onclick="openDrawer('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v14.1</div>
+        <div class="sb-ver" id="sb-ver">v14.2</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
@@ -3053,17 +3053,17 @@ function showPanel(id){
             </div>
 
             <!-- Progress -->
-            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Progress</div>
-                <div style="font-size:12px;font-weight:800;color:var(--green)" id="disc-progress-label">0 / 11</div>
+            <div class="disc-progress-card">
+              <div class="disc-progress-header">
+                <span class="disc-progress-lbl">Progress</span>
+                <span class="disc-progress-count" id="disc-progress-label">0 / 11</span>
               </div>
-              <div style="background:var(--bg3);border-radius:4px;height:4px;overflow:hidden;margin-bottom:7px">
-                <div id="disc-progress-bar" style="background:var(--green);height:100%;width:0%;border-radius:4px;transition:width .4s ease"></div>
+              <div class="disc-progress-bar-wrap">
+                <div id="disc-progress-bar" class="disc-progress-bar-fill"></div>
               </div>
-              <div style="display:flex;align-items:center;justify-content:space-between">
-                <div style="font-size:11px;color:var(--subtle)" id="disc-current-level">L1 · Execution · Q1</div>
-                <div style="font-size:11px;color:var(--green);font-weight:700" id="disc-next-focus">Next focus: Tools</div>
+              <div class="disc-progress-footer">
+                <span class="disc-level-lbl" id="disc-current-level">L1 Execution · Q1</span>
+                <span class="disc-next-focus-lbl" id="disc-next-focus">Next focus: Tools</span>
               </div>
             </div>
 
@@ -3094,11 +3094,11 @@ function showPanel(id){
               <div class="disc-q-hint" id="disc-q-hint">—</div>
               <div class="disc-answer-wrap">
                 <label class="disc-answer-label">What they said</label>
-                <textarea id="disc-answer-input" class="disc-answer-input" rows="2" placeholder="Type their answer here…"></textarea>
+                <textarea id="disc-answer-input" class="disc-answer-input" rows="2" placeholder="Type their answer here…" onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='var(--border2)'"></textarea>
               </div>
               <button id="disc-answered-btn" onclick="discSaveAnswer()">Save Answer →</button>
               <button id="disc-skip-btn" onclick="discSkip()">Skip this question</button>
-            </div></div>
+            </div>
 
             <!-- All questions (collapsed) -->
             <details style="margin-bottom:14px">
