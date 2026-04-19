@@ -1052,7 +1052,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v14.2 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v14.3 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -2970,7 +2970,7 @@ function showPanel(id){
         <div class="sb-item" onclick="openDrawer('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v14.2</div>
+        <div class="sb-ver" id="sb-ver">v14.3</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
@@ -3039,88 +3039,95 @@ function showPanel(id){
 
           <!-- LAYER 2: Discovery -->
           <div id="main-discovery" style="display:none">
-            <div class="disc-score-wrap">
-              <div>
-                <div class="disc-score-title">Building your</div>
-                <div class="disc-score-heading">Shipping Efficiency Score</div>
-                <div class="disc-score-sub">Each answer reveals where cost and time are being lost.</div>
-              </div>
-              <div class="disc-score-right">
-                <div class="disc-score-lbl">Score</div>
-                <div class="disc-score-num" id="disc-eff-score">100</div>
-                <div class="disc-score-status" id="disc-eff-label">Efficient</div>
-              </div>
-            </div>
-            <div class="disc-eff-bar-outer">
-              <div id="disc-eff-bar" class="disc-eff-bar-inner"></div>
-            </div>
 
-            <!-- Progress -->
-            <div class="disc-progress-card">
-              <div class="disc-progress-header">
-                <span class="disc-progress-lbl">Progress</span>
-                <span class="disc-progress-count" id="disc-progress-label">0 / 11</span>
+            <!-- Score header -->
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:6px">
+              <div style="flex:1">
+                <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-bottom:5px">Building your</div>
+                <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:900;color:var(--text);line-height:1.1;margin-bottom:4px">Shipping Efficiency Score</div>
+                <div style="font-size:12px;color:var(--muted)">Each answer reveals where cost and time are being lost.</div>
               </div>
-              <div class="disc-progress-bar-wrap">
-                <div id="disc-progress-bar" class="disc-progress-bar-fill"></div>
-              </div>
-              <div class="disc-progress-footer">
-                <span class="disc-level-lbl" id="disc-current-level">L1 Execution · Q1</span>
-                <span class="disc-next-focus-lbl" id="disc-next-focus">Next focus: Tools</span>
+              <div style="text-align:right;flex-shrink:0;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:12px 16px">
+                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:2px">Score</div>
+                <div style="font-family:'Syne',sans-serif;font-size:36px;font-weight:900;color:var(--green);line-height:1" id="disc-eff-score">100</div>
+                <div style="font-size:9px;color:var(--green);margin-top:2px;font-weight:700" id="disc-eff-label">Efficient</div>
               </div>
             </div>
 
-            <!-- Insight flash -->
-            <div id="disc-insight-flash" style="display:none">
-              <div class="ins-card" id="disc-flash-card">
-                <div class="ins-header">
-                  <span class="ins-icon" id="disc-flash-icon">✔</span>
-                  <span class="ins-badge" id="disc-flash-label">Insight captured</span>
+            <!-- Efficiency bar -->
+            <div style="background:var(--bg3);border-radius:3px;height:4px;margin-bottom:18px;overflow:hidden">
+              <div id="disc-eff-bar" style="background:var(--green);height:100%;width:100%;border-radius:3px;transition:width .6s ease,background .4s ease"></div>
+            </div>
+
+            <!-- Progress card -->
+            <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:14px 16px;margin-bottom:14px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                <span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Progress</span>
+                <span style="font-size:13px;font-weight:800;color:var(--green)" id="disc-progress-label">0 / 11</span>
+              </div>
+              <div style="background:var(--bg3);border-radius:99px;height:5px;overflow:hidden;margin-bottom:10px">
+                <div id="disc-progress-bar" style="background:var(--green);height:100%;width:0%;border-radius:99px;transition:width .4s ease"></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:11px;color:var(--subtle)" id="disc-current-level">L1 Execution · Q1</span>
+                <span style="font-size:11px;color:var(--green);font-weight:700" id="disc-next-focus">Next focus: Tools</span>
+              </div>
+            </div>
+
+            <!-- Insight flash (shown after save) -->
+            <div id="disc-insight-flash" style="display:none;margin-bottom:14px;animation:fup .25s ease">
+              <div id="disc-flash-card" style="background:var(--bg2);border-left:4px solid var(--green);border:1px solid var(--g3);border-radius:12px;padding:16px;margin-bottom:10px">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                  <span style="font-size:16px" id="disc-flash-icon">✔</span>
+                  <span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green)" id="disc-flash-label">Insight captured</span>
                 </div>
-                <div class="ins-answer" id="disc-insight-answer">—</div>
-                <div class="ins-text" id="disc-insight-text">—</div>
-                <div class="ins-next" id="disc-insight-next">—</div>
+                <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;line-height:1.5" id="disc-insight-answer">—</div>
+                <div style="font-size:12px;color:var(--muted);line-height:1.65;margin-bottom:4px" id="disc-insight-text">—</div>
+                <div style="font-size:12px;color:var(--green);font-weight:700;margin-top:6px" id="disc-insight-next">—</div>
               </div>
-
-              <!-- Standalone Next Question button (shown after save) -->
               <div id="disc-next-btn-wrap" style="display:none">
-                <button onclick="discAdvance()" style="width:100%;background:var(--green);border:none;border-radius:9px;padding:14px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer">Next Question →</button>
+                <button onclick="discAdvance()" style="width:100%;background:var(--green);border:none;border-radius:9px;padding:14px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer;letter-spacing:.02em">Next Question →</button>
               </div>
-
             </div>
 
             <!-- Question block -->
-            <div id="disc-question-block" class="disc-q-block">
-              <div class="disc-q-step">Current Step</div>
-              <div class="disc-q-level" id="disc-q-level">L1 · Execution</div>
-              <div class="disc-q-text" id="disc-q-text">—</div>
-              <div class="disc-q-hint" id="disc-q-hint">—</div>
-              <div class="disc-answer-wrap">
-                <label class="disc-answer-label">What they said</label>
-                <textarea id="disc-answer-input" class="disc-answer-input" rows="2" placeholder="Type their answer here…" onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='var(--border2)'"></textarea>
+            <div id="disc-question-block" style="background:linear-gradient(135deg,rgba(61,220,132,.12),rgba(61,220,132,.04));border:2px solid var(--green);border-radius:16px;padding:22px;margin-bottom:14px">
+              <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Current Step</div>
+              <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:12px" id="disc-q-level">L1 · Execution</div>
+              <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:10px" id="disc-q-text">—</div>
+              <div style="font-size:11px;color:var(--subtle);margin-bottom:16px;font-style:italic;line-height:1.6" id="disc-q-hint">—</div>
+              <div style="margin-bottom:12px">
+                <label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px;display:block">What they said</label>
+                <textarea id="disc-answer-input" rows="3" placeholder="Type their answer here…" style="width:100%;background:rgba(0,0,0,.3);border:1.5px solid var(--border2);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;resize:none;outline:none;transition:border-color .2s;line-height:1.5" onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='var(--border2)'"></textarea>
               </div>
-              <button id="disc-answered-btn" onclick="discSaveAnswer()">Save Answer →</button>
-              <button id="disc-skip-btn" onclick="discSkip()">Skip this question</button>
+              <button id="disc-answered-btn" onclick="discSaveAnswer()" style="width:100%;background:var(--green);border:none;border-radius:10px;padding:14px;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#050f0b;cursor:pointer;letter-spacing:.02em;transition:opacity .15s">Save Answer →</button>
+              <button id="disc-skip-btn" onclick="discSkip()" style="width:100%;background:none;border:none;padding:9px;font-size:11px;color:var(--subtle);cursor:pointer;margin-top:4px;transition:color .15s">Skip this question</button>
             </div>
 
             <!-- All questions (collapsed) -->
             <details style="margin-bottom:14px">
-              <summary style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);cursor:pointer;padding:8px 0">All questions ▾</summary>
-              <div id="disc-q-list" style="margin-top:8px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px"></div>
+              <summary style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);cursor:pointer;padding:8px 0;list-style:none;display:flex;align-items:center;gap:6px">
+                <span>▶ All Questions</span>
+              </summary>
+              <div id="disc-q-list" style="margin-top:8px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px 14px"></div>
             </details>
 
-            <!-- Discovery Complete transition -->
+            <!-- Discovery complete -->
             <div id="disc-complete-area" style="display:none">
-              <div style="background:linear-gradient(135deg,rgba(61,220,132,.15),rgba(61,220,132,.05));border:2px solid var(--green);border-radius:var(--radius-lg);padding:20px;margin-bottom:12px;text-align:center">
-                <div style="font-size:28px;margin-bottom:8px">✅</div>
-                <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:900;color:var(--green);margin-bottom:6px">Discovery Complete</div>
-                <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:4px">You have enough signal to position value and run execution guidance.</div>
-                <div style="font-size:11px;color:var(--subtle);margin-bottom:12px" id="disc-complete-count">— questions answered</div>
-                <div id="disc-summary-card" style="text-align:left;background:var(--bg3);border-radius:10px;padding:12px 14px;margin-bottom:14px"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:7px">What you learned</div><div id="disc-summary-list" style="font-size:12px;color:var(--muted);line-height:1.85"></div></div>
-                <button class="gen-btn" style="margin-bottom:0;font-size:15px;padding:14px" onclick="discComplete();showLayer('command')">Go to Command →</button>
-                <div style="font-size:11px;color:var(--subtle);margin-top:10px;line-height:1.6">Next step: Move into Command to position Lazr around the operational gaps uncovered.</div>
+              <div style="background:linear-gradient(135deg,rgba(61,220,132,.15),rgba(61,220,132,.05));border:2px solid var(--green);border-radius:16px;padding:24px;margin-bottom:12px;text-align:center">
+                <div style="font-size:32px;margin-bottom:10px">✅</div>
+                <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:900;color:var(--green);margin-bottom:6px">Discovery Complete</div>
+                <div style="font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:6px">You have enough signal to position value and run execution guidance.</div>
+                <div style="font-size:11px;color:var(--subtle);margin-bottom:18px" id="disc-complete-count">— questions answered</div>
+                <div id="disc-summary-card" style="text-align:left;background:rgba(0,0,0,.2);border-radius:10px;padding:12px 14px;margin-bottom:18px">
+                  <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:8px">What you learned</div>
+                  <div id="disc-summary-list" style="font-size:12px;color:var(--muted);line-height:1.9"></div>
+                </div>
+                <button style="width:100%;background:var(--green);border:none;border-radius:10px;padding:15px;font-family:'Syne',sans-serif;font-size:15px;font-weight:900;color:#050f0b;cursor:pointer;letter-spacing:.02em" onclick="discComplete();showLayer('command')">Go to Command →</button>
+                <div style="font-size:11px;color:var(--subtle);margin-top:10px;line-height:1.6">Next: Position Lazr around the gaps uncovered.</div>
               </div>
             </div>
+
           </div>
 
           <!-- LAYER 3: Command -->
