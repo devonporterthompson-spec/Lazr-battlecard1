@@ -2457,23 +2457,54 @@ function renderAIContract(d, el){
 // ── PREP ──
 async function runPrep(){
   var prompt='MODE: PREP'+buildDealContext();
-  var out=document.getElementById('prep-output');
-  await callAI(prompt,out,'prep',function(text,o){
-    var open=extr(text,'OPEN'),gap=extr(text,'GAP'),angle=extr(text,'ANGLE');
-    if(open)o.appendChild(makeSayBlock(open));
-    if(gap)o.appendChild(makeBlock('Gap to expose',gap,'amber',gap));
-    if(angle)o.appendChild(makeBlock('Best angle',angle,'blue',angle));
-    // Forward to discovery
+  var out=document.getElementById('prep-output');if(!out)return;
+  await callAI(prompt,out,'prep',function(parsed,el){
+    el.innerHTML='';
+    // Handle both JSON contract and legacy text format
+    var contract=typeof parsed==='object'&&parsed!==null
+      ?parsed
+      :parseAIContract(String(parsed));
+    // Render structured output
+    if(contract.say){
+      var sayDiv=document.createElement('div');
+      sayDiv.style.cssText='background:rgba(61,220,132,.08);border-left:3px solid var(--green);border-radius:8px;padding:14px 16px;margin-bottom:10px';
+      sayDiv.innerHTML='<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:6px">Opening line</div>'
+        +'<div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.65">'+contract.say+'</div>';
+      el.appendChild(sayDiv);
+    }
+    if(contract.ask){
+      var askDiv=document.createElement('div');
+      askDiv.style.cssText='background:var(--b2);border-left:3px solid var(--blue);border-radius:8px;padding:14px 16px;margin-bottom:10px';
+      askDiv.innerHTML='<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--blue);margin-bottom:6px">First question</div>'
+        +'<div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.65">'+contract.ask+'</div>';
+      el.appendChild(askDiv);
+    }
+    if(contract.means){
+      var meansDiv=document.createElement('div');
+      meansDiv.style.cssText='background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:10px';
+      meansDiv.innerHTML='<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:5px">Likely gap</div>'
+        +'<div style="font-size:12px;color:var(--muted);line-height:1.65">'+contract.means+'</div>';
+      el.appendChild(meansDiv);
+    }
+    if(contract.next_action){
+      var naDiv=document.createElement('div');
+      naDiv.style.cssText='background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:10px';
+      naDiv.innerHTML='<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:5px">Next action</div>'
+        +'<div style="font-size:13px;font-weight:700;color:var(--green)">→ '+contract.next_action+'</div>';
+      el.appendChild(naDiv);
+    }
+    // Forward to discovery button
     var fwd=document.createElement('div');
     fwd.style.cssText='margin-top:14px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px';
-    fwd.innerHTML='<div style="font-size:12px;color:var(--muted)">Next: run discovery to map the operation.</div>';
+    fwd.innerHTML='<div style="font-size:12px;color:var(--muted)">Next: run discovery to map their operation.</div>';
     var discBtn=document.createElement('button');
-    discBtn.textContent='Start discovery →';
+    discBtn.textContent='Start Discovery →';
     discBtn.style.cssText='background:var(--green);border:none;border-radius:7px;padding:9px 16px;font-family:Syne,sans-serif;font-size:12px;font-weight:800;color:#050f0b;cursor:pointer;flex-shrink:0';
     discBtn.onclick=function(){closeDrawer();showLayer('discovery');updateDiscoveryPanel();};
     fwd.appendChild(discBtn);
-    o.appendChild(fwd);
-    addEvent('prep','Prep complete');saveDeals();updateDashboard();showToast('Prep ready -- start discovery');
+    el.appendChild(fwd);
+    addEvent('prep','Prep complete');saveDeals();updateDashboard();
+    showToast('Opening brief ready — start discovery');
   });
 }
 
