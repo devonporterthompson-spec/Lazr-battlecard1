@@ -541,13 +541,289 @@ async function generateBriefing(){
 <body>
 
 <script>
+// ══ LIVE CALL MODE ════════════════════════════════════════════
+var _lcPPStep=0;
+
+function lcUpdateStrip(){
+  if(!deal.client)return;
+  var cl=document.getElementById('lc-client');if(cl)cl.textContent=deal.client;
+  var health=calculateHealth(deal);
+  var rEl=document.getElementById('lc-risk-chip');
+  if(rEl){
+    rEl.style.display='inline-block';
+    rEl.className='lc-risk-chip '+(health<50?'lc-risk-high':health<75?'lc-risk-med':'lc-risk-low');
+    rEl.textContent=health<50?'High Risk':health<75?'Med Risk':'Low Risk';
+  }
+  var mom=deal.momentum||'neutral';
+  var mEl=document.getElementById('lc-mom-chip');
+  if(mEl){mEl.style.display='inline-block';mEl.textContent=mom.charAt(0).toUpperCase()+mom.slice(1);}
+  // Stage pips
+  var order=['prep','discover','position','roi','close','advance'];
+  var cur=resolveStage(deal);var curI=order.indexOf(cur);
+  order.forEach(function(s,i){
+    var p=document.getElementById('lcs-'+s);if(!p)return;
+    p.className='lc-stage-pip'+(i===curI?' active':i<curI?' done':'');
+  });
+  // Risk bar
+  var reasons=[];
+  if(!deal.discoveryDone)reasons.push('Discovery not complete');
+  if(!flowState.numbersShown)reasons.push('ROI not shown');
+  if(!flowState.positioningDone&&cur!=='prep'&&cur!=='discover')reasons.push('Positioning not done');
+  if(deal.momentum==='stalling')reasons.push('Momentum stalling');
+  var bar=document.getElementById('lc-risk-bar');
+  if(bar){
+    if(reasons.length===0){bar.classList.remove('show');}
+    else{
+      bar.classList.add('show');
+      var col=health<50?'var(--red)':health<75?'var(--amber)':'var(--green)';
+      bar.style.borderColor=col;
+      var lbl=document.getElementById('lc-risk-label');
+      var rea=document.getElementById('lc-risk-reasons');
+      var scr=document.getElementById('lc-risk-score');
+      if(lbl){lbl.textContent=(health<50?'⚠ Deal Risk: HIGH':health<75?'⚠ Deal Risk: MEDIUM':'Deal Risk: LOW');lbl.style.color=col;}
+      if(rea)rea.innerHTML=reasons.map(function(r){return '· '+r;}).join('<br>');
+      if(scr){scr.textContent=health;scr.style.color=col;}
+    }
+  }
+}
+
+function lcSetCard(say,ask,showInput,eye){
+  var sEl=document.getElementById('lc-say');if(sEl)sEl.textContent=say;
+  var aEl=document.getElementById('lc-ask');
+  var aLbl=document.getElementById('lc-ask-label');
+  if(aEl){aEl.textContent=ask||'';aEl.style.display=ask?'block':'none';}
+  if(aLbl)aLbl.style.display=ask?'block':'none';
+  var iWrap=document.getElementById('lc-input-wrap');
+  if(iWrap)iWrap.style.display=showInput?'block':'none';
+  var eEl=document.getElementById('lc-card-eye');if(eEl)eEl.textContent=eye||'Do This Now';
+  var ins=document.getElementById('lc-insight-card');if(ins)ins.style.display='none';
+  var inp=document.getElementById('lc-response');if(inp){inp.value='';inp.disabled=false;}
+  var subBtn=document.getElementById('lc-submit-btn');if(subBtn)subBtn.style.display='block';
+  var ppArea=document.getElementById('lc-pp-area');if(ppArea)ppArea.style.display='none';
+  var mc=document.getElementById('lc-main-card');if(mc)mc.style.display='block';
+}
+
+function lcUpdateSurface(){
+  if(!deal.client)return;
+  lcUpdateStrip();
+  var ctx=getDealOperatingContext(deal,flowState,discoveryProgress);
+
+  if(ctx.stage==='discover'){
+    var cur=Math.min(discoveryProgress.current,DISCOVERY_QUESTIONS.length-1);
+    var dq=DISCOVERY_QUESTIONS[cur];if(!dq)return;
+    var mc=document.getElementById('lc-main-card');if(mc)mc.style.display='block';
+    var ppArea=document.getElementById('lc-pp-area');if(ppArea)ppArea.style.display='none';
+    var sayEl=document.getElementById('lc-say');if(sayEl)sayEl.textContent=dq.q;
+    var askEl=document.getElementById('lc-ask');if(askEl)askEl.style.display='none';
+    var askLbl=document.getElementById('lc-ask-label');if(askLbl)askLbl.style.display='none';
+    var eyeEl=document.getElementById('lc-card-eye');if(eyeEl)eyeEl.textContent='Q'+(cur+1)+' of '+DISCOVERY_QUESTIONS.length+' · '+dq.level;
+    var iWrap=document.getElementById('lc-input-wrap');if(iWrap)iWrap.style.display='block';
+    var inp=document.getElementById('lc-response');if(inp){inp.value='';inp.disabled=false;}
+    var subBtn=document.getElementById('lc-submit-btn');if(subBtn){subBtn.textContent='Save Answer →';subBtn.style.display='block';subBtn.onclick=lcDiscoverSubmit;}
+    var insCard=document.getElementById('lc-insight-card');if(insCard)insCard.style.display='none';
+    var bar=document.getElementById('next-bar');if(bar)bar.style.display='none';
+    return;
+  }
+
+  if(ctx.stage==='position'&&ctx.positioningDone){lcShowPP();return;}
+
+  var contract=getStaticContract(ctx);
+  renderCommandSurface(contract);
+
+  var nb=document.getElementById('nb-btn');var bar=document.getElementById('next-bar');
+  if(ctx.stage==='prep'){
+    if(nb){nb.textContent='Set Up Deal →';nb.onclick=function(){openDrawer('prep',document.querySelector('[data-p="prep"]'));};}
+    if(bar)bar.style.display='flex';
+  }else if(ctx.stage==='position'){
+    if(nb){nb.textContent='Positioning Done →';nb.onclick=function(){flowState.positioningDone=true;deal.flowState=Object.assign({},flowState);saveDeals();lcShowPP();refreshCommandOS();};}
+    if(bar)bar.style.display='flex';
+  }else if(ctx.stage==='roi'){
+    if(nb){nb.textContent='Show ROI →';nb.onclick=function(){openDrawer('roi',document.querySelector('[data-p="roi"]'));};}
+    if(bar)bar.style.display='flex';
+  }else if(ctx.stage==='close'){
+    if(nb){nb.textContent='Advance Deal →';nb.onclick=function(){openDrawer('advance',document.querySelector('[data-p="advance"]'));};}
+    if(bar)bar.style.display='flex';
+  }else if(ctx.stage==='advance'){
+    if(nb){nb.textContent='Send Follow-Up →';nb.onclick=function(){openDrawer('advance',document.querySelector('[data-p="advance"]'));};}
+    if(bar)bar.style.display='flex';
+  }else{if(bar)bar.style.display='none';}
+}
+
+function lcDiscoverSubmit(){
+  var inp=document.getElementById('lc-response');
+  var ans=inp?inp.value.trim():'';
+  var cur=discoveryProgress.current;
+  var q=DISCOVERY_QUESTIONS[cur];if(!q)return;
+  if(!deal.discoveryAnswers)deal.discoveryAnswers={};
+  deal.discoveryAnswers[q.area]=ans;
+  if(discoveryProgress.answered.indexOf(cur)<0)discoveryProgress.answered.push(cur);
+  if(ans)addEvent('discover','['+q.area+'] '+ans.slice(0,60));
+  updateEfficiencyScore();saveDeals();
+  setTimeout(refreshCommandOS,100);
+  // Insight
+  var insight=DISC_INSIGHTS[q.area]||{text:'Noted.',level:1};
+  var icons=['','✔','⚡','🔥'];var colors=['','var(--green)','var(--amber)','var(--red)'];
+  var badges=['','Insight captured','Inefficiency identified','Major gap detected'];
+  var lvl=insight.level||1;var col=colors[lvl]||'var(--green)';
+  var insCard=document.getElementById('lc-insight-card');
+  var remaining=DISCOVERY_QUESTIONS.length-discoveryProgress.answered.length;
+  var nextQ=DISCOVERY_QUESTIONS[Math.min(cur+1,DISCOVERY_QUESTIONS.length-1)];
+  document.getElementById('lc-ins-icon').textContent=icons[lvl]||'✔';
+  var badge=document.getElementById('lc-ins-badge');if(badge){badge.textContent=badges[lvl];badge.style.color=col;}
+  document.getElementById('lc-ins-quote').textContent=ans?'"'+ans.slice(0,80)+(ans.length>80?'…':'')+'"':'(skipped)';
+  var insText=document.getElementById('lc-ins-text');if(insText){insText.textContent=insight.text;insText.style.borderLeftColor=col;}
+  var insNext=document.getElementById('lc-ins-next');
+  if(insNext)insNext.textContent=remaining>0&&nextQ?'Next: '+nextQ.level:'Discovery complete — move to Command';
+  if(insCard){insCard.style.display='block';insCard.style.borderLeftColor=col;}
+  if(inp)inp.disabled=true;
+  var subBtn=document.getElementById('lc-submit-btn');if(subBtn)subBtn.style.display='none';
+  var contBtn=document.getElementById('lc-continue-btn');
+  if(contBtn){
+    if(remaining>0){contBtn.textContent='Continue →';contBtn.onclick=lcContinue;}
+    else{contBtn.textContent='Discovery Complete → Go to Command';contBtn.onclick=function(){discComplete();showLayer('command');lcUpdateSurface();};}
+  }
+}
+
+function lcContinue(){
+  var cur=discoveryProgress.current;
+  if(cur<DISCOVERY_QUESTIONS.length-1){
+    discoveryProgress.current=cur+1;
+    lcUpdateSurface();
+  } else {
+    discComplete();showLayer('command');lcUpdateSurface();
+  }
+}
+
+function lcShowPP(){
+  var mc=document.getElementById('lc-main-card');if(mc)mc.style.display='none';
+  var ppArea=document.getElementById('lc-pp-area');if(ppArea)ppArea.style.display='block';
+  var ins=document.getElementById('lc-insight-card');if(ins)ins.style.display='none';
+  var bar=document.getElementById('next-bar');if(bar)bar.style.display='none';
+  if(flowState.numbersShown){lcPP(5);} else {lcPP(1);}
+}
+
+function lcPP(step){
+  _lcPPStep=step;
+  for(var i=1;i<=5;i++){
+    var el=document.getElementById('lc-pp-'+i);
+    if(el)el.style.display=i===step?'block':'none';
+  }
+  if(step===3){
+    var el3=document.getElementById('lc-pp-3');
+    if(el3){el3.style.outline='2px solid var(--amber)';setTimeout(function(){var e=document.getElementById('lc-pp-3');if(e)e.style.outline='';},1800);}
+  }
+  if(step===5){
+    flowState.closeReady=true;flowState.numbersShown=true;
+    deal.flowState=Object.assign({},flowState);saveDeals();
+    lcBuildCloseCTAs();lcUpdateStrip();
+    refreshCommandOS();
+  }
+}
+
+function lcShowROI(){
+  var ships=deal.ships||100;var portals=deal.carriers||3;
+  var fmult=portals>=7?2.8:portals>=5?2.2:portals>=4?1.8:portals>=3?1.4:portals>=2?1.15:1.0;
+  var autoAns=(deal.discoveryAnswers&&deal.discoveryAnswers.automation)||'';
+  var manMult=/manual|mostly/i.test(autoAns)?1.3:1.0;
+  var annual=Math.round(ships*0.04*fmult*manMult*22*4.33)*12;
+  var numEl=document.getElementById('lc-roi-num');
+  if(numEl){
+    var t0=Date.now();
+    (function tick(){
+      var p=Math.min((Date.now()-t0)/900,1),e=1-Math.pow(1-p,3);
+      numEl.textContent='$'+Math.round(e*annual).toLocaleString();
+      if(p<1)requestAnimationFrame(tick);
+      else{numEl.textContent='$'+annual.toLocaleString();numEl.style.transform='scale(1.07)';setTimeout(function(){numEl.style.transform='';numEl.style.transition='transform .3s ease';},400);}
+    })();
+  }
+  var dEl=document.getElementById('lc-roi-drivers');
+  if(dEl)dEl.textContent='Drivers: '+(portals>=3?portals+' portals · ':'')+'manual workflows · no invoice audit';
+  var sEl=document.getElementById('lc-roi-say');
+  if(sEl)sEl.textContent='"If nothing changes, that is $'+annual.toLocaleString()+' every year — before we even touch your rates."';
+  flowState.numbersShown=true;deal.flowState=Object.assign({},flowState);saveDeals();
+  lcPP(4);
+  setTimeout(refreshCommandOS,400);
+}
+
+function lcBuildCloseCTAs(){
+  var wrap=document.getElementById('lc-close-ctas');if(!wrap)return;
+  var primary=deal.ships>=100||deal.carriers>=2?'Request Shipment Data →':'Book Follow-Up Call →';
+  var secondary=(deal.role==='operations'||deal.role==='logistics')?'Loop In Stakeholder →':'';
+  wrap.innerHTML='<button class="lc-cta-primary" onclick="lcJump(\'advance\')">'+primary+'</button>'
+    +(secondary?'<button class="lc-cta-secondary" onclick="lcJump(\'advance\')">'+secondary+'</button>':'');
+}
+
+function lcJump(stage){
+  if(!deal.client){showToast('Set up a deal first.');return;}
+  if(stage==='discover'){showLayer('discovery');updateDiscoveryPanel();}
+  else if(stage==='prep')openDrawer('prep',document.querySelector('[data-p="prep"]'));
+  else if(stage==='roi')openDrawer('roi',document.querySelector('[data-p="roi"]'));
+  else if(stage==='advance')openDrawer('advance',document.querySelector('[data-p="advance"]'));
+  else{showLayer('command');lcUpdateSurface();}
+}
+
+function lcCompSearch(val){
+  var result=document.getElementById('lc-comp-result');if(!result)return;
+  if(!val||val.length<2){result.style.display='none';return;}
+  var found=Object.keys(STATIC_OBJ||{}).find(function(k){return k.toLowerCase().includes(val.toLowerCase());});
+  if(!found){result.style.display='none';return;}
+  var data=STATIC_OBJ[found];
+  result.style.display='block';
+  result.innerHTML='<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--blue);margin-bottom:8px">vs '+found+'</div>'
+    +'<div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Best angle</div>'
+    +'<div style="font-size:13px;color:var(--text);margin-bottom:10px;line-height:1.65;font-style:italic">'+data.say+'</div>'
+    +'<div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Then ask</div>'
+    +'<div style="font-size:13px;color:var(--muted);line-height:1.65;font-style:italic">'+data.ask+'</div>'
+    +'<div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--red);margin:10px 0 4px">Do not say</div>'
+    +'<div style="font-size:12px;color:var(--muted);line-height:1.6">'+data.means+'</div>';
+}
+
+function _updateRiskBanner(healthScore, stage){
+  var el=document.getElementById('cmd-risk-banner');
+  if(!el||!deal.client)return;
+  var reasons=[];
+  if(!deal.discoveryDone)reasons.push('Discovery incomplete');
+  if(!flowState.numbersShown)reasons.push('ROI not shown');
+  if(!flowState.positioningDone&&stage!=='prep'&&stage!=='discover')reasons.push('No positioning done');
+  if(deal.momentum==='stalling')reasons.push('Momentum: stalling');
+  if(deal.lastObj&&!flowState.objectionHandled)reasons.push('Unhandled objection');
+  if(stage==='advance'&&!flowState.callEnded)reasons.push('No confirmed next step');
+  if(reasons.length===0){el.style.display='none';return;}
+  var isHigh=healthScore<50;var isMed=healthScore<75;
+  var col=isHigh?'var(--red)':isMed?'var(--amber)':'var(--green)';
+  var label=isHigh?'HIGH RISK':isMed?'MED RISK':'LOW RISK';
+  el.style.display='block';
+  el.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">'
+    +'<div>'
+    +'<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:'+col+';margin-bottom:5px">⚠ Deal Risk: '+label+'</div>'
+    +'<div style="font-size:11px;color:var(--muted);line-height:1.7">'+reasons.map(function(r){return '· '+r;}).join('<br>')+'</div>'
+    +'</div>'
+    +'<div style="font-family:Syne,sans-serif;font-size:28px;font-weight:900;color:'+col+';flex-shrink:0">'+healthScore+'</div>'
+    +'</div>';
+  el.style.background=isHigh?'rgba(255,95,87,.07)':isMed?'rgba(245,166,35,.07)':'rgba(61,220,132,.06)';
+  el.style.borderColor=isHigh?'var(--r3)':isMed?'var(--am3)':'var(--g3)';
+}
+
 
 // ══ POST-POSITIONING STEP FLOW ══
 var _ppStep=1;
 function ppAdvance(nextStep){
   for(var i=1;i<=5;i++){var el=document.getElementById('pp-step-'+i);if(el)el.style.display='none';}
   var nxt=document.getElementById('pp-step-'+nextStep);
-  if(nxt){nxt.style.display='block';nxt.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  if(nxt){
+    nxt.style.display='block';
+    nxt.scrollIntoView({behavior:'smooth',block:'nearest'});
+    // STOP moment at ROI and Close
+    if(nextStep===3){
+      nxt.style.borderLeft='4px solid var(--amber)';
+      setTimeout(function(){var n=document.getElementById('pp-step-3');if(n)n.style.borderLeft='';},2000);
+    }
+    if(nextStep===4){
+      // Flash the ROI card
+      var roi=document.getElementById('pp-roi-num');
+      if(roi){roi.style.transform='scale(1.08)';setTimeout(function(){roi.style.transform='';roi.style.transition='transform .3s ease';},400);}
+    }
+  }
   _ppStep=nextStep;
   if(nextStep===5){
     flowState.closeReady=true;flowState.numbersShown=true;
@@ -582,11 +858,12 @@ async function generateBriefing(){
   var btn=document.getElementById('cmd-briefing-btn');
   if(!brief)return;
   if(btn){btn.disabled=true;btn.textContent='Generating…';}
-  var prompt='MODE: BRIEFING\nSummarize: (1) what we know about their operation, (2) top 2-3 pain signals, (3) recommended positioning angle, (4) what to watch for, (5) single most important action right now.'+buildDealContext();
-  await callAI(prompt,brief,'briefing',function(text,el){
-    el.innerHTML='<div class="out-block green" style="border-left:4px solid var(--green)"><span class="ob-eye say-eye">Deal Brief</span><div class="ob-body" style="font-size:13px;line-height:1.8">'+text.replace(/\n/g,'<br>')+'</div></div>';
+  var prompt='MODE: BRIEFING'+buildDealContext();
+  await callAI(prompt,brief,'briefing',function(d,el){
+    if(typeof d==='object'){renderAIContract(d,el);}
+    else{el.innerHTML='<div style="font-size:12px;color:var(--muted);line-height:1.7">'+d.replace(/\n/g,'<br>')+'</div>';}
   });
-  if(btn){btn.disabled=false;btn.textContent='Refresh Brief';}
+  if(btn){btn.disabled=false;btn.textContent='Refresh';}
 }
 
 async function runHandle(){
@@ -594,17 +871,16 @@ async function runHandle(){
   if(!obj){var hc=document.getElementById('h-custom');if(hc)obj=hc.value.trim();}
   if(!obj){showToast('Select a chip or type an objection.');return;}
   var out=document.getElementById('handle-output');if(!out)return;
-  var resp=STATIC_OBJ[obj];
-  if(resp){renderHandleStatic(resp);}else{out.innerHTML='';}
+  // Show static immediately
+  var resp=STATIC_OBJ[obj];if(resp){renderHandleStatic(resp);}else{out.innerHTML='';}
   var ctx=document.getElementById('h-ctx');
-  var ctxVal=ctx?ctx.value.trim():'';
-  var prompt='MODE: HANDLE\nObjection: '+obj+(ctxVal?'\nContext: '+ctxVal:'')+buildDealContext();
-  await callAI(prompt,out,'handle',function(text,el){
-    var d=document.createElement('div');
-    d.style.cssText='margin-top:12px;background:var(--b2);border:1px solid var(--b3);border-left:4px solid var(--blue);border-radius:10px;padding:14px';
-    d.innerHTML='<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--blue);margin-bottom:8px">⚡ Deal-Specific Response</div>'
-      +'<div style="font-size:13px;color:var(--text);line-height:1.8">'+text.replace(/\n/g,'<br>')+'</div>';
-    el.appendChild(d);
+  var prompt='MODE: HANDLE\nObjection: '+obj+(ctx&&ctx.value?'\nContext: '+ctx.value:'')+buildDealContext();
+  await callAI(prompt,out,'handle',function(d,el){
+    var d2=document.createElement('div');
+    d2.style.cssText='margin-top:12px;padding-top:12px;border-top:1px solid var(--border)';
+    d2.innerHTML='<div style="font-size:9px;font-weight:800;text-transform:uppercase;color:var(--blue);margin-bottom:8px">AI — Deal-Specific Response</div>';
+    renderAIContract(d,d2);
+    el.appendChild(d2);
   });
 }
 
@@ -664,15 +940,56 @@ function advTemplate(key,el){
   if(prev)prev.style.display='block';
 }
 
+
 var STATIC_OBJ={
-  'Prices too high':{ack:'That is fair — cost always matters.',say:'Most teams that raise that are comparing list rates. The real question is what fragmentation is already costing. Before we look at pricing, would it help to see what your current setup is costing per month?',ask:'What are you paying today across all portals and admin time combined?',means:'Price objection is a buying signal. Redirect to total cost of status quo.'},
-  'Using FreightCOM':{ack:'FreightCOM is solid for LTL.',say:'A lot of our customers came from FreightCOM. The difference is usually visibility beyond LTL — parcel, FTL, cross-border, invoice auditing in one place. The question is whether you are managing multiple portals alongside it.',ask:'Is FreightCOM handling everything, or are there other systems running in parallel?',means:'Gap is usually multi-mode. Parallel systems = fragmentation confirmed.'},
-  'Happy with setup':{ack:'Makes sense — if it is working, why change.',say:'That is exactly where most teams are when we start talking. The question is: happy with the result, or happy enough to not want to deal with switching? Because teams we work with were mostly in the second camp.',ask:'If you had perfect visibility across every carrier right now, what would that change for your team?',means:'Dig into whether happy means optimized or just adapted to friction.'},
-  'Not the right time':{ack:'Timing is real.',say:'Understood. Freight costs and admin overhead do not wait for a good time though. Is the timing about budget, bandwidth, or something else on the roadmap?',ask:'What would need to change for this to be the right time?',means:'Timing objection is usually about internal friction. Find the real blocker.'},
-  'Need to think':{ack:'Absolutely — this is a real decision.',say:'What I usually suggest: let me send a one-page summary of what we covered so you have something concrete to review. That way you are not thinking about a conversation — you are looking at actual numbers.',ask:'Is there someone else you would want to loop in before making a call on this?',means:'Stall = missing stakeholder or missing clarity. Offer a concrete artifact.'},
-  'Have a TMS':{ack:'A TMS is a different category than what Lazr does.',say:'Most TMS platforms handle routing rules and carrier management. What Lazr adds is the financial layer: invoice auditing, cost-per-shipment visibility, cross-carrier comparison. Most customers run both.',ask:'Is your TMS connected to carrier invoices, or is that still a separate process?',means:'TMS does not make Lazr redundant. Position around the financial and visibility gap.'},
-  'Rates not competitive':{ack:'Rate competitiveness always matters.',say:'Rates are one piece. But most teams pay 8 to 15 percent more than they should because of manual errors, missed audits, and habit-based carrier selection — not base rates. That is what we fix first.',ask:'When a shipment goes out, how is the carrier chosen — data or habit?',means:'Rate objection often masks process problems. Win on process before rates.'},
-  'Using eShipper':{ack:'eShipper is well-known in Canada.',say:'eShipper works well for parcel. Where teams usually hit limits is scaling LTL or cross-border — those tend to land in a separate workflow. Does that match what you are seeing?',ask:'Are all your modes going through eShipper, or are there gaps handled elsewhere?',means:'Multi-mode is the opening. If parallel systems exist, fragmentation is confirmed.'}
+  'Prices too high':{
+    ack:'Understood — cost always matters.',
+    say:'Most teams that raise pricing are comparing our rate to what they pay a broker. That is the wrong comparison. The real number is what fragmentation costs before rates come into it.',
+    ask:'What are you paying across all your portals, admin time, and invoice errors combined — do you have a sense of that number?',
+    means:'Price objection means they are comparing wrong things. Redirect to total cost of status quo.'
+  },
+  'Using FreightCOM':{
+    ack:'FreightCOM works well for certain volumes.',
+    say:'Most of our customers came from FreightCOM. The difference is not rate access — it is what happens around it. Invoice auditing, multi-mode visibility, cross-border in the same workflow. The question is whether FreightCOM handles everything or whether your team is filling in the gaps manually.',
+    ask:'Is FreightCOM your only system, or are there other platforms running alongside it?',
+    means:'If they say yes to other systems, fragmentation is confirmed. That is your angle.'
+  },
+  'Using eShipper':{
+    ack:'eShipper is well-known in Canada.',
+    say:'eShipper handles parcel well. Where teams hit a wall is when LTL, cross-border, or custom carrier agreements enter the picture — those tend to live somewhere else. I want to understand if that is the case here.',
+    ask:'Is every mode going through eShipper, or are there shipment types handled separately?',
+    means:'Multi-mode gap is the opening. If anything lives outside eShipper, fragmentation is confirmed.'
+  },
+  'Happy with setup':{
+    ack:'That is worth taking seriously — if it is working, there is no reason to change.',
+    say:'The teams I talk to who are in the same position are not unhappy with their setup — they just do not know what optimized looks like until they see it. The question is not whether things are working. It is whether they are as efficient as they could be.',
+    ask:'If I showed you what is being spent on overhead — invoice errors, portal-switching, manual booking — and it was higher than you expected, would that change the conversation?',
+    means:'Comfort does not equal optimized. Reframe toward what they do not know they are losing.'
+  },
+  'Not the right time':{
+    ack:'Timing is real — I get it.',
+    say:'The overhead I am talking about does not wait for the right time. It is already in your process. The question is whether it is worth a 20-minute look at the number before you decide to deprioritize it.',
+    ask:'Is the timing about budget cycle, bandwidth, or something specific on your roadmap?',
+    means:'Timing objection is usually about internal friction. Find the real blocker and name it.'
+  },
+  'Need to think':{
+    ack:'Absolutely — this is a real decision.',
+    say:'I do not want you thinking about a conversation. I want you looking at a document. Let me send you a one-page summary with the cost breakdown we discussed — that way you are evaluating a number, not trying to remember what we talked about.',
+    ask:'Is there someone else you would want to loop in before making a call on this?',
+    means:'Stall usually means missing stakeholder or missing clarity. A concrete artifact plus finding the decision-maker fixes both.'
+  },
+  'Have a TMS':{
+    ack:'A TMS is a different category than what Lazr does.',
+    say:'Your TMS handles operations — routing, carrier assignment. What Lazr adds is the financial layer: automatic invoice auditing, cost-per-lane visibility, and carrier comparison in real time. Most of our customers run both. The question is whether your TMS is connected to your invoice workflow, or whether that is still a separate process.',
+    ask:'When a carrier invoice comes in, how does it get verified before payment?',
+    means:'TMS does not close the financial gap. That is where Lazr wins alongside it.'
+  },
+  'Rates not competitive':{
+    ack:'Rate competitiveness always matters.',
+    say:'The teams paying the most are not the ones with the worst rates — they are the ones with the most errors. Eight to fifteen percent overbilling is average when you add up accessorials, weight corrections, and duplicate charges nobody catches manually. That is the number I want to show you first.',
+    ask:'When a carrier invoice comes in, what is the process for checking it before it gets paid?',
+    means:'Rate objection almost always masks a process problem. Win on the process first, then rates become secondary.'
+  }
 };
 function renderHandleStatic(resp){
   var out=document.getElementById('handle-output');if(!out)return;
@@ -819,6 +1136,7 @@ function setActiveDeal(id){
     discoveryProgress.current = Math.min(nextUnanswered, DISCOVERY_QUESTIONS.length);
     discoveryProgress.skipped = [];
   }
+  setTimeout(refreshCommandOS,100);
 }
 
 function saveDeals(){
@@ -1052,7 +1370,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v14.3 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v14.7 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1254,6 +1572,7 @@ function showLayer(layer){
       if(lockEl)lockEl.style.display='none';
       if(surfaceEl)surfaceEl.style.display='block';
       updateCommandSurface();
+      setTimeout(refreshCommandOS,50);
     }
     updateDashboard();
   }
@@ -1301,13 +1620,12 @@ function setDirective(data){
   // d-next removed from UI -- next bar is the single action point
 }
 
-function setNextBar(text, btnLabel, action){
+function setNextBar(label, action){
   var bar=document.getElementById('next-bar');
   var b=document.getElementById('nb-btn');
   if(!deal.client){if(bar)bar.style.display='none';return;}
   if(bar)bar.style.display='flex';
-  // Next bar = pure action button only. Text param ignored.
-  if(b){b.textContent=btnLabel;b.onclick=action;}
+  if(b){b.textContent=label;b.onclick=action;}
 }
 
 function resetDirective(){
@@ -1392,19 +1710,24 @@ function confirmDeleteDeal(){
 function deleteDeal(){ showDeleteModal(); }
 
 function updateCommandFlowBanner(stage){
-  var labels={prep:'Set up deal',discover:'Run discovery',position:'Position value',roi:'Show ROI',close:'Close',advance:'Follow up'};
-  var subs={prep:'Understand the client before the call starts',discover:'Ask before you pitch',position:'Frame Lazr around their specific gap',roi:'Make the cost of inaction visible',close:'Secure the next concrete step',advance:'Maintain momentum after the call'};
-  var nexts={prep:'Next: Run discovery',discover:'Next: Position value',position:'Next: Show ROI',roi:'Next: Close',close:'Next: Follow up',advance:'Next: Return to dashboard'};
-  var coaching={prep:'Top reps prep before every call.',discover:'Top reps ask before they pitch.',qualify:'Not every deal deserves the same effort.',position:'Frame around their gap, not your features.',handle:'Acknowledge. Reframe. Control.',roi:'A number on screen beats any claim.',next:'Every call ends with a concrete next step.',close:'Commitment, not interest. Ask for it.',advance:'First follow-up within 2 hours wins.'};
+  var labels={prep:'Deal Setup',discover:'Discovery',position:'Positioning',roi:'ROI',close:'Close',advance:'Advance'};
+  var coaching={
+    prep:'No setup = no direction. Fill this in before anything else.',
+    discover:'Ask before you pitch. Every question is intelligence.',
+    position:'Frame around their gap — not your features. Use their exact words.',
+    roi:'Put a number on the problem. Interest without cost = no urgency.',
+    close:'You are not closing a contract. You are closing the next step.',
+    advance:'First 2 hours after a call are the highest-leverage time you have.'
+  };
+  var nexts={prep:'→ Run discovery',discover:'→ Position value',position:'→ Show ROI',roi:'→ Close',close:'→ Follow up',advance:'→ Done'};
   var nowEl=document.getElementById('command-stage-now');
   var badgeEl=document.getElementById('command-stage-badge');
   var nxtEl=document.getElementById('command-stage-next');
-  if(nowEl)nowEl.textContent=(labels[stage]||'In flow').toUpperCase();
-  if(badgeEl)badgeEl.textContent=stage?stage.toUpperCase():'';
-  if(nxtEl)nxtEl.textContent=nexts[stage]||'';
   var actionEl=document.getElementById('command-stage-action');
-  var actions={prep:'Fill in what you know.',discover:'Ask. Do not pitch yet.',position:'Expose the gap using their words.',roi:'Put a number on the problem.',close:'Ask for the next step.',advance:'Send follow-up now.'};
-  if(actionEl)actionEl.textContent=actions[stage]||'';
+  if(nowEl)nowEl.textContent=(labels[stage]||'In Flow').toUpperCase();
+  if(badgeEl)badgeEl.textContent=stage?stage.toUpperCase():'';
+  if(nxtEl)nxtEl.textContent=coaching[stage]||'';
+  if(actionEl)actionEl.textContent=nexts[stage]||'';
 }
 
 var STAGE_LOADING_TEXT = {
@@ -1504,68 +1827,99 @@ function updateNextActionBlock(stage){
 function updateCommandSurface(){
   updateStageBar();
   var stage=resolveStage(deal);
-
-  // Show close-ready block when deal has ROI shown or is at close/advance stage
-  var crEl=document.getElementById('cmd-close-ready');
-  if(crEl){
-    var showClose=flowState.numbersShown&&stage!=='close'&&stage!=='advance';
-    crEl.style.display=showClose?'block':'none';
-  }
-  // Reset advance deal btn — close stage shows it
+  var risk=calculateHealth(deal);
+  _updateRiskBanner(risk,stage);
   var advBtnReset=document.getElementById('cmd-advance-deal');
   if(advBtnReset)advBtnReset.style.display='none';
-
   updateCommandFlowBanner(stage);
   updateNextActionBlock(stage);
+  if(deal.client)lcUpdateSurface();
+
+  var a=deal.discoveryAnswers||{};
+  var tool=a.tools||deal.tool||'their setup';
 
   if(stage==='prep'){
-    setDirective({say:'We need the deal context before the system can guide accurately.',ask:'Can you walk me through how you manage shipping today?',means:'No context = generic output. Specific context = specific direction.',risk:'Without setup, every response will be too broad to use.',status:'🟡 Setup required'});
-    setNextBar('Set up deal →','Set up deal →',function(){openDrawer('prep',document.querySelector('[data-p="prep"]'));});
+    setDirective({
+      say:'Fill in deal context before this system gives you anything useful.',
+      ask:'"Walk me through how a shipment gets booked and sent from your team today."',
+      means:'Every field sharpens the output. Client name alone gives you nothing. Stage, size, concern — each one changes the directive.',
+      risk:'Without context, every response is a guess.',
+      status:'Setup'
+    });
+    setNextBar('Set Up Deal',function(){openDrawer('prep',document.querySelector('[data-p="prep"]'));});
     return;
   }
 
   if(stage==='discover'){
-    setDirective({say:'Before I tell you anything about what we do -- I want to understand your operation.',ask:'How are you currently deciding which carrier to use per shipment?',means:'Every answer tells you exactly which problem Lazr solves for them. Do not skip this.',risk:'Pitch before you understand their process and the product feels optional, not urgent.',status:'🟡 Discover'});
-    setNextBar('Run discovery →','Run discovery →',function(){openDrawer('prep',document.querySelector('[data-p="prep"]'));});
+    var answered=discoveryProgress.answered.length;
+    var remaining=DISCOVERY_QUESTIONS.length-answered;
+    setDirective({
+      say:'"Before I tell you anything about what Lazr does — I want to understand exactly how your operation works today."',
+      ask:'"Walk me through the last shipment that caused a problem. What happened, and who had to deal with it?"',
+      means:'Discovery is not warmup. Every answer identifies which specific problem Lazr solves for this company.',
+      risk:remaining+' questions unanswered. Pitch without discovery and the product feels optional.',
+      status:'Discover'
+    });
+    setNextBar('Run Discovery',function(){showLayer('discovery');updateDiscoveryPanel();});
     return;
   }
 
   if(stage==='position'){
-    if(flowState.positioningDone){
-      // Already positioned — show post-positioning sequence
-      triggerPostPositioning();
-      return;
-    }
-    setDirective({say:'Most teams in your position are not trying to replace what is working -- they are trying to get control and visibility without adding more tools.',ask:'If you had one place to manage all of this, what would that change for your team?',means:'You have enough context to frame Lazr around their specific gap. Use what they told you.',risk:'Generic positioning feels like a pitch. Use their words back at them.',status:'🟢 Position'});
-    setNextBar('Positioning done →','Positioning done →',function(){
-      flowState.positioningDone=true;
-      deal.flowState=Object.assign({},flowState);
-      saveDeals();
-      triggerPostPositioning();
+    if(flowState.positioningDone){triggerPostPositioning();return;}
+    var pain=a.time?'the time lost on '+a.time:a.costs?'invoice leakage':a.automation&&/manual/i.test(a.automation)?'manual booking overhead':'operational fragmentation';
+    setDirective({
+      say:'"The teams I talk to are not trying to replace their carriers — they are trying to stop managing them like it is 2012. The '+pain+' is the symptom. Visibility is what is missing."',
+      ask:'"If every carrier, every invoice, every exception came through one screen — what is the first thing your team would stop doing manually?"',
+      means:'Position around the gap they described. Their words, their pain. Do not pitch features — reflect their problem back at them.',
+      risk:'Generic pitch = optional product. Their words back at them = urgent problem.',
+      status:'Position'
+    });
+    setNextBar('Positioning Done',function(){
+      flowState.positioningDone=true;deal.flowState=Object.assign({},flowState);
+      saveDeals();triggerPostPositioning();
     });
     return;
   }
 
   if(stage==='roi'){
-    setDirective({say:'Based on what you have described, there is meaningful overhead from fragmentation -- before rate optimization even starts.',ask:'How many systems or portals is your team using today to manage shipping?',means:'A number makes the cost real. Without a number, interest stays conceptual.',risk:'If they leave without seeing a cost, urgency fades fast.',status:'🟡 Show ROI'});
-    setNextBar('Show ROI →','Show ROI →',function(){openDrawer('roi',document.querySelector('[data-p="roi"]'));});
-    autoRouteStage(stage);
+    var ships=deal.ships||0;var portals=deal.carriers||0;
+    var estMonthly=ships>0?Math.round(ships*0.04*1.4*22*4.33):null;
+    var roiLine=portals>=3&&ships>0
+      ? '"'+portals+' portals across '+ships+' shipments a month — that overhead does not disappear, it hides in admin time and missed audits."'
+      : '"The cost here is not in your rates. It is already in the process — every manual step, every unverified invoice, every portal your team switches between."';
+    setDirective({
+      say:roiLine,
+      ask:'"Would it help if I put a number on that right now — based on what you just told me?"',
+      means:'ROI lands when they ask for the number. Ask permission first. Then show it.',
+      risk:(estMonthly?'Estimated leakage: ~$'+estMonthly.toLocaleString()+'/mo. ':'')+'If they leave without seeing a cost, urgency disappears.',
+      status:'Show ROI'
+    });
+    setNextBar('Show ROI',function(){openDrawer('roi',document.querySelector('[data-p="roi"]'));});
     return;
   }
 
   if(stage==='close'){
-    setDirective({say:'Based on everything we have covered, the next step is simple — let me put together a cost analysis using your actual shipments.',ask:'Can you send over a few recent shipments so I can show you exactly where this applies?',means:'The deal is ready to advance. You are not closing a contract — you are closing the next step.',risk:'Leaving without a defined next action is how deals die quietly.',status:'🟢 Close'});
+    setDirective({
+      say:'"The only thing left is to run this against your actual data. The estimate becomes a real number — and you decide from there."',
+      ask:'"Can you send over a few recent invoices — any format — so I can show you what this looks like for your operation?"',
+      means:'You are not closing a contract. You are closing the next step. One ask. One action. Nothing else.',
+      risk:'This call ends without a next step and the deal goes cold. Commit to one action before you hang up.',
+      status:'Close'
+    });
     var nb=document.getElementById('next-bar');if(nb)nb.style.display='none';
-    var cr2=document.getElementById('cmd-close-ready');if(cr2)cr2.style.display='none';
     var advBtn=document.getElementById('cmd-advance-deal');if(advBtn)advBtn.style.display='block';
-    autoRouteStage(stage);
     return;
   }
 
   if(stage==='advance'){
-    setDirective({say:'I will follow up with the summary and the materials we discussed.',ask:'Is there anyone else who should be on the next conversation?',means:'The call is over. Follow-through in the next 2 hours keeps momentum alive.',risk:'Every hour of delay costs deal velocity. Send the follow-up now.',status:'🟡 Advance'});
-    setNextBar('Follow up →','Follow up →',function(){openDrawer('advance',document.querySelector('[data-p="advance"]'));});
-    autoRouteStage(stage);
+    setDirective({
+      say:'"I will send you a one-pager with the cost breakdown and what onboarding looks like. You will have it in your inbox within the hour."',
+      ask:'"Before I do — is there anyone else who should be on the next call? Finance, operations, your manager?"',
+      means:'Speed wins. First follow-up within 2 hours sets the tone for the whole deal.',
+      risk:'Every hour you wait, the deal cools. Send the follow-up before anything else.',
+      status:'Advance'
+    });
+    setNextBar('Send Follow-Up',function(){openDrawer('advance',document.querySelector('[data-p="advance"]'));});
     return;
   }
 }
@@ -1771,81 +2125,333 @@ function buildDealContext(){
   }
   return ctx;
 }
-var SYS=`You are LAZR Command OS — a real-time Deal Acceleration Engine for Lazr Freight.
+var SYS=`You are LAZR Command OS — a real-time deal operator for Lazr Freight sales reps.
 
-ROLE: Direct, decisive, deal-focused. Not a chatbot. Every output is usable mid-call, word for word.
+You are NOT a chatbot. You produce structured outputs only.
 
-LAZR (2026): One platform — LTL, parcel, FTL, cross-border. Automated invoice auditing (80% of invoices have errors). Free to start. Bring your own carriers. No rip-and-replace. Live in 24-48 hours. Multi-user role access. ERP/EDI integrations.
+LAZR (2026): One platform — LTL, parcel, FTL, cross-border. Automated invoice auditing (80% of invoices have errors). Free to start, live in 24-48h. Bring your own carriers. ERP/EDI integrations. Multi-user role access.
 
-OUTPUT RULES:
-1. Every response ends with ONE explicit next action. Never vague. Never optional.
-2. Reference specific discovery answers when available. Generic = wasted.
-3. All lines to be spoken must be in quotes.
-4. Max 200 words. Reps are mid-call.
-5. No teaching. No fluff. Direct only.
+OUTPUT CONTRACT — MANDATORY:
+Every response must be a single JSON object with exactly these keys:
+{
+  "say": "exact words to say now — max 2 sentences — no fluff",
+  "ask": "exact question to ask next — one question only",
+  "means": "what their answer or situation means operationally — max 2 sentences",
+  "next_action": "one explicit action — singular, specific, immediate",
+  "risk": "consequence of not acting — max 1 sentence",
+  "confidence": "high|medium|low"
+}
 
-NEXT STEP RULE: End every output with "NEXT: [exact action]" — singular, specific, time-bound.
+STRICT RULES:
+- Return JSON only. No prose. No markdown. No backticks. No preamble.
+- Max 2 sentences per field. Every word earns its place.
+- say and ask must be speakable verbatim mid-call — direct quotes
+- next_action must be singular and explicit: "Ask for shipment data now" not "consider following up"
+- Never generic. Always use discovery answers if available.
+- No "just checking in", "it may help", "you might want to", "feel free to"
 
-MODES:
-DISCOVERY — Probe based on what is known. Surface pain. Identify the gap.
-POSITION — Use their exact answers. Name their problem. Frame Lazr as the fix.
-HANDLE — Acknowledge, reframe, ask. Three steps. Redirect to cost of status quo.
-ROI — Calculate or estimate fragmentation cost. Make the number specific.
-ADVANCE — Follow-up email + what to do in next 2 hours + how to open next call.
-BRIEFING — Full deal summary: what we know, top pain signals, recommended angle, ONE priority action.
-WHEREWEWIN — Scenario-specific positioning statement + follow-up question.
-CLOSE — Exact closing sequence: say this, ask this, handle the pause, get the next step.
+DECISION PRIORITY (use in this order):
+1. current stage
+2. latest discovery answer (most important signal)
+3. last objection
+4. momentum (stalling = urgency)
+5. shipment volume
+6. carrier portal count
+7. contact role
+8. stated concern
+
+SIGNAL MAPPING (if discovered):
+- multiple portals → fragmentation angle
+- manual workflows → admin drag / scaling failure
+- invoice uncertainty → cost leakage / audit gap
+- high volume → scale inefficiency
+- stalling momentum → urgency + next-step locking
+- no champion → stakeholder risk
+
+MODES — each obeys the same output contract:
+PREP: best opener + first discovery question + likely gap + immediate next action
+DISCOVERY: react to latest answer — surface the hidden problem — ask the next smartest question
+POSITION: use their exact discovery language — frame Lazr around the operational gap they exposed — no feature pitching
+HANDLE: acknowledge (1 sentence) — reframe toward cost of status quo — one redirecting question
+ROI: convert deal inputs into a specific business impact narrative — make the number actionable — push to close
+CLOSE: one concrete next step only — not closing the contract — closing the action
+ADVANCE: follow-up language + immediate post-call action + next call opener
+BRIEFING: deal state in operator language — best angle — biggest risk — one priority move
+WHEREWEWIN: scenario-based positioning — why Lazr wins here — one follow-up question
 `
+
+
+// ══ UNIFIED DECISION ENGINE ══════════════════════════════════
+function fallbackAIContract(overrides){
+  return Object.assign({
+    say:'Stay focused on their operation. You have the context — use it.',
+    ask:'Can you walk me through what happens when that issue shows up?',
+    means:'The current signal needs more depth before you position.',
+    risk:'Move too early and Lazr sounds optional instead of necessary.',
+    next_action:'Ask the next diagnostic question now.',
+    confidence:'medium'
+  },overrides||{});
+}
+
+function parseAIContract(raw){
+  try{
+    if(!raw)return fallbackAIContract();
+    var clean=String(raw).replace(/```json|```/g,'').trim();
+    var jsonStart=clean.indexOf('{');
+    if(jsonStart>0)clean=clean.slice(jsonStart);
+    var jsonEnd=clean.lastIndexOf('}');
+    if(jsonEnd>=0)clean=clean.slice(0,jsonEnd+1);
+    var data=JSON.parse(clean);
+    return fallbackAIContract({
+      say:data.say||'',ask:data.ask||'',means:data.means||'',
+      risk:data.risk||'',next_action:data.next_action||'',confidence:data.confidence||'medium'
+    });
+  }catch(e){
+    return fallbackAIContract({means:'AI response could not be parsed. Fallback active.',risk:'Raw output would confuse the rep mid-call.'});
+  }
+}
+
+function getLatestDiscoveryAnswer(d){
+  if(!d||!d.discoveryAnswers)return null;
+  var entries=Object.keys(d.discoveryAnswers).map(function(k){return{area:k,value:d.discoveryAnswers[k]};}).filter(function(e){return String(e.value||'').trim().length>0;});
+  if(!entries.length)return null;
+  return entries[entries.length-1];
+}
+
+function getCompetitorMention(d){
+  var obj=(d.lastObj||'').toLowerCase();
+  var known=['freightcom','eshipper','clickship','2ship','shiptime','freightview','shipstation','shippo'];
+  return known.find(function(n){return obj.includes(n);})||null;
+}
+
+function getDealOperatingContext(d,fs,dp){
+  var stage=resolveStage(d);
+  return{
+    stage:stage,
+    objectionActive:!!(fs&&(fs.objectionActive||d.lastObj)),
+    roiShown:!!(fs&&fs.numbersShown),
+    closeReady:!!(fs&&fs.closeReady),
+    positioningDone:!!(fs&&fs.positioningDone),
+    discoveryDone:!!d.discoveryDone,
+    callEnded:!!(fs&&fs.callEnded),
+    momentum:d.momentum||'neutral',
+    latestObjection:d.lastObj||'',
+    latestDiscovery:getLatestDiscoveryAnswer(d),
+    competitorMentioned:getCompetitorMention(d),
+    riskScore:calculateHealth(d),
+    answersCount:dp&&dp.answered?dp.answered.length:0,
+    remainingQ:dp?(DISCOVERY_QUESTIONS.length-(dp.answered?dp.answered.length:0)):0
+  };
+}
+
+function getStaticContract(ctx){
+  var a=deal.discoveryAnswers||{};
+  var tool=a.tools||deal.tool||'their current setup';
+  var fs=flowState||{};
+
+  if(ctx.stage==='prep')return fallbackAIContract({
+    say:'Fill in deal context before this system gives you anything useful. Every blank field is a missed signal.',
+    ask:'"Walk me through how a shipment gets booked and sent from your team today — start from the moment someone decides it needs to go out."',
+    means:'Client name alone gives you nothing. Stage, size, role, concern — each one changes what the system outputs.',
+    risk:'Operating without context means every directive is a guess.',
+    next_action:'Open Deal Setup and fill in what you know now.',
+    confidence:'high'
+  });
+
+  if(ctx.stage==='discover'){
+    var cur=Math.min(discoveryProgress.current,DISCOVERY_QUESTIONS.length-1);
+    var dq=DISCOVERY_QUESTIONS[cur];
+    return fallbackAIContract({
+      say:'"Before I tell you anything about what Lazr does — I want to understand exactly how your operation works today."',
+      ask:dq?'"'+dq.q+'"':'Ask the next discovery question.',
+      means:'Discovery is not warmup. Every answer identifies which specific problem Lazr solves for this company.',
+      risk:ctx.remainingQ+' questions unanswered. Pitch without context and the product sounds optional.',
+      next_action:'Save their answer and continue to the next question.',
+      confidence:'high'
+    });
+  }
+
+  if(ctx.objectionActive&&ctx.latestObjection){
+    var so=STATIC_OBJ[ctx.latestObjection];
+    if(so)return fallbackAIContract({
+      say:so.say,ask:so.ask,means:so.means,
+      risk:'Unhandled objection stops momentum cold.',
+      next_action:'Deliver the reframe, then ask the redirecting question.',
+      confidence:'high'
+    });
+  }
+
+  if(ctx.stage==='position'&&!ctx.positioningDone){
+    var pain=a.time?'the time lost on '+a.time:a.costs?'invoice leakage':a.automation&&/manual/i.test(a.automation)?'manual booking overhead':'operational fragmentation';
+    return fallbackAIContract({
+      say:'"The teams I talk to are not trying to replace their carriers — they are trying to stop managing them separately. The '+pain+' is the symptom. Visibility is what is missing."',
+      ask:'"If every carrier, every invoice, every exception came through one screen — what is the first thing your team would stop doing manually?"',
+      means:'Position around the gap they described. Their words, their pain. Do not pitch features — reflect their problem back at them.',
+      risk:'Generic framing makes Lazr sound optional. Their words back at them make it urgent.',
+      next_action:'Confirm alignment, then advance to micro-commitment.',
+      confidence:'high'
+    });
+  }
+
+  if(ctx.stage==='roi'){
+    var ships=deal.ships||0;var portals=deal.carriers||0;
+    var estM=ships>0?Math.round(ships*0.04*1.4*22*4.33):0;
+    return fallbackAIContract({
+      say:portals>=3&&ships>0
+        ? '"'+portals+' portals across '+ships+' shipments a month — that overhead does not disappear, it hides in admin time and missed audits."'
+        : '"The cost is already in the process — every manual step, every unverified invoice, every portal switch. It compounds before rates even come into it."',
+      ask:'"Would it help if I put a number on that right now — based on what you just told me?"',
+      means:'ROI lands when they ask for the number. Bridge to it before showing it.',
+      risk:(estM?'Est. leakage: ~$'+estM.toLocaleString()+'/mo. ':'')+' If they leave without seeing a cost, urgency disappears.',
+      next_action:'Ask permission, then trigger ROI reveal.',
+      confidence:'high'
+    });
+  }
+
+  if(ctx.stage==='close')return fallbackAIContract({
+    say:'"The only thing left is to run this against your actual data. The estimate becomes a real number — and you decide from there."',
+    ask:'"Can you send over a few recent invoices — any format — so I can show you exactly what this looks like for your operation?"',
+    means:'You are not closing a contract. You are closing the next step. One ask. One action.',
+    risk:'This call ends without a next step and the deal goes cold. Get one commitment before you hang up.',
+    next_action:'Get shipment data commitment or book next call now.',
+    confidence:'high'
+  });
+
+  if(ctx.stage==='advance')return fallbackAIContract({
+    say:'"I will send you a one-pager with the cost breakdown and what onboarding looks like. You will have it within the hour."',
+    ask:'"Before I do — is there anyone else who should be on the next call? Finance, operations, your manager?"',
+    means:'First follow-up within 2 hours wins. Speed signals competence.',
+    risk:'Every hour of delay costs deal velocity. Send the follow-up before anything else.',
+    next_action:'Open Advance drawer and send the follow-up now.',
+    confidence:'high'
+  });
+
+  return fallbackAIContract();
+}
+
+function renderCommandSurface(contract){
+  var safe=fallbackAIContract(typeof contract==='object'&&contract!==null?contract:{});
+  var ctx=getDealOperatingContext(deal,flowState,discoveryProgress);
+  var stageLabels={prep:'Setup',discover:'Discover',position:'Position',roi:'ROI',close:'Close',advance:'Follow Up'};
+
+  // Live Call card
+  var sayEl=document.getElementById('lc-say');if(sayEl)sayEl.textContent=safe.say;
+  var askEl=document.getElementById('lc-ask');
+  var askLbl=document.getElementById('lc-ask-label');
+  if(askEl){askEl.textContent=safe.ask;askEl.style.display=safe.ask?'block':'none';}
+  if(askLbl)askLbl.style.display=safe.ask?'block':'none';
+  var eyeEl=document.getElementById('lc-card-eye');
+  if(eyeEl)eyeEl.textContent='Do This Now · '+(stageLabels[ctx.stage]||ctx.stage.toUpperCase());
+
+  // Directive card
+  setDirective({say:safe.say,ask:safe.ask,means:safe.means,risk:safe.risk,status:safe.confidence==='high'?'High':'Low'});
+
+  // Risk field styling
+  var rWrap=document.getElementById('d-risk-wrap');
+  if(rWrap)rWrap.style.borderLeftColor=safe.confidence==='high'?'var(--red)':'var(--amber)';
+
+  // Next bar
+  var bar=document.getElementById('next-bar');var btn=document.getElementById('nb-btn');
+  if(bar&&btn&&deal.client){
+    bar.style.display='flex';
+    btn.textContent=safe.next_action||'Continue →';
+    btn.style.background=safe.confidence==='low'?'var(--amber)':'var(--green)';
+  }
+
+  lcUpdateStrip();
+}
+
+async function refreshCommandOS(){
+  if(!deal||!deal.client)return;
+  var ctx=getDealOperatingContext(deal,flowState,discoveryProgress);
+
+  // Always render static immediately
+  var staticC=getStaticContract(ctx);
+  renderCommandSurface(staticC);
+
+  // Skip AI for prep
+  if(ctx.stage==='prep')return;
+
+  var apiKey=getApiKey();
+  if(!apiKey)return;
+
+  var prompt='MODE: COMMAND\nReturn JSON only. No prose. No markdown.\nDecide exactly what the rep should say and do right now.\n'+buildDealContext();
+  var dummy=document.createElement('div');
+  await callAI(prompt,dummy,'command',function(parsed){
+    var safe=typeof parsed==='string'?parseAIContract(parsed):fallbackAIContract(parsed);
+    if(safe.say&&safe.say!==fallbackAIContract().say){
+      renderCommandSurface(safe);
+    }
+  });
+}
+// ══ END UNIFIED DECISION ENGINE ══════════════════════════════
 
 
 
 async function callAI(prompt, outputEl, mode, renderFn){
-  var apiKey = getApiKey();
+  var apiKey=getApiKey();
   if(!apiKey){
-    var noKeyDiv=document.createElement('div');
-    noKeyDiv.className='out-block';
-    noKeyDiv.style.borderColor='var(--am3)';
-    noKeyDiv.innerHTML='<span class="ob-eye" style="color:var(--amber)">API Key Required</span><div class="ob-body">No API key set. Click the ⚙️ button in the top right to add your Anthropic API key.</div>';
-    var noKeyBtn=document.createElement('button');
-    noKeyBtn.textContent='Set API Key →';
-    noKeyBtn.style.cssText='margin-top:10px;background:var(--green);border:none;border-radius:7px;padding:8px 16px;font-family:Syne,sans-serif;font-size:12px;font-weight:800;color:#050f0b;cursor:pointer';
-    noKeyBtn.onclick=showApiKeyModal;
-    noKeyDiv.appendChild(noKeyBtn);
-    outputEl.appendChild(noKeyDiv);
+    outputEl.innerHTML='<div style="background:var(--am2);border:1px solid var(--am3);border-radius:10px;padding:14px">'
+      +'<div style="font-size:9px;font-weight:800;text-transform:uppercase;color:var(--amber);margin-bottom:6px">API Key Required</div>'
+      +'<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Add your Anthropic API key to unlock AI responses.</div>'
+      +'<button onclick="showApiKeyModal()" style="background:var(--green);border:none;border-radius:7px;padding:8px 16px;font-family:Syne,sans-serif;font-size:12px;font-weight:800;color:#050f0b;cursor:pointer">Set API Key →</button>'
+      +'</div>';
     return;
   }
-  var btn=document.getElementById(mode+'-btn')||document.querySelector('#panel-'+mode+' .gen-btn');
-  if(btn){btn.disabled=true;btn.innerHTML='<span class="spin"></span>Thinking…';}
-  outputEl.innerHTML='';
+  var loadingHtml='<div style="display:flex;align-items:center;gap:10px;padding:14px;color:var(--muted);font-size:13px">'
+    +'<span class="spin"></span>Generating response…</div>';
+  outputEl.innerHTML=loadingHtml;
   try{
     var r=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key':apiKey,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,system:SYS,messages:[{role:'user',content:prompt}]})
     });
     var data=await r.json();
     if(data.error){
-      var msg=data.error.message||'API error';
       if(data.error.type==='authentication_error'){
-        outputEl.innerHTML='<div class="out-block" style="border-color:var(--r3)"><span class="ob-eye" style="color:var(--red)">Invalid API Key</span><div class="ob-body">The API key is invalid or expired. <button onclick="showApiKeyModal()" style="background:none;border:none;color:var(--green);font-weight:700;cursor:pointer;font-size:13px">Update key →</button></div></div>';
-        if(btn){btn.disabled=false;btn.textContent=btn.getAttribute('data-label')||'Generate →';}
+        outputEl.innerHTML='<div style="color:var(--red);font-size:12px;padding:10px">Invalid API key. <button onclick="showApiKeyModal()" style="background:none;border:none;color:var(--green);font-weight:700;cursor:pointer">Update →</button></div>';
         return;
       }
-      throw new Error(msg);
+      throw new Error(data.error.message||'API error');
     }
-    var text=(data.content&&data.content[0]&&data.content[0].text)||'';
-    if(!text)throw new Error('empty response');
-    renderFn(text,outputEl);
+    var raw=(data.content&&data.content[0]&&data.content[0].text)||'';
+    if(!raw)throw new Error('empty response');
+    // Parse JSON contract
+    var parsed=null;
+    try{
+      var clean=raw.replace(/```json|```/g,'').trim();
+      parsed=JSON.parse(clean);
+    }catch(e){
+      // Fallback: render as plain text if JSON parsing fails
+      if(renderFn){renderFn(raw,outputEl);}
+      else{outputEl.innerHTML='<div style="font-size:13px;color:var(--text);line-height:1.7;padding:12px">'+raw.replace(/\n/g,'<br>')+'</div>';}
+      return;
+    }
+    // Render structured contract
+    if(renderFn){renderFn(parsed,outputEl);}
+    else{renderAIContract(parsed,outputEl);}
   }catch(e){
-    var errMsg=e.message||'Unknown error';
-    outputEl.innerHTML='<div class="out-block" style="border-color:var(--r3)"><span class="ob-eye" style="color:var(--red)">Error</span><div class="ob-body">'+errMsg+'. Check your API key and network connection.</div></div>';
+    outputEl.innerHTML='<div style="color:var(--red);font-size:12px;padding:10px">'+( e.message||'Error')+'</div>';
   }
-  if(btn){btn.disabled=false;btn.textContent=btn.getAttribute('data-label')||'Generate →';}
+}
+
+function renderAIContract(d, el){
+  if(typeof d==='string'){el.innerHTML='<div style="font-size:13px;color:var(--text);line-height:1.7;padding:12px">'+d.replace(/\n/g,'<br>')+'</div>';return;}
+  var conf=d.confidence||'medium';
+  var confColor=conf==='high'?'var(--green)':conf==='low'?'var(--amber)':'var(--muted)';
+  el.innerHTML=''
+    +(d.say?'<div style="margin-bottom:12px"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:5px">Say this</div>'
+      +'<div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.65;padding:12px 14px;background:rgba(61,220,132,.08);border-left:3px solid var(--green);border-radius:7px">'+d.say+'</div></div>':'')
+    +(d.ask?'<div style="margin-bottom:12px"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--blue);margin-bottom:5px">Then ask</div>'
+      +'<div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.65;padding:12px 14px;background:var(--b2);border-left:3px solid var(--blue);border-radius:7px">'+d.ask+'</div></div>':'')
+    +(d.means?'<div style="margin-bottom:10px"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:4px">What this means</div>'
+      +'<div style="font-size:12px;color:var(--muted);line-height:1.65">'+d.means+'</div></div>':'')
+    +(d.next_action?'<div style="margin-bottom:10px"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:4px">Next action</div>'
+      +'<div style="font-size:13px;font-weight:700;color:var(--green)">→ '+d.next_action+'</div></div>':'')
+    +(d.risk?'<div style="background:rgba(255,95,87,.07);border-left:3px solid var(--red);border-radius:7px;padding:8px 12px">'
+      +'<div style="font-size:11px;color:var(--red);font-weight:600">'+d.risk+'</div></div>':'')
+    +'<div style="margin-top:8px;text-align:right"><span style="font-size:9px;color:'+confColor+';font-weight:700;text-transform:uppercase">'+conf+' confidence</span></div>';
 }
 
 // ── PREP ──
@@ -1910,7 +2516,13 @@ function hChip(el){
   _currentObj=el.textContent.trim();
   var hc=document.getElementById('h-custom');if(hc)hc.value='';
   var resp=STATIC_OBJ[_currentObj];
-  if(resp)renderHandleStatic(resp);
+  if(resp){
+    renderHandleStatic(resp);
+    deal.lastObj=_currentObj;
+    flowState.objectionActive=true;
+    deal.flowState=Object.assign({},flowState);saveDeals();
+    renderCommandSurface(getStaticContract(getDealOperatingContext(deal,flowState,discoveryProgress)));
+  }
 }
 function clearHChips(){
   _currentObj='';
@@ -2091,7 +2703,7 @@ function updateDiscoveryPanel(){
   if(allVisited){
     // All questions visited — hide question block, show complete if eligible
     if(qBlock)qBlock.style.display='none';
-    // If not yet enough answers, still show complete area so user isn't stuck
+    // If not yet enough answers, still show complete area so user isn\'t stuck
     if(!enoughAnswers&&answered>=3){
       if(completeArea)completeArea.style.display='block';
       var countEl2=document.getElementById('disc-complete-count');
@@ -2109,9 +2721,9 @@ var DISC_INSIGHTS={
   "tools":     {text:"Multiple portals = confirmed fragmentation. This is a direct ROI input -- every portal adds management cost.", level:2},
   "people":    {text:"Shared ownership without a shared system creates errors. This is a major source of operational inconsistency.", level:2},
   "time":      {text:"Time lost at this step is the most visible cost. This is where Lazr creates immediate, measurable impact.", level:3},
-  "costs":     {text:"If they can't verify invoices automatically, they're paying errors every month. This is a major source of cost leakage.", level:3},
+  "costs":     {text:"If they can\'t verify invoices automatically, they\'re paying errors every month. This is a major source of cost leakage.", level:3},
   "services":  {text:"Multi-mode without a unified platform means siloed decisions. Every mode managed separately is margin left on the table.", level:2},
-  "carriers":  {text:"Habit-based carrier selection means they're not optimizing. This introduces inconsistency in pricing and service.", level:2},
+  "carriers":  {text:"Habit-based carrier selection means they\'re not optimizing. This introduces inconsistency in pricing and service.", level:2},
   "volume":    {text:"Volume confirmed. This anchors the ROI calculation -- fragmentation cost scales directly with shipment count.", level:1},
   "automation":{text:"Manual processes at this volume are compounding the problem. Every manual step is a scaling failure waiting to happen.", level:3},
   "scale":     {text:"If they struggled to answer this, the gap is real and live. Scale pressure is the strongest closing argument.", level:3},
@@ -2347,19 +2959,17 @@ async function runClose(){
 
 // ── ADVANCE ──
 async function runAdvance(){
-  var callSum=val('adv-call');
-  var req=val('adv-req')||val('adv-action')||'';
-  var out=document.getElementById('advance-output');
-  if(!out)return;
+  var callSum=val('adv-call');var req=val('adv-req')||val('adv-action')||'';
+  var out=document.getElementById('advance-output');if(!out)return;
   if(!callSum&&!req){showToast('Add a note about what happened on the call.');return;}
   var prompt='MODE: ADVANCE'
     +'\nCall summary: '+(callSum||'Not provided')
     +'\nWhat they asked for: '+(req||'Not specified')
     +'\nStatus: '+(_advStatusVal||'Not set')
-    +'\nGenerate: (1) follow-up email, (2) action in next 2 hours, (3) opening line for next call.'
     +buildDealContext();
-  await callAI(prompt,out,'advance',function(text,el){
-    el.innerHTML='<div class="out-block green" style="border-left:4px solid var(--green);margin-top:14px"><span class="ob-eye say-eye">AI Follow-Up Plan</span><div class="ob-body" style="font-size:13px;line-height:1.8">'+text.replace(/\n/g,'<br>')+'</div></div>';
+  await callAI(prompt,out,'advance',function(d,el){
+    el.innerHTML='<div style="margin-top:14px">';
+    renderAIContract(d,el.querySelector('div')||el);
   });
 }
 
@@ -2391,21 +3001,21 @@ vsCompetitors = {
     data:[1,1,0.5,1,0.5,0,0.5,0,0.5,0.5,0,0,1,0.5,1],
     hook:"FreightCOM has LTL, parcel, and spot FTL quotes -- a real Canadian platform. But they lock you into their carrier network, no multi-user role-based ecosystem, no pre-order tracking, no automated invoice audit, and no strategic partnership model. Complaints on Trustpilot include slow claims resolution (8+ months unresolved in 2025).",
     angle:"Ask if they can fully customize which carriers appear. Ask if accounting, warehouse, and ops all have separate role-based access. Ask if every invoice is automatically audited before payment. Those are the gaps Lazr was built around.",
-    dont:"Don't say FreightCOM is bad -- they're a legitimate Canadian platform. Don't compete on carrier breadth alone. Don't ignore ClickShip -- it's their eCommerce play and a real strength."
+    dont:"Don\'t say FreightCOM is bad -- they\'re a legitimate Canadian platform. Don\'t compete on carrier breadth alone. Don\'t ignore ClickShip -- it\'s their eCommerce play and a real strength."
   },
   eshipper: {
     name:'eShipper',
     data:[1,1,1,1,0,0,0.5,0,0.5,0.5,0,0,1,1,1],
     hook:"eShipper is capable -- LTL, FTL, parcel, cross-border, ERP API, Shopify, free to start. Real gaps: no bring-your-own contracts, no customizable carrier roster, limited multi-user access, no pre-order tracking, no automated invoice audit. Transactional by design.",
     angle:"Who runs the platform day-to-day? With eShipper, the account manager does. With Lazr, your ops, finance, and warehouse team all run it themselves. Also: can they load their own Purolator contract and see it alongside eShipper's rates?",
-    dont:"Don't dismiss eShipper's freight breadth -- they have LTL and FTL. Don't lead with rate comparisons. Don't call them expensive -- they're free to start too."
+    dont:"Don\'t dismiss eShipper\'s freight breadth -- they have LTL and FTL. Don\'t lead with rate comparisons. Don\'t call them expensive -- they\'re free to start too."
   },
   totalship: {
     name:'TotalShip',
     data:[0,1,0,0,0,0,0,0,0,0,0,0,1,0,0],
     hook:"Parcel-only specialist. Deep expertise in UPS, FedEx, and Purolator billing. The moment they ship anything on a pallet, TotalShip is done.",
     angle:"Ask what they do for pallet freight. TotalShip literally cannot process it. Lazr handles parcel through FTL with one login for every team member.",
-    dont:"Don't compete on parcel billing expertise -- TotalShip knows UPS/FedEx tariffs deeply. Don't lead with features TotalShip doesn't even attempt."
+    dont:"Don\'t compete on parcel billing expertise -- TotalShip knows UPS/FedEx tariffs deeply. Don\'t lead with features TotalShip doesn\'t even attempt."
   },
   flagship: {
     name:'Flagship',
@@ -2426,14 +3036,14 @@ vsCompetitors = {
     data:[0,1,0,0,0,0.5,0.5,0,0,0,0,0,0,0,1],
     hook:"US-first eCommerce parcel platform. Zero LTL or FTL capability. Subscription fees scale sharply. Built entirely for consumer eCommerce, not B2B freight.",
     angle:"Ask your prospect: do you ship anything on a pallet? ShipStation literally cannot process that shipment. Lazr starts exactly where ShipStation stops.",
-    dont:"Don't compete on eCommerce order management -- ShipStation is strong there. Don't dismiss their Shopify integration -- it's genuinely good."
+    dont:"Don\'t compete on eCommerce order management -- ShipStation is strong there. Don\'t dismiss their Shopify integration -- it\'s genuinely good."
   },
   freightview: {
     name:'Freightview',
     data:[1,1,1,0.5,1,1,1,0,1,1,0.5,0,0,0,0],
     hook:"Legitimate, well-reviewed US TMS -- LTL, parcel, FTL, BYOC, ERP API, multi-user, analytics. Invoice audit is an add-on, not standard. No Canada-first focus, no free-to-start tier, no cross-border Canada depth.",
-    angle:"Canadian-specific: their Canadian carrier depth is limited, cross-border Canada-US isn't their strength, and there's no free-to-start tier. Also confirm: is their invoice audit standard or an add-on?",
-    dont:"Don't dismiss Freightview -- it's one of the stronger US TMS tools. Don't lead with Canada unless you've confirmed they're Canadian-focused. Don't claim more ERP depth without specifics."
+    angle:"Canadian-specific: their Canadian carrier depth is limited, cross-border Canada-US isn\'t their strength, and there\'s no free-to-start tier. Also confirm: is their invoice audit standard or an add-on?",
+    dont:"Don\'t dismiss Freightview -- it\'s one of the stronger US TMS tools. Don\'t lead with Canada unless you\'ve confirmed they\'re Canadian-focused. Don\'t claim more ERP depth without specifics."
   },
   freightera: {
     name:'Freightera',
@@ -2447,21 +3057,21 @@ vsCompetitors = {
     data:[1,1,1,0.5,1,0.5,1,0,1,1,1,0,0,0,0],
     hook:"Capable US TMS with parcel, LTL, FTL, ERP integration, and genuine automated invoice auditing via EDI. US-first with weak Canadian carrier coverage, complex implementation, no free-to-start.",
     angle:"Acknowledge their invoice audit strength. Your angles: built for the US market, Canadian carrier coverage is limited, setup takes significant implementation time, no free tier.",
-    dont:"Don't dismiss FreightPOP's invoice audit -- it's real and deep. Don't claim better ERP integration without specifics. Don't underestimate their enterprise credibility."
+    dont:"Don\'t dismiss FreightPOP\'s invoice audit -- it\'s real and deep. Don\'t claim better ERP integration without specifics. Don\'t underestimate their enterprise credibility."
   },
   kuebix: {
     name:'Kuebix / Trimble',
     data:[1,0.5,1,0,1,0.5,1,0,1,1,1,0,0,0.5,0],
     hook:"Kuebix (now Trimble TMS) is an enterprise US TMS with freight audit. Heavy implementation -- Trimble states typical go-live is 6-8 weeks. Documented account manager turnover. No Canada-first, weak Canadian carrier depth.",
     angle:"For a Canadian mid-market shipper who needs to be running in days -- not weeks -- and wants a strategic partner rather than an enterprise implementation project, Lazr is the right fit.",
-    dont:"Don't mock the Trimble brand -- it's enterprise credible. Don't compete on features they don't use anyway. Don't underestimate the power of their existing customer base."
+    dont:"Don\'t mock the Trimble brand -- it\'s enterprise credible. Don\'t compete on features they don\'t use anyway. Don\'t underestimate the power of their existing customer base."
   },
   mycarrier: {
     name:'MyCarrierTMS',
     data:[1,0.5,1,0,1,1,1,0,1,1,1,0,0,0.5,0],
     hook:"More capable than many assume -- LTL, FTL, BYOC, ERP API, multi-user, and MyInvoiceHub freight audit. US-focused with limited Canadian carrier depth, no cross-border Canada strength, limited parcel.",
     angle:"Give them credit for invoice audit and ERP. Your angles: built for the US market, Canadian carrier coverage is thin, parcel is very limited. If they ship mixed freight in Canada, Lazr covers all modes with Canadian carrier depth from day one.",
-    dont:"Don't dismiss MyCarrierTMS -- they have real invoice audit. Don't compete on LTL breadth without Canadian specifics. Don't claim parcel if they're LTL-heavy."
+    dont:"Don\'t dismiss MyCarrierTMS -- they have real invoice audit. Don\'t compete on LTL breadth without Canadian specifics. Don\'t claim parcel if they\'re LTL-heavy."
   },
   shippo: {
     name:'Shippo',
@@ -2481,14 +3091,14 @@ vsCompetitors = {
     name:'NetParcel',
     data:[1,1,0,1,1,0,0,0,0.5,0,0,0,1,1,1],
     hook:"Canadian rate broker for parcel and LTL -- BYOC supported, 40+ LTL carriers, Shopify, cross-border, free to start. No FTL, no multi-user role-based access, no ERP integration, no automated invoice audit. A rate comparison tool, not a logistics management platform.",
-    angle:"NetParcel is a good rate comparison tool -- BYOC and free to start are real strengths. Your angle: it's a rate broker, not a platform your team runs their business on. No multi-user access, no ERP connection, no invoice audit running in the background.",
-    dont:"Don't dismiss NetParcel's BYOC or free tier -- they're real. Don't compete on Canadian parcel rate access alone. Don't overclaim ERP depth."
+    angle:"NetParcel is a good rate comparison tool -- BYOC and free to start are real strengths. Your angle: it\'s a rate broker, not a platform your team runs their business on. No multi-user access, no ERP connection, no invoice audit running in the background.",
+    dont:"Don\'t dismiss NetParcel\'s BYOC or free tier -- they\'re real. Don\'t compete on Canadian parcel rate access alone. Don\'t overclaim ERP depth."
   },
   easyship: {
     name:'EasyShip',
     data:[0,1,0,0,0,0,0,0,0,0,0,0,0,0.5,1],
     hook:"Global eCommerce parcel platform. Strong international rates, Shopify integration, good DTC features. Zero LTL or FTL capability. No BYOC, no multi-user ecosystem, no invoice audit, not Canada-first.",
-    angle:"EasyShip is built for brands shipping consumer parcels internationally. There is no freight capability at all -- no LTL, no FTL. If your prospect has any B2B freight or pallet shipments, EasyShip doesn't exist for that part of their business.",
+    angle:"EasyShip is built for brands shipping consumer parcels internationally. There is no freight capability at all -- no LTL, no FTL. If your prospect has any B2B freight or pallet shipments, EasyShip doesn\'t exist for that part of their business.",
     dont:"Don't compete on international consumer parcel rates -- EasyShip is strong there. Don't dismiss their eCommerce ecosystem integrations."
   }
 };
@@ -2599,14 +3209,10 @@ function runBattlecard(){ if(document.getElementById('bc-input'))bcRender(); }
 async function runWWW(){
   var scenario=val('www-scenario');
   if(!scenario){showToast('Describe the scenario first.');return;}
+  var out=document.getElementById('www-output');if(!out)return;
   var prompt='MODE: WHEREWEWIN\nScenario: '+scenario+buildDealContext();
-  var out=document.getElementById('www-output');
-  await callAI(prompt,out,'wherewewin',function(text,o){
-    var fit=extr(text,'FIT'),angle=extr(text,'ANGLE'),line=extr(text,'LINE'),proof=extr(text,'PROOF');
-    if(fit)o.appendChild(makeBlock('Lane / scenario fit',fit,'green',fit));
-    if(angle)o.appendChild(makeBlock('Best angle',angle,'blue',angle));
-    if(line)o.appendChild(makeSayBlock(line));
-    if(proof)o.appendChild(makeBlock('Proof point',proof,'',proof));
+  await callAI(prompt,out,'www',function(d,el){
+    el.innerHTML='';renderAIContract(d,el);
   });
 }
 
@@ -2970,7 +3576,7 @@ function showPanel(id){
         <div class="sb-item" onclick="openDrawer('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v14.3</div>
+        <div class="sb-ver" id="sb-ver">v14.7</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
@@ -3132,149 +3738,157 @@ function showPanel(id){
 
           <!-- LAYER 3: Command -->
           <div id="main-command" style="display:none">
-            <!-- Locked state -->
-            <div id="cmd-lock" style="display:none;text-align:center;padding:48px 20px">
-              <div style="font-size:28px;margin-bottom:12px;opacity:.3">🔒</div>
-              <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:900;color:var(--text);margin-bottom:8px">⚡ Command Locked</div>
-              <div style="font-size:13px;color:var(--muted);margin-bottom:6px;max-width:260px;margin-left:auto;margin-right:auto">Complete discovery to unlock live execution guidance.</div>
-              <div style="font-size:11px;color:var(--subtle);opacity:.7;margin-bottom:20px;font-style:italic">Every answer you capture sharpens the directive.</div>
-              <button style="background:var(--green);border:none;border-radius:8px;padding:11px 24px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer" onclick="showLayer('discovery')">Go to Discovery →</button>
-            </div>
 
-            <!-- Command surface -->
-            <div id="cmd-surface">
+            <!-- ══ LIVE CALL MODE ══ -->
+            <div class="lc-wrap">
 
-              <!-- Deal Briefing -->
-              <div id="cmd-briefing" class="brief-card">
-                <div class="brief-header">
-                  <span class="brief-label">Deal Brief</span>
-                  <button id="cmd-briefing-btn" class="brief-btn" onclick="generateBriefing()">Generate Brief</button>
-                </div>
-                <div id="cmd-briefing-output" class="brief-output">Hit Generate Brief for a full AI summary before you speak.</div>
+              <!-- TOP STRIP -->
+              <div class="lc-strip">
+                <div class="lc-client" id="lc-client">—</div>
+                <div id="lc-risk-chip" class="lc-risk-chip lc-risk-low" style="display:none">Low Risk</div>
+                <div id="lc-mom-chip" class="lc-mom-chip" style="display:none">Neutral</div>
               </div>
 
-              <div id="command-flow-banner" class="flow-banner">
-                <div class="flow-banner-top">
-                  <div class="flow-stage-name" id="command-stage-now">—</div>
-                  <div class="flow-stage-badge" id="command-stage-badge">—</div>
-                </div>
-                <div class="flow-banner-sub">
-                  <div class="flow-next-label" id="command-stage-next">—</div>
-                  <div class="flow-next-action" id="command-stage-action">—</div>
-                </div>
+              <!-- STAGE FLOW BAR -->
+              <div style="display:flex;align-items:center;gap:3px;margin-bottom:14px;flex-wrap:wrap">
+                <span class="lc-stage-pip" id="lcs-prep"    onclick="lcJump('prep')">Prep</span>
+                <span style="color:var(--subtle);font-size:10px;padding:0 2px">›</span>
+                <span class="lc-stage-pip" id="lcs-discover" onclick="lcJump('discover')">Discover</span>
+                <span style="color:var(--subtle);font-size:10px;padding:0 2px">›</span>
+                <span class="lc-stage-pip" id="lcs-position" onclick="lcJump('position')">Position</span>
+                <span style="color:var(--subtle);font-size:10px;padding:0 2px">›</span>
+                <span class="lc-stage-pip" id="lcs-roi"      onclick="lcJump('roi')">ROI</span>
+                <span style="color:var(--subtle);font-size:10px;padding:0 2px">›</span>
+                <span class="lc-stage-pip" id="lcs-close"    onclick="lcJump('close')">Close</span>
+                <span style="color:var(--subtle);font-size:10px;padding:0 2px">›</span>
+                <span class="lc-stage-pip" id="lcs-advance"  onclick="lcJump('advance')">Advance</span>
               </div>
 
-              <!-- Next action block -->
-              <div id="command-next-action" style="background:linear-gradient(135deg,rgba(61,220,132,.13) 0%,rgba(61,220,132,.04) 100%);border:2px solid var(--green);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:14px;display:none">
-                <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:10px;font-style:italic" id="cna-question">—</div>
-                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-                  <div style="font-size:11px;color:var(--muted)" id="cna-progress">—</div>
-                  <button id="cna-btn" style="background:var(--green);border:none;border-radius:8px;padding:9px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer">Continue →</button>
-                </div>
-              </div>
-
-              <!-- Directive -->
-              <div class="directive" id="deal-directive">
-                <span class="dir-eye">Do This Now</span>
-                <div class="dir-field">
-                  <span class="dir-field-label">Say this</span>
-                  <div class="say-text" id="d-say">Complete discovery to get your first directive.</div>
-                </div>
-                <div class="dir-field">
-                  <span class="dir-field-label">Then ask</span>
-                  <div class="ask-text" id="d-ask">—</div>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-                  <div class="dir-field" style="margin-bottom:0">
-                    <span class="dir-field-label">What this means</span>
-                    <div class="insight-text" id="d-means">—</div>
+              <!-- RISK BAR -->
+              <div class="lc-risk-bar" id="lc-risk-bar">
+                <div class="lc-risk-row">
+                  <div style="flex:1">
+                    <div id="lc-risk-label" style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;margin-bottom:5px;color:var(--red)">&#9888; Deal Risk: HIGH</div>
+                    <div class="lc-risk-reasons" id="lc-risk-reasons"></div>
                   </div>
-                  <div class="dir-field" style="margin-bottom:0">
-                    <span class="dir-field-label">Risk if unchanged</span>
-                    <div class="risk-text" id="d-risk">—</div>
-                  </div>
+                  <div class="lc-risk-score" id="lc-risk-score" style="color:var(--red)">0</div>
                 </div>
-                <div style="display:flex;align-items:center;justify-content:flex-end">
-                  <div class="dir-status" id="d-status">🟡</div>
-                </div>
-                <button class="copy-btn" onclick="copyDirective()">Copy</button>
               </div>
 
-              <!-- Post-positioning sequence -->
-              <div id="cmd-post-pos" style="display:none">
-                <div class="pp-step" id="pp-step-1">
-                  <div class="pp-step-label">Step 1 of 5 &middot; Alignment Check</div>
-                  <div class="pp-say-card"><div class="pp-eyebrow green">Say this</div><div class="pp-say-text">&ldquo;Does that align with how things are working on your end today?&rdquo;</div></div>
-                  <div class="pp-note">Wait for confirmation. Yes = continue. No = adjust framing first.</div>
-                  <button class="pp-advance-btn" onclick="ppAdvance(2)">They confirmed &rarr;</button>
+              <!-- MAIN DIRECTIVE CARD -->
+              <div class="lc-card urgent" id="lc-main-card">
+                <div class="lc-card-eye" id="lc-card-eye">Do This Now</div>
+                <div class="lc-say-label">Say this</div>
+                <div class="lc-say-text" id="lc-say">Set up your deal to get your first directive.</div>
+                <div class="lc-ask-label" id="lc-ask-label">Then ask</div>
+                <div class="lc-ask-text" id="lc-ask" style="display:none">—</div>
+                <div id="lc-input-wrap" style="display:none;margin-top:4px">
+                  <label class="lc-input-label">What did they say?</label>
+                  <textarea class="lc-input" id="lc-response" rows="2" placeholder="Type their response here&hellip;" onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='var(--border2)'"></textarea>
+                  <button class="lc-submit-btn" id="lc-submit-btn" onclick="lcDiscoverSubmit()">Save &amp; Continue &rarr;</button>
                 </div>
-                <div class="pp-step" id="pp-step-2" style="display:none">
-                  <div class="pp-step-label">Step 2 of 5 &middot; Micro-Commitment</div>
-                  <div class="pp-say-card pp-blue"><div class="pp-eyebrow blue">Then ask</div><div class="pp-say-text">&ldquo;If that was simplified into one system, would that make things easier for your team?&rdquo;</div></div>
-                  <div class="pp-note">This is where they mentally accept the solution. Wait for yes.</div>
-                  <button class="pp-advance-btn" onclick="ppAdvance(3)">They said yes &rarr;</button>
-                </div>
-                <div class="pp-step" id="pp-step-3" style="display:none">
-                  <div class="pp-step-label">Step 3 of 5 &middot; ROI Bridge</div>
-                  <div class="pp-say-card"><div class="pp-eyebrow green">Say this</div><div class="pp-say-text">&ldquo;Based on what you&rsquo;ve shared, there&rsquo;s usually a measurable cost tied to this.&rdquo;</div></div>
-                  <div class="pp-say-card pp-blue" style="margin-top:8px"><div class="pp-eyebrow blue">Then ask</div><div class="pp-say-text">&ldquo;Would it help if we quantified that quickly &mdash; so you have an actual number?&rdquo;</div></div>
-                  <div class="pp-note">ROI feels natural when they ask for it. Wait for yes.</div>
-                  <button class="pp-advance-btn" onclick="ppShowROI()">Show the number &rarr;</button>
-                </div>
-                <div class="pp-step" id="pp-step-4" style="display:none">
-                  <div class="pp-step-label">Step 4 of 5 &middot; ROI Reveal</div>
-                  <div style="background:var(--r2);border:2px solid var(--r3);border-radius:var(--radius-lg);padding:18px;margin-bottom:10px;text-align:center">
-                    <div style="font-size:9px;font-weight:800;text-transform:uppercase;color:var(--red);margin-bottom:8px">&#9940; Show This</div>
-                    <div style="font-family:'Syne',sans-serif;font-size:52px;font-weight:900;color:var(--red);line-height:1" id="pp-roi-num">&mdash;</div>
-                    <div style="font-size:12px;color:var(--muted);margin-top:4px">per year &middot; fragmentation overhead</div>
-                    <div style="font-size:11px;color:var(--subtle);margin-top:6px" id="pp-roi-drivers"></div>
-                  </div>
-                  <div class="pp-say-card"><div class="pp-eyebrow green">Say immediately</div><div class="pp-say-text" id="pp-roi-say">&ldquo;If nothing changes, this continues every month &mdash; before we even touch your rates.&rdquo;</div></div>
-                  <div class="pp-note">Let the number land. Silence is fine. Then say the line above.</div>
-                  <button class="pp-advance-btn" onclick="ppAdvance(5)">Number landed &rarr; Close</button>
-                </div>
-                <div class="pp-step" id="pp-step-5" style="display:none">
-                  <div class="pp-step-label">Step 5 of 5 &middot; Close</div>
-                  <div class="pp-say-card"><div class="pp-eyebrow green">Say this</div><div class="pp-say-text">&ldquo;The next step is simple &mdash; I just need to validate this against your actual shipments.&rdquo;</div></div>
-                  <div class="pp-say-card pp-blue" style="margin-top:8px"><div class="pp-eyebrow blue">Then ask</div><div class="pp-say-text">&ldquo;Would you be open to sending over a few recent shipments?&rdquo;</div></div>
-                  <div style="margin-top:14px"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px">Required Next Step</div><div id="pp-nextstep-btns"></div></div>
-                </div>
-              </div><!-- end cmd-post-pos -->
+              </div>
 
-              <!-- Advance Deal button (shown at close stage) -->
-              <div id="cmd-advance-deal" style="display:none;margin-bottom:14px">
-                <div style="display:flex;flex-direction:column;gap:8px">
-                  <button onclick="openDrawer('advance',document.querySelector('[data-p=advance]'))" style="width:100%;background:var(--green);border:none;border-radius:9px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#050f0b;cursor:pointer">Advance Deal →</button>
-                  <div style="display:flex;gap:8px">
-                    <button onclick="openDrawer('advance',document.querySelector('[data-p=advance]'));showToast('Request shipment data')" style="flex:1;background:none;border:1px solid var(--border2);border-radius:8px;padding:9px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer">📋 Request Data</button>
-                    <button onclick="openDrawer('advance',document.querySelector('[data-p=advance]'));showToast('Book follow-up')" style="flex:1;background:none;border:1px solid var(--border2);border-radius:8px;padding:9px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer">📅 Book Follow-Up</button>
-                    <button onclick="openDrawer('advance',document.querySelector('[data-p=advance]'));showToast('Loop in stakeholder')" style="flex:1;background:none;border:1px solid var(--border2);border-radius:8px;padding:9px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer">👥 Loop In</button>
+              <!-- INSIGHT CARD -->
+              <div class="lc-insight" id="lc-insight-card" style="border-left:4px solid var(--green)">
+                <div class="lc-insight-header">
+                  <span class="lc-insight-icon" id="lc-ins-icon">&#10004;</span>
+                  <span class="lc-insight-badge" id="lc-ins-badge" style="color:var(--green)">Insight</span>
+                </div>
+                <div class="lc-insight-quote" id="lc-ins-quote"></div>
+                <div class="lc-insight-text" id="lc-ins-text" style="padding-left:10px;border-left:2px solid var(--green)"></div>
+                <div class="lc-next-label" style="margin-top:12px">Next step</div>
+                <div class="lc-next-text" id="lc-ins-next"></div>
+                <button class="lc-continue-btn" id="lc-continue-btn" onclick="lcContinue()">Continue &rarr;</button>
+              </div>
+
+              <!-- POST-POSITIONING STEPS -->
+              <div id="lc-pp-area" style="display:none">
+
+                <div class="lc-pp-step" id="lc-pp-1" style="display:none">
+                  <div class="lc-pp-label">Step 1 of 5 &middot; Alignment Check</div>
+                  <div class="lc-card" style="margin-bottom:10px">
+                    <div class="lc-card-eye">Do This Now</div>
+                    <div class="lc-say-label">Say this</div>
+                    <div class="lc-say-text">&ldquo;Everything I just described — does that match what your team is actually dealing with right now?&rdquo;</div>
+                    <div style="font-size:11px;color:var(--subtle);margin:-6px 0 14px;font-style:italic">Wait for yes. If no — adjust framing before continuing.</div>
+                    <button class="lc-submit-btn" onclick="lcPP(2)">They confirmed &rarr;</button>
                   </div>
                 </div>
-              </div>
 
-              <!-- Close-ready CTA (hidden until triggered) -->
-              <div id="cmd-close-ready" style="display:none;margin-bottom:14px">
-                <div style="background:linear-gradient(135deg,rgba(61,220,132,.15),rgba(61,220,132,.05));border:2px solid var(--green);border-radius:var(--radius-lg);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-                  <div>
-                    <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:3px">⚡ Close Ready</div>
-                    <div style="font-size:13px;font-weight:700;color:var(--text)">You have enough to ask for the next step.</div>
+                <div class="lc-pp-step" id="lc-pp-2" style="display:none">
+                  <div class="lc-pp-label">Step 2 of 5 &middot; Micro-Commitment</div>
+                  <div class="lc-card" style="margin-bottom:10px">
+                    <div class="lc-card-eye">Do This Now</div>
+                    <div class="lc-ask-label">Then ask</div>
+                    <div class="lc-ask-text" style="display:block">&ldquo;If your team had one place to manage all of this — would that change how much time they spend on it every week?&rdquo;</div>
+                    <div style="font-size:11px;color:var(--subtle);margin:8px 0 14px;font-style:italic">Wait for yes. This is where they mentally accept the solution.</div>
+                    <button class="lc-submit-btn" onclick="lcPP(3)">They said yes &rarr;</button>
                   </div>
-                  <button onclick="openDrawer('close',document.querySelector('[data-p=close]'))" style="background:var(--green);border:none;border-radius:8px;padding:10px 20px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#050f0b;cursor:pointer;white-space:nowrap;flex-shrink:0">Move to Close →</button>
                 </div>
+
+                <div class="lc-pp-step" id="lc-pp-3" style="display:none">
+                  <div class="lc-pp-label">Step 3 of 5 &middot; ROI Bridge</div>
+                  <div class="lc-card" style="margin-bottom:10px">
+                    <div class="lc-card-eye">Do This Now</div>
+                    <div class="lc-say-label">Say this</div>
+                    <div class="lc-say-text">&ldquo;What you&rsquo;ve described has a cost attached to it — not in your rates, but in the overhead around them. I can show you what that number looks like.&rdquo;</div>
+                    <div class="lc-ask-label" style="margin-top:12px">Then ask</div>
+                    <div class="lc-ask-text" style="display:block">&ldquo;Can I show you a rough number right now — based on what you just told me?&rdquo;</div>
+                    <div style="font-size:11px;color:var(--subtle);margin:8px 0 14px;font-style:italic">ROI feels natural when they ask for it. Wait for yes.</div>
+                    <button class="lc-submit-btn" onclick="lcShowROI()">Show Impact &rarr;</button>
+                  </div>
+                </div>
+
+                <div class="lc-pp-step" id="lc-pp-4" style="display:none">
+                  <div class="lc-pp-label">Step 4 of 5 &middot; ROI Reveal</div>
+                  <div class="lc-roi-card">
+                    <div class="lc-roi-stop">&#9940; Show This Now</div>
+                    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Based on your discovery</div>
+                    <div class="lc-roi-num" id="lc-roi-num">&mdash;</div>
+                    <div class="lc-roi-period">per year &middot; fragmentation overhead alone</div>
+                    <div class="lc-roi-drivers" id="lc-roi-drivers"></div>
+                  </div>
+                  <div class="lc-card" style="margin-bottom:10px">
+                    <div class="lc-say-label">Say this immediately</div>
+                    <div class="lc-say-text" id="lc-roi-say">&ldquo;That&rsquo;s the overhead your operation is carrying right now — before we look at a single rate. Every month it doesn&rsquo;t change, it compounds.&rdquo;</div>
+                    <div style="font-size:11px;color:var(--subtle);margin:-4px 0 14px">Let the number land. Silence is fine.</div>
+                    <button class="lc-submit-btn" onclick="lcPP(5)">Number landed &rarr; Move to Close</button>
+                  </div>
+                </div>
+
+                <div class="lc-pp-step" id="lc-pp-5" style="display:none">
+                  <div class="lc-pp-label">Step 5 of 5 &middot; Close</div>
+                  <div class="lc-close-card">
+                    <div class="lc-close-badge">&#9889; Close Ready</div>
+                    <div class="lc-say-label">Say this</div>
+                    <div class="lc-say-text">&ldquo;The estimate is useful, but the real number comes from your actual shipments. That&rsquo;s all I need to make this concrete.&rdquo;</div>
+                    <div class="lc-ask-label" style="margin-top:12px">Then ask</div>
+                    <div class="lc-ask-text" style="display:block">&ldquo;Can you send over a few recent invoices — any format — so I can show you exactly where this number comes from in your operation?&rdquo;</div>
+                    <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-top:16px;margin-bottom:8px">Required Next Step</div>
+                    <div id="lc-close-ctas"></div>
+                  </div>
+                </div>
+
+              </div><!-- end lc-pp-area -->
+
+              <!-- COMPETITOR LOOKUP -->
+              <div style="margin-top:8px;padding-top:14px;border-top:1px solid var(--border)">
+                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:7px">Competitor mentioned?</div>
+                <input class="lc-comp-input" id="lc-comp-input" type="text" placeholder="Type competitor name&hellip;" oninput="lcCompSearch(this.value)">
+                <div class="lc-comp-result" id="lc-comp-result"></div>
               </div>
 
-              <!-- Live signals -->
-              <div style="margin-top:12px">
-                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:6px">Live signals</div>
-                <div class="trigger-row">
-                  <button class="trigger-btn" onclick="quickTrigger('price')">💰 Mentioned price</button>
-                  <button class="trigger-btn" onclick="quickTrigger('competitor')">🥊 Uses a competitor</button>
-                  <button class="trigger-btn" onclick="quickTrigger('hesitant')">😶 Hesitant</button>
-                  <button class="trigger-btn" onclick="quickTrigger('quiet')">🔇 Gone quiet</button>
+              <!-- Deal Brief (collapsed by default) -->
+              <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+                  <span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)">Deal Brief</span>
+                  <button id="cmd-briefing-btn" class="brief-btn" onclick="generateBriefing()">AI Brief</button>
                 </div>
+                <div id="cmd-briefing-output" class="brief-output" style="font-size:11px">AI summary of deal state, pain signals, and recommended angle.</div>
               </div>
-            </div>
+
+            </div><!-- end lc-wrap -->
           </div>
 
         </div><!-- end panel-main -->
