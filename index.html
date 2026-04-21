@@ -685,12 +685,18 @@ function lcDiscoverSubmit(){
 }
 
 function lcContinue(){
+  // Hide insight card before advancing
+  var insCard=document.getElementById('lc-insight-card');if(insCard)insCard.style.display='none';
   var cur=discoveryProgress.current;
   if(cur<DISCOVERY_QUESTIONS.length-1){
     discoveryProgress.current=cur+1;
     lcUpdateSurface();
+    renderCommandSurface(getStaticContract(getDealOperatingContext(deal,flowState,discoveryProgress)));
   } else {
-    discComplete();showLayer('command');lcUpdateSurface();
+    discComplete();
+    var insCard2=document.getElementById('lc-insight-card');if(insCard2)insCard2.style.display='none';
+    showLayer('command');
+    setTimeout(refreshCommandOS,50);
   }
 }
 
@@ -1370,7 +1376,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(saved){try{doLogin(JSON.parse(saved));}catch(ex){focusLogin();}}
   else{focusLogin();}
   var d=new Date();
-  document.getElementById('sb-ver').textContent='v14.7 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sb-ver').textContent='v14.8 · '+d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 });
 function focusLogin(){setTimeout(function(){var u=document.getElementById('l-u');if(u)u.focus();},100);}
 
@@ -1628,38 +1634,8 @@ function setNextBar(label, action){
   if(b){b.textContent=label;b.onclick=action;}
 }
 
-function resetDirective(){
-  function _set(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
-  _set('d-say','Set your deal context in Prep to get your first move.');
-  _set('d-ask','Use Prep to start the flow.');
-  _set('d-means','--');
-  _set('d-risk','--');
-  _set('d-status','🟡 Set deal first');
-}
 
-function resetFlowState(){
-  flowState.liveSignal='';flowState.explicitNeed='';
-  flowState.callEnded=false;flowState.numbersShown=false;
-  flowState.objectionActive=false;flowState.closeReady=false;
-}
 
-function clearPrepFields(){
-  discoveryProgress = {answered:[], current:0, skipped:[]};
-  if(deal) deal.discoveryAnswers={};
-  ['p-client','p-industry','p-tool','p-concern','p-lastobj','p-ships','p-carriers',
-   'r-portals','r-ships','r-hrs','r-rate','r-locs',
-   'h-custom','h-ctx','nx-signal','c-blocker','adv-call','adv-req','www-scenario','ot-input'
-  ].forEach(function(id){setVal(id,'');});
-  setVal('p-size','smb');setVal('p-role','operations');
-  setVal('p-stage','prep');setVal('p-momentum','neutral');
-  ['prep-output','handle-output','next-output','close-output','advance-output','www-output'].forEach(function(id){
-    var el=document.getElementById(id);if(el)el.innerHTML='';
-  });
-  if(typeof roiShowState==='function')roiShowState('manual');
-  var rc=document.getElementById('roi-compound');if(rc)rc.style.display='none';
-  // Reset post-positioning block
-  var pp=document.getElementById('cmd-post-pos');if(pp)pp.style.display='none';
-}
 
 function showDeleteModal(){
   if(!deal.client){showToast('No active deal to delete.');return;}
@@ -1866,7 +1842,8 @@ function updateCommandSurface(){
 
   if(stage==='position'){
     if(flowState.positioningDone){triggerPostPositioning();return;}
-    var pain=a.time?'the time lost on '+a.time:a.costs?'invoice leakage':a.automation&&/manual/i.test(a.automation)?'manual booking overhead':'operational fragmentation';
+    var _rawPain=a.time||'';var _cleanPain=_rawPain.replace(/all the above|n\/a|not sure/gi,'').trim().slice(0,40);
+    var pain=_cleanPain?'the time lost on '+_cleanPain:a.costs?'invoice leakage':a.automation&&/manual/i.test(a.automation)?'manual booking overhead':'operational fragmentation';
     setDirective({
       say:'"The teams I talk to are not trying to replace their carriers — they are trying to stop managing them like it is 2012. The '+pain+' is the symptom. Visibility is what is missing."',
       ask:'"If every carrier, every invoice, every exception came through one screen — what is the first thing your team would stop doing manually?"',
@@ -2059,24 +2036,10 @@ function toggleLang(){currentLang=currentLang==='en'?'fr':'en';var lbt=document.
 // ══ AI UTILITIES ══
 
 
-function showPanel(id){
-  var map={followup:'advance',closingflow:'close',nextmove:'next'};
-  var target=map[id]||id;
-  if(DRAWER_PANELS.indexOf(target)>=0) openDrawer(target,document.querySelector('[data-p="'+target+'"]'));
-  else showToast('Opening '+id+'...');
-}
 
-function copyDirective(){
-  var parts=[];
-  var say=document.getElementById('d-say');if(say&&say.textContent&&say.textContent!=='—')parts.push('Say this: '+say.textContent);
-  var ask=document.getElementById('d-ask');if(ask&&ask.textContent&&ask.textContent!=='—')parts.push('Then ask: '+ask.textContent);
-  var means=document.getElementById('d-means');if(means&&means.textContent&&means.textContent!=='—')parts.push('Means: '+means.textContent);
-  var risk=document.getElementById('d-risk');if(risk&&risk.textContent&&risk.textContent!=='—')parts.push('Risk: '+risk.textContent);
-  var text=parts.join('\n\n');
-  if(text)copyText(text,document.querySelector('.directive .copy-btn'));else showToast('Nothing to copy yet.');
-}
 
 function extr(text,marker){
+  if(!text||typeof text!=='string')return '';
   var re=new RegExp('\\['+marker+'\\]([\\s\\S]*?)(?=\\[|$)','i');
   var m=text.match(re);return m?m[1].trim():'';
 }
@@ -2282,7 +2245,8 @@ function getStaticContract(ctx){
   }
 
   if(ctx.stage==='position'&&!ctx.positioningDone){
-    var pain=a.time?'the time lost on '+a.time:a.costs?'invoice leakage':a.automation&&/manual/i.test(a.automation)?'manual booking overhead':'operational fragmentation';
+    var _rawPain=a.time||'';var _cleanPain=_rawPain.replace(/all the above|n\/a|not sure/gi,'').trim().slice(0,40);
+    var pain=_cleanPain?'the time lost on '+_cleanPain:a.costs?'invoice leakage':a.automation&&/manual/i.test(a.automation)?'manual booking overhead':'operational fragmentation';
     return fallbackAIContract({
       say:'"The teams I talk to are not trying to replace their carriers — they are trying to stop managing them separately. The '+pain+' is the symptom. Visibility is what is missing."',
       ask:'"If every carrier, every invoice, every exception came through one screen — what is the first thing your team would stop doing manually?"',
@@ -2616,23 +2580,6 @@ function roiMoveToClose(){
 function renderDealList(){/* prospect switcher handles deal list */}
 
 // ══ DASHBOARD ══
-function updateDashboard(){
-  if(!deal.client) return;
-  var stage=resolveStage(deal);
-  var clientEl=document.getElementById('dash-client');if(clientEl)clientEl.textContent=deal.client;
-  var stageEl=document.getElementById('dash-stage-chip');if(stageEl)stageEl.textContent=cap(stage);
-  var answered=discoveryProgress.answered.length;
-  var total=DISCOVERY_QUESTIONS.length;
-  var progEl=document.getElementById('dash-progress-text');
-  if(progEl){if(deal.discoveryDone)progEl.textContent='Discovery complete';else progEl.textContent='Discovery: '+answered+' / '+total;}
-  var mom=deal.momentum||'neutral';
-  var momEl=document.getElementById('dash-momentum-chip');
-  if(momEl)momEl.textContent=(mom==='advancing'?'🟢':mom==='stalling'?'🔴':'🟡')+' '+cap(mom);
-  var fbEl=document.getElementById('dash-flow-btn');
-  if(fbEl&&fbEl.style.display!=='none'){fbEl.textContent=deal.discoveryDone?'Go to Command →':'Start discovery →';}
-  var _hint=document.getElementById('dash-next-hint');
-  if(_hint){var _hmap={prep:'→ Complete deal setup',discover:'→ Run discovery',position:'→ Position Lazr',roi:'→ Show the cost',close:'→ Ask for next step',advance:'→ Send follow-up now'};_hint.textContent=_hmap[resolveStage(deal)]||'';}
-}
 
 // ══ DISCOVERY PANEL ══
 var DISC_HINTS = [
@@ -2977,14 +2924,41 @@ async function runClose(){
   if(!chip){showToast('Select their situation first.');return;}
   var blocker=val('c-blocker');
   var prompt='MODE: CLOSE\nSituation: '+chip.textContent+(blocker?'\nBlocker: '+blocker:'')+buildDealContext();
-  var out=document.getElementById('close-output');
-  await callAI(prompt,out,'close',function(text,o){
-    var insight=extr(text,'INSIGHT'),close=extr(text,'CLOSE'),step=extr(text,'STEP'),next=extr(text,'NEXT');
-    if(insight)o.appendChild(makeBlock("What's happening",insight,'amber',insight));
-    if(close)o.appendChild(makeSayBlock(close));
-    if(step)o.appendChild(makeBlock('Concrete next step',step,'green',step));
-    if(next)o.appendChild(makeBlock('After that',next,'',next));
-    flowState.closeReady=true;deal.flowState=Object.assign({},flowState);addEvent('close','Close attempted');saveDeals();updateCommandSurface();updateDashboard();
+  var out=document.getElementById('close-output');if(!out)return;
+  await callAI(prompt,out,'close',function(parsed,el){
+    el.innerHTML='';
+    var c=typeof parsed==='object'&&parsed?parsed:parseAIContract(String(parsed));
+    if(c.means){
+      var d=document.createElement('div');
+      d.style.cssText='background:var(--am2);border-left:3px solid var(--amber);border-radius:8px;padding:12px 14px;margin-bottom:10px';
+      d.innerHTML='<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--amber);margin-bottom:5px">What is happening</div>'
+        +'<div style="font-size:13px;color:var(--text);line-height:1.65">'+c.means+'</div>';
+      el.appendChild(d);
+    }
+    if(c.say){
+      var d2=document.createElement('div');
+      d2.style.cssText='background:rgba(61,220,132,.08);border-left:3px solid var(--green);border-radius:8px;padding:14px 16px;margin-bottom:10px';
+      d2.innerHTML='<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:6px">Say this</div>'
+        +'<div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.65">'+c.say+'</div>';
+      el.appendChild(d2);
+    }
+    if(c.ask){
+      var d3=document.createElement('div');
+      d3.style.cssText='background:var(--b2);border-left:3px solid var(--blue);border-radius:8px;padding:12px 14px;margin-bottom:10px';
+      d3.innerHTML='<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--blue);margin-bottom:5px">Then ask</div>'
+        +'<div style="font-size:14px;font-style:italic;color:var(--text);line-height:1.65">'+c.ask+'</div>';
+      el.appendChild(d3);
+    }
+    if(c.next_action){
+      var d4=document.createElement('div');
+      d4.style.cssText='background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:10px';
+      d4.innerHTML='<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:5px">Required next step</div>'
+        +'<div style="font-size:13px;font-weight:700;color:var(--green)">→ '+c.next_action+'</div>';
+      el.appendChild(d4);
+    }
+    flowState.closeReady=true;deal.flowState=Object.assign({},flowState);
+    addEvent('close','Close attempted');saveDeals();
+    refreshCommandOS();updateDashboard();
   });
 }
 
@@ -3607,7 +3581,7 @@ function showPanel(id){
         <div class="sb-item" onclick="openDrawer('battlecard',this)" data-p="battlecard"><span class="si-icon">🥊</span><span class="si-label">Battlecard</span></div>
       </div>
       <div class="sb-foot">
-        <div class="sb-ver" id="sb-ver">v14.7</div>
+        <div class="sb-ver" id="sb-ver">v14.8</div>
         <button class="sb-foot-btn red" onclick="doLogout()">↩ Sign out</button>
       </div>
     </div>
